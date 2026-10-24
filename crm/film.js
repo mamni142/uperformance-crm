@@ -38,7 +38,7 @@
 
   let st = null; // den öppna spelaren
 
-  const html = (iMote) => `<div class="film-inre" data-film-inre>
+  const html = (iMote) => `<div class="film-inre" data-film-inre tabindex="-1">
       <div class="film-topp">
         <span class="film-ogon"><i aria-hidden="true">${IK.u}</i>Filmen</span>
         <h2 class="film-titel" id="film-titel">Hälsa med elitstandard <em>– på en minut</em></h2>
@@ -112,7 +112,25 @@
   /* ---- handlingar ---- */
   const spela = () => { const p = st.video.play(); if (p && p.catch) p.catch(() => lage()); };
   const vaxla = () => { if (st.video.paused || st.video.ended) spela(); else st.video.pause(); };
-  const hoppa = (s) => { const v = st.video; v.currentTime = Math.max(0, Math.min((v.duration || LANGD) - 0.05, s)); rita(); vakna(); };
+  /* Servrar utan Range (den lokala förhandsvisningen python -m http.server) kan inte söka – seekable blir [0, 0] och kapitlen
+     startade om filmen. Då hämtas filmen en gång som blob och tiden sätts när den är laddad (CSP: media-src blob:).
+     GitHub Pages, Vercel och den skarpa servern har Range, där händer det aldrig. */
+  const kanSoka = (v, s) => { for (let i = 0; i < v.seekable.length; i++) if (s >= v.seekable.start(i) - 0.1 && s <= v.seekable.end(i) + 0.1) return true; return false; };
+  function helFilm(s) {
+    st.malTid = s; if (st.laddarHel) return;
+    st.laddarHel = true; const nu = st; const v = st.video;
+    fetch(v.currentSrc || kalla()).then((r) => (r.ok ? r.blob() : Promise.reject(r.status))).then((b) => {
+      if (st !== nu) return;
+      const spelade = !v.paused && !v.ended; nu.blobUrl = URL.createObjectURL(b);
+      v.addEventListener('loadedmetadata', () => { if (st !== nu) return; v.currentTime = nu.malTid; rita(); if (spelade) spela(); }, { once: true });
+      v.src = nu.blobUrl;
+    }).catch(() => { nu.laddarHel = false; });
+  }
+  const hoppa = (s) => {
+    const v = st.video; const mal = Math.max(0, Math.min((v.duration || LANGD) - 0.05, s));
+    if (v.readyState >= 1 && !st.blobUrl && !kanSoka(v, mal)) helFilm(mal); else v.currentTime = mal;
+    rita(); vakna();
+  };
   const tillKapitel = (i) => { hoppa(KAPITEL[Math.max(0, Math.min(KAPITEL.length - 1, i))].t); if (st.video.paused || st.video.ended) spela(); };
   function helskarm() {
     const inre = $('[data-film-inre]', st.el);
@@ -139,6 +157,7 @@
 
   function klick(ev) {
     if (!st) return;
+    if (performance.now() - (st.vaknadeTid || 0) < 700) return; // pekskärm: första trycket i vila tar bara fram kontrollerna
     const el = ev.target.closest('[data-film-g]');
     if (!el) { if (ev.target === st.video) vaxla(); return; } // klick på bilden = spela/pausa (som en biograf)
     const g = el.dataset.filmG;
@@ -155,6 +174,7 @@
     const k = ev.key; const knapp = ev.target.closest && ev.target.closest('button');
     vakna();
     if (k === 'Escape') return; // dialogen stänger sig själv (cancel → close); i helskärm lämnar webbläsaren först den
+    if (ev.ctrlKey || ev.metaKey || ev.altKey) return; // Ctrl F/P, Alt ← osv. är webbläsarens (Alt ← = bakåt, stänger filmen)
     if ((k === ' ' || k === 'k' || k === 'K') && !(knapp && k === ' ')) { ev.preventDefault(); vaxla(); }
     else if (k === 'ArrowRight' || k === 'ArrowLeft') { ev.preventDefault(); hoppa(st.video.currentTime + (k === 'ArrowRight' ? 5 : -5)); }
     else if (k === 'PageDown' || k === 'n' || k === 'N') { ev.preventDefault(); if (st.kap < KAPITEL.length - 1) tillKapitel(st.kap + 1); } // presentationsklickerns "nästa"
@@ -166,6 +186,7 @@
   }
 
   function spelaFilm({ kapitel = 0, fran = document.activeElement } = {}) {
+    if (st && !st.el.isConnected) stadat(); // en spelare som revs bort med presentationen städas först
     if (st) { tillKapitel(kapitel); return; }
     const mote = document.querySelector('.mote:not([data-stanger])');
     const dlg = document.createElement('dialog');
@@ -185,6 +206,8 @@
     dlg.addEventListener('click', klick);
     dlg.addEventListener('keydown', tangent);
     dlg.addEventListener('pointermove', vakna, { passive: true });
+    // Pekskärm: vilande kontroller tar inga tryck (CSS) – trycket väcker dem, och klicket som följer gör ingenting (klick)
+    dlg.addEventListener('pointerdown', (ev) => { if (!st) return; st.vaknadeTid = ev.pointerType !== 'mouse' && st.el.hasAttribute('data-vilar-kontroller') ? performance.now() : 0; vakna(); }, { passive: true });
     dlg.addEventListener('focusin', vakna);
     st.tidlinje.addEventListener('pointerdown', tidlinjeDrag);
     dlg.addEventListener('close', stadat);
@@ -192,32 +215,38 @@
     addEventListener('resize', rita);
     document.documentElement.setAttribute('data-film-oppen', '');
     // Bakåtknappen stänger filmen (en egen post i historiken, adressen ändras inte) – i presentationen står mötet kvar (mote.js vidBakat)
-    if (!(history.state && history.state.upFilm)) history.pushState({ ...(history.state || {}), upFilm: true }, '');
+    // Nyckeln är unik per öppning: en gammal upFilm-post (omladdning, bakåt + framåt) får aldrig tas för den här spelarens
+    st.nyckel = `f${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+    history.pushState({ ...(history.state || {}), upFilm: st.nyckel }, '');
     addEventListener('popstate', vidBakat);
     dlg.showModal();
     video.src = kalla();
-    if (kapitel) video.currentTime = KAPITEL[kapitel] ? KAPITEL[kapitel].t : 0;
+    if (KAPITEL[kapitel] && kapitel) video.addEventListener('loadedmetadata', () => { if (st && st.video === video) hoppa(KAPITEL[kapitel].t); }, { once: true });
     rita(); lage();
     spela();
-    st.spelaKnapp.focus({ preventScroll: true });
+    // Fokus på spelaren, inte på Pausa: öppnad med tangentbordet gav knappen :focus-visible och kontrollerna vilade aldrig
+    $('[data-film-inre]', dlg).focus({ preventScroll: true });
   }
   // Stängningen: först ur filmens helskärm (presentationens egen helskärm står kvar), sedan dialogen
-  function stang() {
+  // nu = städa direkt (presentationen avslutas och tar bort elementet – då hinner close-händelsen inte komma)
+  function stang({ nu = false } = {}) {
     if (!st) return;
+    if (nu) { if (st.el.open) st.el.close(); stadat(); return; }
     const inre = $('[data-film-inre]', st.el);
     if (document.fullscreenElement === inre) document.exitFullscreen().catch(() => {}).finally(() => st && st.el.open && st.el.close());
     else if (st.el.open) st.el.close();
   }
   let viaBakat = false;
-  function vidBakat() { if (!st || (history.state && history.state.upFilm)) return; viaBakat = true; stang(); }
+  function vidBakat() { if (!st || (history.state && history.state.upFilm === st.nyckel)) return; viaBakat = true; stang(); }
   function stadat() {
     if (!st) return;
-    const { el, video, fran, raf, vilaTimer } = st; st = null;
+    const { el, video, fran, raf, vilaTimer, nyckel, blobUrl } = st; st = null;
     cancelAnimationFrame(raf); clearTimeout(vilaTimer);
     video.pause(); video.removeAttribute('src'); video.load(); // laddningen avbryts – ingen film som fortsätter i bakgrunden
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
     document.removeEventListener('fullscreenchange', vidHelskarm); removeEventListener('resize', rita); removeEventListener('popstate', vidBakat);
     // Stängd med knappen eller Esc: filmens post i historiken tas bort (med bakåtknappen är den redan borta)
-    if (!viaBakat && history.state && history.state.upFilm) history.back();
+    if (!viaBakat && history.state && history.state.upFilm === nyckel) history.back();
     viaBakat = false;
     document.documentElement.removeAttribute('data-film-oppen');
     if (!lugn) { el.setAttribute('data-stanger', ''); setTimeout(() => el.remove(), 260); } else el.remove();

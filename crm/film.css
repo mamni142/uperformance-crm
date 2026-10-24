@@ -86,8 +86,11 @@ html[data-film-oppen] { overflow: hidden; }
 
 /* ---- biograf: under uppspelningen vilar allt utom bilden efter 2,6 s utan rörelse (film.js vakna) ---- */
 .film :is(.film-topp, .film-kontroller, .film-kapitel) { transition: opacity .55s ease; }
-.film[data-vilar-kontroller]:not(:has(:focus-visible, .film-topp:hover, .film-kontroller:hover, .film-kapitel:hover)) :is(.film-topp, .film-kontroller, .film-kapitel) { opacity: 0; }
-.film[data-vilar-kontroller]:not(:has(:focus-visible)) .film-inre { cursor: none; }
+/* Vilande delar tar inga tryck (pekskärm: första trycket väcker dem, film.js). Spelaren själv (.film-inre) får fokus när den öppnas
+   och räknas inte – annars vilade kontrollerna aldrig när filmen öppnades med F. Pekaren göms även över bilden. */
+.film[data-vilar-kontroller]:not(:has(:focus-visible:not(.film-inre), .film-topp:hover, .film-kontroller:hover, .film-kapitel:hover)) :is(.film-topp, .film-kontroller, .film-kapitel) { opacity: 0; pointer-events: none; }
+.film[data-vilar-kontroller]:not(:has(:focus-visible:not(.film-inre))) :is(.film-inre, .film-video) { cursor: none; }
+.film-inre:focus { outline: none; }
 
 /* Under 1200 px: kapitlen blir en rad som rullar i sidled (snäpper), miniatyren ovanför texten blir kvar till vänster */
 @media (max-width: 1199px) {

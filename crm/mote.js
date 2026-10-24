@@ -411,6 +411,7 @@
   };
 
   function starta({ kundId = null, affarId = null, bilder = BILDER.map((b) => b.id), start = null, antal = null } = {}) {
+    const forraNyckel = st ? st.histNyckel : null;
     if (st) avsluta(true);
     koppla();
     const a = affarId ? C.affar(affarId) : null; const kundObj = kundId ? C.kund(kundId) : a ? C.kund(a.kundId) : null;
@@ -437,18 +438,26 @@
     addEventListener('keydown', hanteraTangent);
     document.addEventListener('fullscreenchange', helskarmByte);
     // Telefonens/webbläsarens bakåtknapp stänger presentationen (en egen post i historiken – adressen ändras inte, vyn står kvar)
-    if (!(history.state && history.state.upMote)) history.pushState({ ...(history.state || {}), upMote: true }, '');
+    // Unik nyckel per presentation: en kvarglömd upMote-post (omladdning, bakåt + framåt) tas aldrig för den här, och en gammal
+    // upFilm (film.js) följer inte med in. En omstart (avsluta(true) + starta) behåller sin post.
+    if (forraNyckel && history.state && history.state.upMote === forraNyckel) st.histNyckel = forraNyckel;
+    else {
+      const { upFilm, ...rest } = history.state || {};
+      st.histNyckel = `m${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+      history.pushState({ ...rest, upMote: st.histNyckel }, '');
+    }
     addEventListener('popstate', vidBakat);
     const fram = $('[data-m="fram"]', el); (fram && !fram.disabled ? fram : el).focus({ preventScroll: true });
     if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
   }
   let viaBakat = false;
   // Står historiken kvar på presentationens post har bara något ovanpå stängts (filmen, film.js) – mötet fortsätter
-  function vidBakat() { if (!st || (history.state && history.state.upMote)) return; viaBakat = true; try { avsluta(); } finally { viaBakat = false; } }
+  function vidBakat() { if (!st || (history.state && history.state.upMote === st.histNyckel)) return; viaBakat = true; try { avsluta(); } finally { viaBakat = false; } }
   // Har mötet redan loggats som möte under presentationen – en sparad kalkyl eller en sparad inspelning (aktivitet typ möte)?
   const moteLoggat = () => !!st.sparadAffar || C.db.aktiviteter.some((x) => x.kundId === st.kundId && x.typ === 'mote' && String(x.tid || '') >= st.startIso);
   function avsluta(tyst) {
     if (!st) return;
+    if (window.UPFilm && UPFilm.oppen) UPFilm.stang({ nu: true }); // filmen ligger i presentationens element – städas innan det tas bort
     const el = st.el; const sparad = st.sparadAffar; const forra = st.forraFokus; const data = (forra && forra.dataset) || {}; const bakat = viaBakat;
     /* "Hur gick mötet?" (crm.js oppnaMoteLogg): kund vald, minst ett bildbyte och inget loggat som möte under presentationen. Inte
        heller när en inspelning finns kvar – sparas den loggar den mötet, och arket skulle lägga sig över inspelningskortet. */
@@ -456,7 +465,7 @@
       ? { kundId: st.kundId, affarId: st.affarId || null, visade: st.visade.size, alla: st.bilder.length, minuter: Math.max(1, Math.round((Date.now() - st.startTid) / 60000)), id: String(st.startTid) } : null;
     removeEventListener('keydown', hanteraTangent); document.removeEventListener('fullscreenchange', helskarmByte); removeEventListener('popstate', vidBakat);
     // Stängd med Avsluta/Esc: historikens post för presentationen tas bort (tyst = en ny presentation startar och behåller posten)
-    if (!tyst && !bakat && history.state && history.state.upMote) {
+    if (!tyst && !bakat && history.state && history.state.upMote === st.histNyckel) {
       if (sparad && location.hash !== `#/affar/${sparad}`) { const { upMote, ...rest } = history.state; history.replaceState(Object.keys(rest).length ? rest : null, ''); } else history.back();
     }
     if (st.summaObs) st.summaObs.disconnect();
