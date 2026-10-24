@@ -1,0 +1,151 @@
+/* Uperformance CRM – mötesinspelningen (crm/inspelning.js). Samma formspråk som hjältarna: mörkt rundat glaskort,
+   mint som accent, röd prick = live. Ständiga animationer rör bara transform/opacity. Kortet ligger fast nere till höger på
+   dator (ovanpå presentationen eller Kundmöte-sidan) och som ett ark underifrån på mobil. */
+
+/* Knappen "Spela in" (Kundmöte-sidans docka och presentationens topprad) */
+.insp-knapp { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 7px 14px 7px 12px; border-radius: 999px; border: 1px solid rgba(246, 244, 239, .16);
+  background: rgba(246, 244, 239, .06); color: var(--ben, #f6f4ef); font: 600 .8rem/1 var(--font-rubrik, Poppins, sans-serif); cursor: pointer; white-space: nowrap;
+  transition: background-color .2s, border-color .2s, transform .12s; }
+.insp-knapp:hover { background: rgba(246, 244, 239, .14); border-color: rgba(246, 244, 239, .3); }
+.insp-knapp:active { transform: scale(.96); }
+.insp-knapp:focus-visible { outline: 2px solid var(--accent, #7ee0c3); outline-offset: 2px; }
+.insp-knapp .ikon { width: 16px; height: 16px; }
+.insp-prick { width: 8px; height: 8px; flex: none; border-radius: 50%; background: #ff5c6c; box-shadow: 0 0 0 0 rgba(255, 92, 108, .5); }
+.insp-knapp-aktiv { border-color: rgba(255, 92, 108, .55); background: rgba(255, 92, 108, .12); font-variant-numeric: tabular-nums; }
+.insp-knapp-aktiv .insp-prick { animation: insp-puls 1.6s ease-out infinite; }
+.insp-knapp-aktiv .ikon { display: none; }
+@keyframes insp-puls { 0% { transform: scale(1); opacity: 1; } 70% { transform: scale(1.9); opacity: .25; } 100% { transform: scale(1); opacity: 1; } }
+/* Kundmöte-sidans docka: mintknappen är "Starta", så inspelningsknappen är glas där */
+.mk-docka-knappar .insp-knapp { min-height: 48px; padding: 0 20px 0 16px; font-size: .92rem; color: var(--ben); background: rgba(255, 255, 255, .08); border: 0; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); }
+.mk-docka-knappar .insp-knapp:hover { background: rgba(255, 255, 255, .14); }
+.mk-docka-knappar .insp-knapp-aktiv { box-shadow: inset 0 0 0 1px rgba(255, 92, 108, .55); background: rgba(255, 92, 108, .12); }
+
+/* Kortet */
+.insp-kort { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 420; width: min(400px, calc(100vw - 32px));
+  padding: 18px 20px 20px; border-radius: 24px; color: var(--ben, #f6f4ef); isolation: isolate; overflow: hidden;
+  background: radial-gradient(90% 100% at 100% 0%, rgba(29, 65, 102, .85), transparent 60%), linear-gradient(170deg, #122334 0%, #0b1520 60%, #08121c 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 30px 70px -30px rgba(0, 0, 0, .8), 0 0 0 1px rgba(167, 210, 255, .12);
+  opacity: 0; transform: translateY(16px) scale(.98); transition: opacity .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1); }
+.insp-kort[data-in] { opacity: 1; transform: none; }
+.insp-kort::before { content: ''; position: absolute; left: 8%; right: 8%; top: 0; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(167, 210, 255, .45) 30%, rgba(126, 224, 195, .7) 62%, transparent); }
+.insp-kort[data-lage="spelar"] { box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 30px 70px -30px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 92, 108, .35), 0 0 40px -12px rgba(255, 92, 108, .35); }
+.insp-huvud { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 32px; margin-bottom: 12px; padding-right: 44px; }
+/* Stäng/Göm står sist i kortet (Tab-ordningen) men visas uppe till höger, i huvudets rad */
+.insp-kort > .insp-stang { position: absolute; top: 18px; right: 20px; }
+.insp-ogon { display: inline-flex; align-items: center; gap: 8px; font: 600 .66rem/1 var(--font-rubrik, Poppins, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: rgba(246, 244, 239, .62); }
+.insp-live { width: 7px; height: 7px; border-radius: 50%; background: var(--accent, #7ee0c3); }
+.insp-kort[data-lage="spelar"] .insp-live { background: #ff5c6c; animation: insp-puls 1.6s ease-out infinite; }
+.insp-stang { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(246, 244, 239, .08); color: var(--ben, #f6f4ef); cursor: pointer; transition: background-color .2s; }
+.insp-stang:hover { background: rgba(246, 244, 239, .16); }
+.insp-stang .ikon { width: 14px; height: 14px; }
+.insp-rubrik { margin: 0 0 8px; font: 600 1.35rem/1.1 var(--font-rubrik, Poppins, sans-serif); letter-spacing: -.03em; }
+.insp-rubrik em { font-style: normal; background: linear-gradient(90deg, var(--accent, #7ee0c3), var(--is, #a7d2ff)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.insp-text { margin: 0; font-size: .86rem; line-height: 1.5; color: rgba(246, 244, 239, .72); }
+.insp-text strong { color: var(--ben, #f6f4ef); font-weight: 600; }
+.insp-text-liten { font-size: .78rem; margin-top: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* samtycket */
+.insp-samtycke { display: flex; align-items: flex-start; gap: 12px; margin: 14px 0 0; padding: 12px 14px; border-radius: 16px; background: rgba(246, 244, 239, .06); box-shadow: inset 0 0 0 1px rgba(246, 244, 239, .1); cursor: pointer; font-size: .86rem; line-height: 1.45; }
+.insp-samtycke input { width: 20px; height: 20px; margin: 2px 0 0; flex: none; accent-color: var(--accent, #7ee0c3); }
+.insp-samtycke small { display: block; margin-top: 4px; font-size: .74rem; color: rgba(246, 244, 239, .55); }
+.insp-samtycke:has(input:checked) { box-shadow: inset 0 0 0 1px rgba(126, 224, 195, .5); background: rgba(126, 224, 195, .08); }
+
+/* ljudnivå + tid */
+.insp-rad { display: flex; align-items: center; gap: 16px; margin-top: 4px; }
+.insp-niva { display: flex; align-items: center; gap: 3px; flex: 1; height: 56px; min-width: 0; }
+.insp-niva i { flex: 1; height: 100%; border-radius: 3px; background: linear-gradient(180deg, var(--is, #a7d2ff), var(--accent, #7ee0c3)); transform: scaleY(.08); transform-origin: center; transition: transform .08s linear; opacity: .9; }
+.insp-kort[data-lage="paus"] .insp-niva i { transform: scaleY(.08) !important; opacity: .35; }
+.insp-tid { flex: none; text-align: right; }
+.insp-tid span { display: block; font: 600 1.7rem/1 var(--font-rubrik, Poppins, sans-serif); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.insp-tid small { display: block; margin-top: 4px; font: 600 .64rem/1 var(--font-rubrik, Poppins, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: rgba(246, 244, 239, .55); }
+.insp-kort[data-lage="spelar"] .insp-tid small { color: #ff8a95; }
+
+/* spelaren när inspelningen är klar */
+.insp-spelare { display: block; width: 100%; margin: 14px 0 0; border-radius: 12px; color-scheme: dark; }
+
+/* knappar */
+.insp-knappar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.insp-primar, .insp-sekundar { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; font: 600 .88rem/1 var(--font-rubrik, Poppins, sans-serif); cursor: pointer; transition: transform .12s, background-color .2s, box-shadow .25s; }
+.insp-primar { flex: 1 1 auto; color: var(--ink, #0b1520); background: linear-gradient(160deg, #a6edd8, var(--accent, #7ee0c3) 60%, #5fd0ae); box-shadow: 0 12px 26px -12px rgba(126, 224, 195, .8), inset 0 1px 0 rgba(255, 255, 255, .5); }
+.insp-primar:disabled { color: rgba(246, 244, 239, .6); background: rgba(246, 244, 239, .08); box-shadow: inset 0 0 0 1px rgba(246, 244, 239, .16); cursor: not-allowed; }
+.insp-primar:not(:disabled):hover { transform: translateY(-1px); }
+.insp-primar:active { transform: scale(.97); }
+.insp-sekundar { color: var(--ben, #f6f4ef); background: rgba(246, 244, 239, .07); box-shadow: inset 0 0 0 1px rgba(246, 244, 239, .16); }
+.insp-sekundar:hover { background: rgba(246, 244, 239, .13); }
+.insp-fara { color: #ffb3ba; }
+.insp-fara:hover { background: rgba(255, 92, 108, .14); box-shadow: inset 0 0 0 1px rgba(255, 92, 108, .4); }
+.insp-stopp { background: linear-gradient(160deg, #ff8a95, #ff5c6c 60%, #e2455a); color: #fff; box-shadow: 0 12px 26px -12px rgba(255, 92, 108, .8), inset 0 1px 0 rgba(255, 255, 255, .35); }
+.insp-stopp-ruta { width: 12px; height: 12px; border-radius: 3px; background: #fff; }
+.insp-primar .ikon, .insp-sekundar .ikon { width: 16px; height: 16px; }
+.insp-primar:focus-visible, .insp-sekundar:focus-visible { outline: 2px solid var(--accent, #7ee0c3); outline-offset: 3px; }
+
+/* mobil: ark underifrån, över flikraden */
+@media (max-width: 640px) {
+  .insp-kort { left: 0; right: 0; bottom: 0; width: auto; border-radius: 26px 26px 0 0; padding: 18px 18px calc(20px + env(safe-area-inset-bottom)); transform: translateY(24px); }
+  .insp-kort[data-in] { transform: none; }
+  .insp-kort > .insp-stang { right: 18px; }
+  .insp-primar { flex: 1 1 100%; }
+  .insp-knappar .insp-sekundar { flex: 1 1 auto; }
+}
+
+/* I presentationen (2026-10-24): kortet står ovanför bottenraden, så att bildnamnet, räknaren och ‹ › går att nå. Medan det spelar
+   in är det en smal rad – ljudnivån, tiden, Pausa, Stoppa och Göm – så att det inte täcker kalkylens summa och Spara (kunden står i
+   presentationens topprad, rubriken "Mötesinspelning" finns kvar för skärmläsare). Bottenraden är 46 px pilar + 14 px luft över
+   safe area (42 px på mobil). */
+.mote .insp-kort { bottom: calc(max(14px, env(safe-area-inset-bottom)) + 74px); }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) { display: flex; align-items: center; gap: 10px; width: auto; max-width: calc(100vw - 32px); padding: 8px 8px 8px 18px; border-radius: 999px; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-huvud { display: contents; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-ogon { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-rad { flex: none; gap: 12px; margin: 0 6px 0 0; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-niva { flex: none; width: 66px; height: 30px; gap: 2px; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-tid { text-align: left; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-tid span { font-size: 1.2rem; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-tid small { margin-top: 3px; font-size: .58rem; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-text-liten { display: none; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-knappar { flex: none; flex-wrap: nowrap; gap: 6px; margin: 0; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-knappar > * { flex: none; padding: 0 16px; }
+.mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) > .insp-stang { position: static; flex: none; width: 40px; height: 40px; }
+/* Bilderna får luft under sig medan raden syns – det som står längst ned (kalkylens Spara) går att rulla fram ovanför raden */
+.mote:has(> .insp-kort:is([data-lage="spelar"], [data-lage="paus"]):not([data-ut])) .mote-bild { padding-bottom: 76px; }
+@media (max-width: 640px) {
+  .mote .insp-kort { left: 8px; right: 8px; bottom: calc(max(14px, env(safe-area-inset-bottom)) + 64px); width: auto; border-radius: 22px; padding: 16px 16px 18px; }
+  .mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) { padding: 7px 7px 7px 16px; border-radius: 999px; max-width: none; }
+  .mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-rad { flex: 1 1 auto; min-width: 0; margin: 0; }
+  .mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-knappar > * { padding: 0 13px; }
+}
+@media (max-width: 420px) { .mote .insp-kort:is([data-lage="spelar"], [data-lage="paus"]) .insp-niva { display: none; } }
+
+/* Pillret (2026-10-24, inspelning.js uppdateraPiller): så länge det finns en inspelning och kortet är gömt syns det i hela CRM:et –
+   mikrofonen står aldrig på utan att det syns. Klick öppnar kortet. Samma hörn som kortet på dator (till vänster om chattens
+   ikon när den står där), på mobil till vänster ovanför flikraden (mittlinje med +-knappen till höger). */
+.insp-piller { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 76; display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 0 18px 0 15px; border: 0; border-radius: 999px; color: var(--ben, #f6f4ef); cursor: pointer; white-space: nowrap;
+  background: radial-gradient(120% 140% at 0% 0%, rgba(255, 92, 108, .2), transparent 60%), linear-gradient(170deg, #182a3d, #0b1520);
+  box-shadow: inset 0 0 0 1px rgba(255, 92, 108, .5), 0 18px 40px -16px rgba(0, 0, 0, .75), 0 0 30px -12px rgba(255, 92, 108, .5);
+  font: 600 .86rem/1 var(--font-rubrik, Poppins, sans-serif); font-variant-numeric: tabular-nums;
+  animation: insp-piller-in .45s cubic-bezier(.22, 1, .36, 1) both; transition: transform .2s; }
+.insp-piller[hidden] { display: none; }
+.insp-piller:hover { transform: translateY(-2px); }
+.insp-piller:active { transform: scale(.97); }
+.insp-piller:focus-visible { outline: 2px solid var(--accent, #7ee0c3); outline-offset: 3px; }
+.insp-piller .insp-prick { animation: insp-puls 1.6s ease-out infinite; }
+.insp-piller small { font: 600 .66rem/1 var(--font-rubrik, Poppins, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #ff8a95; }
+.insp-piller[data-lage="paus"] .insp-prick { animation: none; opacity: .55; }
+.insp-piller[data-lage="paus"] small { color: rgba(246, 244, 239, .62); }
+.insp-piller[data-lage="klar"] { box-shadow: inset 0 0 0 1px rgba(126, 224, 195, .5), 0 18px 40px -16px rgba(0, 0, 0, .75), 0 0 30px -12px rgba(126, 224, 195, .45);
+  background: radial-gradient(120% 140% at 0% 0%, rgba(126, 224, 195, .18), transparent 60%), linear-gradient(170deg, #182a3d, #0b1520); }
+.insp-piller[data-lage="klar"] .insp-prick { background: var(--accent, #7ee0c3); animation: none; }
+.insp-piller[data-lage="klar"] small { color: var(--accent, #7ee0c3); }
+@keyframes insp-piller-in { from { opacity: 0; transform: translateY(12px); } }
+body:has(> .chf-ikon[data-hornet]) .insp-piller { right: 92px; }
+@media (max-width: 999px) {
+  .insp-piller, body:has(> .chf-ikon[data-hornet]) .insp-piller { right: auto; left: max(16px, env(safe-area-inset-left)); bottom: calc(var(--flikhojd, 64px) + 20px + max(10px, env(safe-area-inset-bottom))); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .insp-prick, .insp-live { animation: none !important; }
+  .insp-kort { transition: opacity .2s ease; transform: none; }
+  .insp-niva i { transition: none; }
+  .insp-piller { animation: none; }
+}

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<script src="skarpt.js"></script>
+<script>
+  // Skarpt läge (node server/server.js): visa e-post och engångskod direkt, utan att demorollerna blinkar förbi
+  if (window.UP_SKARPT && window.UP_SKARPT.lage === 'skarp') document.documentElement.setAttribute('data-lage', 'skarp');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Logga in · Uperformance</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b1520">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="crm.css?v=36">
+<link rel="stylesheet" href="premium.css?v=25">
+<link rel="stylesheet" href="kund.css?v=13">
+<link rel="stylesheet" href="logga-in.css?v=12">
+<script src="../assets/overgang.js?v=3"></script>
+<script src="portal.js?v=4" defer></script>
+<script src="lager.js?v=14" defer></script>
+<script src="data.js?v=17" defer></script>
+<script src="logga-in.js?v=12" defer></script>
+</head>
+<body class="li-sida">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="logo" viewBox="0 0 1274.2 395">
+    <path fill="none" stroke="currentColor" stroke-width="20" d="M198,10c103.9,0,188,84,188,187.5s-84.1,187.5-188,187.5S10,301,10,197.5,94.1,10,198,10Z"/>
+    <path fill="currentColor" d="M177.5,127.8v88.6c0,7.3,1.6,13,4.7,17.3,3.3,4.1,8.4,6.2,15.5,6.2s12.4-2.1,15.8-6.2c3.4-4.3,5.1-10.1,5.1-17.3v-88.6h49.1v88.6c0,14.9-3.1,27.8-9.3,38.4-6.2,10.5-14.7,18.4-25.5,23.8-10.8,5.3-22.9,8-36.2,8s-25.2-2.7-35.5-8c-10.2-5.3-18.2-13.2-24-23.8-5.8-10.5-8.7-23.3-8.7-38.4v-88.6h49.1-.1Z"/>
+    <path fill="currentColor" d="M518.7,181.6c0,7.7-2.5,13.9-7.6,18.7-5.1,4.7-12.7,7.1-22.8,7.1h-18.2v38.4h-9v-90h27.2c10,0,17.6,2.4,22.7,7.1,5.1,4.7,7.7,11,7.7,18.8h0ZM488.3,199.6c14.1,0,21.1-6,21.1-18s-1.7-10.6-5-13.6c-3.3-3.1-8.7-4.6-16.1-4.6h-18.2v36.3h18.2ZM597.4,207c0,3.1,0,5.4-.3,7.1h-58.3c.3,5.3,1.5,9.9,3.9,13.6,2.3,3.8,5.4,6.7,9.1,8.6,3.8,1.9,7.9,2.8,12.4,2.8s10.7-1.4,14.7-4.2,6.7-6.7,8-11.5h9.5c-1.7,6.9-5.4,12.5-11.1,16.9-5.6,4.3-12.6,6.4-21.1,6.4s-12.5-1.5-17.8-4.4c-5.2-3-9.4-7.2-12.4-12.6-2.9-5.5-4.4-11.9-4.4-19.2s1.5-13.7,4.4-19.2,7-9.7,12.2-12.6c5.2-2.9,11.2-4.4,17.9-4.4s12.5,1.5,17.5,4.4c5.1,2.9,8.9,6.9,11.6,11.8,2.7,4.9,4.1,10.3,4.1,16.3v.2ZM588.3,206.7c0-5.2-1-9.7-3.2-13.4-2.1-3.7-5.1-6.5-8.9-8.4-3.8-1.9-7.9-2.8-12.4-2.8-6.7,0-12.4,2.1-17.1,6.4-4.7,4.3-7.3,10.3-7.9,18.2h49.5ZM622.9,187.9c2-4.4,5-7.8,9-10.2,4.1-2.4,9.1-3.6,15.1-3.6v9.4h-2.4c-6.5,0-11.8,1.8-15.7,5.3s-5.9,9.4-5.9,17.6v39.3h-9v-70.3h9v12.5h0ZM688.2,183h-16.3v62.7h-9v-62.7h-9.8v-7.6h9.8v-4.9c0-7.6,1.9-13.3,5.8-16.9,3.9-3.6,10.3-5.4,19.1-5.4v7.7c-5.8,0-10,1.1-12.4,3.3-2.3,2.2-3.5,6-3.5,11.2v4.9h16.3v7.6h0ZM733.2,246.7c-6.6,0-12.6-1.5-17.9-4.4-5.2-3-9.4-7.2-12.5-12.6-3-5.5-4.5-11.9-4.5-19.2s1.5-13.6,4.6-19.1,7.3-9.7,12.6-12.6c5.3-3,11.3-4.5,17.9-4.5s12.6,1.5,17.9,4.5c5.4,2.9,9.6,7.1,12.6,12.6,3.1,5.4,4.6,11.8,4.6,19.1s-1.5,13.6-4.6,19.1-7.3,9.7-12.7,12.7c-5.4,2.9-11.4,4.4-18,4.4h0ZM733.2,238.9c4.6,0,8.9-1,12.9-3.1,3.9-2.1,7.1-5.3,9.5-9.5,2.5-4.3,3.7-9.5,3.7-15.7s-1.2-11.4-3.6-15.6c-2.4-4.3-5.6-7.5-9.5-9.5-3.9-2.1-8.2-3.2-12.9-3.2s-8.9,1.1-12.9,3.2c-3.9,2.1-7.1,5.2-9.5,9.5-2.3,4.2-3.5,9.4-3.5,15.6s1.2,11.4,3.5,15.7c2.4,4.2,5.5,7.4,9.4,9.5s8.2,3.1,12.9,3.1h0ZM794,187.9c2-4.4,5-7.8,9-10.2,4.1-2.4,9.1-3.6,15.1-3.6v9.4h-2.4c-6.5,0-11.8,1.8-15.7,5.3s-5.9,9.4-5.9,17.6v39.3h-9v-70.3h9v12.5h0ZM915.3,174.1c8.2,0,14.9,2.6,20.1,7.9,5.2,5.1,7.9,12.7,7.9,22.5v41.2h-8.9v-40.2c0-7.6-1.8-13.5-5.5-17.5s-8.7-6.1-15.1-6.1-11.9,2.2-15.8,6.6c-3.9,4.4-5.9,10.7-5.9,19.1v38.1h-8.9v-40.2c0-7.6-1.8-13.5-5.5-17.5s-8.8-6.1-15.2-6.1-11.9,2.2-15.8,6.6c-3.9,4.4-5.9,10.7-5.9,19.1v38.1h-9v-70.3h9v12.1c2.2-4.4,5.4-7.7,9.5-9.9,4.1-2.3,8.7-3.5,13.8-3.5s11.4,1.5,16,4.4,8,7.2,10,12.9c1.9-5.6,5.1-9.8,9.7-12.7,4.6-3,9.9-4.5,15.7-4.5h-.2ZM959.2,210.4c0-7.2,1.4-13.5,4.2-18.9,2.9-5.5,6.9-9.7,12-12.6,5.1-3,10.9-4.5,17.4-4.5s12.4,1.5,17.3,4.6c4.9,3.1,8.4,7,10.6,11.8v-15.4h9v70.3h-9v-15.6c-2.2,4.8-5.8,8.8-10.7,12-4.8,3.1-10.6,4.6-17.3,4.6s-12.1-1.5-17.3-4.5c-5.1-3-9.1-7.3-12-12.7-2.8-5.5-4.2-11.8-4.2-19.1h0ZM1020.6,210.6c0-5.7-1.2-10.6-3.5-14.9-2.3-4.3-5.5-7.6-9.5-9.9-3.9-2.3-8.3-3.5-13.1-3.5s-9.4,1.1-13.4,3.3c-3.9,2.2-7.1,5.5-9.4,9.8-2.2,4.2-3.3,9.2-3.3,15.1s1.1,10.8,3.3,15.2c2.3,4.3,5.4,7.6,9.4,9.9,3.9,2.2,8.4,3.3,13.4,3.3s9.2-1.2,13.1-3.5c4-2.3,7.2-5.6,9.5-9.9,2.3-4.3,3.5-9.3,3.5-14.9h0ZM1083.1,174.1c8.4,0,15.3,2.6,20.6,7.9,5.3,5.1,8,12.7,8,22.5v41.2h-8.9v-40.2c0-7.6-1.9-13.5-5.8-17.5-3.8-4-9-6.1-15.6-6.1s-12.2,2.1-16.2,6.4c-4,4.3-6.1,10.6-6.1,18.9v38.4h-9v-70.3h9v12c2.2-4.3,5.4-7.6,9.7-9.8,4.2-2.3,9-3.5,14.3-3.5h0ZM1127.5,210.6c0-7.3,1.5-13.6,4.4-19.1s7-9.7,12.1-12.6c5.1-3,11-4.5,17.6-4.5s15.8,2.1,21.4,6.4c5.7,4.3,9.3,10.1,10.9,17.5h-9.7c-1.2-5.1-3.8-9-7.9-11.8-3.9-2.9-8.9-4.4-14.8-4.4s-9,1.1-12.7,3.2c-3.8,2.1-6.8,5.4-9,9.7-2.1,4.2-3.2,9.4-3.2,15.6s1.1,11.4,3.2,15.7c2.2,4.3,5.2,7.5,9,9.7,3.8,2.1,8,3.2,12.7,3.2s10.9-1.4,14.8-4.2c4-2.9,6.7-7,7.9-12.1h9.7c-1.6,7.2-5.3,13-10.9,17.4-5.7,4.4-12.8,6.6-21.4,6.6s-12.5-1.5-17.6-4.4c-5.1-3-9.2-7.2-12.1-12.6-2.9-5.5-4.4-11.9-4.4-19.2h0ZM1274.2,207c0,3.1,0,5.4-.3,7.1h-58.3c.3,5.3,1.5,9.9,3.9,13.6,2.3,3.8,5.4,6.7,9.1,8.6,3.8,1.9,7.9,2.8,12.4,2.8s10.7-1.4,14.7-4.2,6.7-6.7,8-11.5h9.5c-1.7,6.9-5.4,12.5-11.1,16.9-5.6,4.3-12.6,6.4-21.1,6.4s-12.5-1.5-17.8-4.4c-5.2-3-9.4-7.2-12.4-12.6-2.9-5.5-4.4-11.9-4.4-19.2s1.5-13.7,4.4-19.2,7-9.7,12.2-12.6c5.2-2.9,11.2-4.4,17.9-4.4s12.5,1.5,17.5,4.4c5.1,2.9,8.9,6.9,11.6,11.8,2.7,4.9,4.1,10.3,4.1,16.3v.2ZM1265,206.7c0-5.2-1-9.7-3.2-13.4-2.1-3.7-5.1-6.5-8.9-8.4s-7.9-2.8-12.4-2.8c-6.7,0-12.4,2.1-17.1,6.4-4.7,4.3-7.3,10.3-7.9,18.2h49.5Z"/>
+  </symbol>
+  <symbol id="u-mark" viewBox="0 0 396 395"><path fill="none" stroke="currentColor" stroke-width="20" d="M198,10c103.9,0,188,84,188,187.5s-84.1,187.5-188,187.5S10,301,10,197.5,94.1,10,198,10Z"/><path fill="currentColor" d="M177.5,127.8v88.6c0,7.3,1.6,13,4.7,17.3,3.3,4.1,8.4,6.2,15.5,6.2s12.4-2.1,15.8-6.2c3.4-4.3,5.1-10.1,5.1-17.3v-88.6h49.1v88.6c0,14.9-3.1,27.8-9.3,38.4-6.2,10.5-14.7,18.4-25.5,23.8-10.8,5.3-22.9,8-36.2,8s-25.2-2.7-35.5-8c-10.2-5.3-18.2-13.2-24-23.8-5.8-10.5-8.7-23.3-8.7-38.4v-88.6h49.1-.1Z"/></symbol>
+  <symbol id="i-prat" viewBox="0 0 24 24"><path pathLength="1" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path pathLength="1" d="M8 12h.01M12 12h.01M16 12h.01"/></symbol>
+  <symbol id="i-projekt" viewBox="0 0 24 24"><rect pathLength="1" x="3" y="4" width="18" height="16" rx="2"/><path pathLength="1" d="M8 4v16M14 4v16"/></symbol>
+  <symbol id="i-kunder" viewBox="0 0 24 24"><rect pathLength="1" x="4" y="2" width="16" height="20" rx="2"/><path pathLength="1" d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></symbol>
+  <symbol id="i-mote" viewBox="0 0 24 24"><path pathLength="1" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/><circle pathLength="1" cx="9" cy="7" r="4"/></symbol>
+  <symbol id="i-pil" viewBox="0 0 24 24"><path pathLength="1" d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-pil-v" viewBox="0 0 24 24"><path pathLength="1" d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-bock" viewBox="0 0 24 24"><path pathLength="1" d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-las" viewBox="0 0 24 24"><rect pathLength="1" x="3" y="11" width="18" height="11" rx="2"/><path pathLength="1" d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-lank" viewBox="0 0 24 24"><path pathLength="1" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path pathLength="1" d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-dokument" viewBox="0 0 24 24"><path pathLength="1" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path pathLength="1" d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol>
+  <symbol id="i-hjarta" viewBox="0 0 24 24"><path pathLength="1" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle pathLength="1" cx="12" cy="12" r="10"/><path pathLength="1" d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="i-kalender" viewBox="0 0 24 24"><rect pathLength="1" x="3" y="4" width="18" height="18" rx="2"/><path pathLength="1" d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-klubb" viewBox="0 0 24 24"><path pathLength="1" d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+  <symbol id="i-salj" viewBox="0 0 24 24"><path pathLength="1" d="M3 3v18h18"/><path pathLength="1" d="m19 9-5 5-4-4-3 3"/></symbol>
+  <symbol id="i-mejl" viewBox="0 0 24 24"><rect pathLength="1" x="2" y="4" width="20" height="16" rx="2"/><path pathLength="1" d="m22 7-10 6L2 7"/></symbol>
+  <symbol id="i-varning" viewBox="0 0 24 24"><path pathLength="1" d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path pathLength="1" d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-klocka" viewBox="0 0 24 24"><circle pathLength="1" cx="12" cy="12" r="10"/><path pathLength="1" d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-ut" viewBox="0 0 24 24"><path pathLength="1" d="M7 17 17 7M8 7h9v9"/></symbol>
+  <!-- samma symboler som CRM:et (index.html) – ersätter emojin i scenens brickor och rollkorten -->
+  <symbol id="i-trend" viewBox="0 0 24 24"><path pathLength="1" d="M22 7 13.5 15.5l-5-5L2 17M16 7h6v6"/></symbol>
+  <symbol id="i-stetoskop" viewBox="0 0 24 24"><path pathLength="1" d="M11 2v2"/><path pathLength="1" d="M5 2v2"/><path pathLength="1" d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path pathLength="1" d="M8 15a6 6 0 0 0 12 0v-3"/><circle pathLength="1" cx="20" cy="10" r="2"/></symbol>
+  <symbol id="i-underlag" viewBox="0 0 24 24"><rect pathLength="1" x="8" y="2" width="8" height="4" rx="1"/><path pathLength="1" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path pathLength="1" d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol>
+  <symbol id="i-medalj" viewBox="0 0 24 24"><path pathLength="1" d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle pathLength="1" cx="12" cy="8" r="6"/></symbol>
+  <symbol id="i-skold" viewBox="0 0 24 24"><path pathLength="1" d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path pathLength="1" d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-krona" viewBox="0 0 24 24"><path pathLength="1" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path pathLength="1" d="M5 21h14"/></symbol>
+</svg>
+
+<div class="li-rutnat">
+  <!-- Vänster: samma mörka panel som CRM:ets sidomeny (varumärket överst, neonkanten mot sidan) -->
+  <div class="li-vanster">
+    <div class="li-bakgrund" aria-hidden="true"><span></span><span></span></div>
+    <header class="li-topp">
+      <a class="li-logga" href="https://www.uperformance.se/" aria-label="Uperformance – till startsidan"><svg aria-hidden="true"><use href="#u-mark"/></svg><span><strong>Uperformance</strong><small>CRM</small></span></a>
+      <a class="li-tillbaka" href="https://www.uperformance.se/"><svg class="ikon" aria-hidden="true"><use href="#i-pil-v"/></svg><span>Till sajten</span></a>
+    </header>
+
+    <main class="li-main">
+      <p class="li-eyebrow"><i aria-hidden="true"></i><span data-li-eyebrow>Demo med exempeldata</span></p>
+      <h1>Välkommen tillbaka</h1>
+      <p class="li-ingress"><span data-li-halsning>Hej</span>! Logga in för att fortsätta till CRM:et.</p>
+
+      <!-- Demo: e-post (demokontonas adresser) eller ett av kontona nedan – inget lösenord, allt sparas i den här webbläsaren -->
+      <form class="li-inlogg" data-li-demo data-bara-demo novalidate>
+        <label class="li-falt-ram"><svg class="ikon" aria-hidden="true"><use href="#i-mejl"/></svg><span class="sr">E-postadress</span><input class="li-falt" type="email" name="epost" list="li-demo-adresser" autocomplete="off" inputmode="email" maxlength="254" placeholder="namn@exempel.se" data-li-demo-epost></label>
+        <datalist id="li-demo-adresser" data-li-demo-adresser></datalist>
+        <button class="li-knapp" type="submit" data-li-demo-knapp>Fortsätt<svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg><svg class="ikon li-bock" aria-hidden="true"><use href="#i-bock"/></svg></button>
+        <p class="li-fel" data-li-demo-fel role="alert" hidden><svg class="ikon" aria-hidden="true"><use href="#i-varning"/></svg><span></span></p>
+      </form>
+
+      <!-- Skarpt läge: e-post → engångskod (6 siffror) -->
+      <form class="li-inlogg" data-li-form data-bara-skarp novalidate>
+        <div class="li-steg" data-li-steg="epost">
+          <label class="li-falt-ram"><svg class="ikon" aria-hidden="true"><use href="#i-mejl"/></svg><span class="sr">E-postadress</span><input class="li-falt" type="email" name="epost" autocomplete="username" inputmode="email" maxlength="254" placeholder="namn@foretag.se" required data-li-epost></label>
+          <button class="li-knapp" type="submit" data-li-knapp>Skicka engångskod<svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg></button>
+        </div>
+        <div class="li-steg" data-li-steg="kod" hidden>
+          <p class="li-skickat"><span class="li-ikon"><svg class="ikon" aria-hidden="true"><use href="#i-mejl"/></svg></span><span>Koden är skickad till <strong data-li-till></strong></span></p>
+          <!-- Ett enda inmatningsfält (klistra in, autofyll av engångskod) – de sex rutorna är bara utseendet -->
+          <label class="li-kodetikett"><span class="sr">Engångskod</span>
+            <span class="li-kod" data-li-kodruta>
+              <input class="li-kodfalt" type="text" name="kod" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="11" placeholder="000000" required spellcheck="false" aria-describedby="li-giltig" data-li-kod>
+              <span class="li-rutor" aria-hidden="true"><i></i><i></i><i></i><b></b><i></i><i></i><i></i></span>
+            </span>
+          </label>
+          <div class="li-giltig" id="li-giltig" data-li-giltig><svg class="ikon" aria-hidden="true"><use href="#i-klocka"/></svg><span data-li-giltig-text>Koden gäller i 10 minuter</span><i class="li-giltig-stapel" aria-hidden="true"><i data-li-stapel></i></i></div>
+          <button class="li-knapp" type="submit" data-li-knapp-kod>Logga in<svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg><svg class="ikon li-bock" aria-hidden="true"><use href="#i-bock"/></svg></button>
+          <div class="li-kodlankar"><button type="button" data-li="ny-kod">Skicka en ny kod</button><button type="button" data-li="byt-epost">Byt e-postadress</button></div>
+          <p class="li-ingenkod" data-li-ingenkod hidden>Ingen kod? Kontrollera stavningen – koden skickas bara till adresser med ett konto i teamet.</p>
+        </div>
+        <p class="li-fel" data-li-fel role="alert" hidden><svg class="ikon" aria-hidden="true"><use href="#i-varning"/></svg><span></span></p>
+        <p class="li-konsol" data-li-konsol hidden><svg class="ikon" aria-hidden="true"><use href="#i-info"/></svg><span>Lokal testmiljö: koden skrivs i serverns konsol och i serverns utkorg.</span></p>
+      </form>
+
+      <!-- Demo: teamets fyra konton (avataren med närvaron, namnet och rollen) – tangenterna 1–4 väljer -->
+      <div class="li-konton" data-bara-demo>
+        <p class="li-eller"><span>eller välj ett konto</span></p>
+        <div class="li-roller" role="group" aria-label="Logga in som">
+          <button class="li-roll" type="button" data-roll="gs" aria-keyshortcuts="1">
+            <span class="li-avatar">GS<i class="li-prick" data-li-status="gs" hidden><span class="sr"></span></i></span>
+            <span class="li-roll-text"><strong>Gustav Svensson<span class="li-senast" data-li-senast hidden>Senast</span></strong><small>Säljare och försäljningschef</small></span>
+            <kbd class="li-tangent" aria-hidden="true">1</kbd>
+            <span class="li-pil"><svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg><svg class="ikon li-bock" aria-hidden="true"><use href="#i-bock"/></svg></span>
+          </button>
+          <button class="li-roll" type="button" data-roll="ma" aria-keyshortcuts="2">
+            <span class="li-avatar li-avatar-salj">MA<i class="li-prick" data-li-status="ma" hidden><span class="sr"></span></i></span>
+            <span class="li-roll-text"><strong>Magnus Andreasson<span class="li-senast" data-li-senast hidden>Senast</span></strong><small>Säljare</small></span>
+            <kbd class="li-tangent" aria-hidden="true">2</kbd>
+            <span class="li-pil"><svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg><svg class="ikon li-bock" aria-hidden="true"><use href="#i-bock"/></svg></span>
+          </button>
+          <button class="li-roll" type="button" data-roll="dr" aria-keyshortcuts="3">
+            <span class="li-avatar li-avatar-test">DR<i class="li-prick" data-li-status="dr" hidden><span class="sr"></span></i></span>
+            <span class="li-roll-text"><strong>Dale Reese<span class="li-senast" data-li-senast hidden>Senast</span></strong><small>Testansvarig</small></span>
+            <kbd class="li-tangent" aria-hidden="true">3</kbd>
+            <span class="li-pil"><svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg><svg class="ikon li-bock" aria-hidden="true"><use href="#i-bock"/></svg></span>
+          </button>
+          <button class="li-roll" type="button" data-roll="ad" aria-keyshortcuts="4">
+            <span class="li-avatar li-avatar-admin">AD<i class="li-prick" data-li-status="ad" hidden><span class="sr"></span></i></span>
+            <span class="li-roll-text"><strong>Administratör<span class="li-senast" data-li-senast hidden>Senast</span></strong><small>Konton och säkerhet</small></span>
+            <kbd class="li-tangent" aria-hidden="true">4</kbd>
+            <span class="li-pil"><svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg><svg class="ikon li-bock" aria-hidden="true"><use href="#i-bock"/></svg></span>
+          </button>
+        </div>
+      </div>
+
+      <nav class="li-kundvy" aria-label="Kundens sidor – öppnas utan inloggning">
+        <span class="li-kundvy-etikett">Kundens sidor</span>
+        <a href="kund.html#t=Vk7Qm2xR9pLt4Wn8Zc3Hs6Ya" title="Företagets underlag – öppnas utan inloggning"><svg class="ikon" aria-hidden="true"><use href="#i-lank"/></svg>Beställning</a>
+        <a href="offert.html#o=Of7Bm2Kq9Xw4Rt8Zp3Hn6Vy" title="Offerten som kunden godkänner digitalt"><svg class="ikon" aria-hidden="true"><use href="#i-dokument"/></svg>Offert</a>
+        <a href="halsa.html#h=Hd3Vk7Qm2xR9pLt4Wn8Zc3" data-li-halsa title="Deltagarens personliga länk"><svg class="ikon" aria-hidden="true"><use href="#i-hjarta"/></svg>Hälsoformulär</a>
+      </nav>
+    </main>
+
+    <footer class="li-fot"><span>© <span data-ar>2026</span> Uperformance AB</span><a href="/#kontakt">Behöver du hjälp?</a></footer>
+  </div>
+
+  <!-- Höger: en hjälte som CRM:ets (mörk, rundad, nära kanterna) – svävande kort och nyckeltal ur exempeldatan -->
+  <div class="li-hoger">
+    <section class="li-scen" data-scen aria-hidden="true">
+      <div class="li-scen-topp">
+        <p class="li-scen-ogon"><i></i>Översikt · bilden visar exempeldata</p>
+        <span class="li-datum" data-li-datum></span>
+      </div>
+      <div class="li-scen-text">
+        <h2>Hela kundresan i <em>ett system</em>.</h2>
+        <p>Sälj, testteam och admin i samma CRM – från första kontakt till testdag, uppföljning och provision till klubben.</p>
+      </div>
+      <div class="li-scen-inre">
+        <div class="li-kort li-kort-panel" style="--d:1">
+          <div class="li-kort-flyt">
+            <span class="li-kort-etikett"><svg class="ikon"><use href="#i-salj"/></svg>Öppen pipeline</span>
+            <strong class="li-stort" data-li-pipe>1,2<small>Mkr</small></strong>
+            <div class="li-staplar" data-li-staplar>
+              <span style="--hojd:80%;--i:0;--f:#5b8fd0"><i></i><b>452 tkr</b><small>Ny kontakt</small></span>
+              <span style="--hojd:12%;--i:1;--f:#3aa9c9"><i></i><b>57 tkr</b><small>Kundbesök</small></span>
+              <span style="--hojd:75%;--i:2;--f:#5ad1c8"><i></i><b>424 tkr</b><small>Offert</small></span>
+              <span style="--hojd:55%;--i:3;--f:#7ee0c3"><i></i><b>311 tkr</b><small>Underlag</small></span>
+            </div>
+            <div class="li-chips" data-li-chips><span>6 affärer</span><span>3 projekt</span></div>
+          </div>
+        </div>
+        <div class="li-kort li-kort-ring" style="--d:2.4">
+          <div class="li-kort-flyt"><div data-scen-ring></div><span class="li-kort-etikett li-mitten" data-scen-ring-etikett><svg class="ikon"><use href="#i-hjarta"/></svg>Hälsoformulär</span></div>
+        </div>
+        <div class="li-kort li-kort-chatt" style="--d:2">
+          <div class="li-kort-flyt">
+            <span class="li-kort-etikett"><svg class="ikon"><use href="#i-prat"/></svg>Meddelanden<i class="li-olast">1</i></span>
+            <div class="li-bubbla-rad"><span class="li-mini-avatar li-avatar-test" data-li-chatt-av>DR</span><p class="li-bubbla"><strong data-li-chatt-namn>Dale Reese</strong><span data-li-chatt-text>Testdagen hos Nordlast är bokad.</span></p></div>
+            <div class="li-skriver"><span class="li-mini-avatar">GS</span><span class="li-prickar"><i></i><i></i><i></i></span><small>Gustav skriver …</small></div>
+          </div>
+        </div>
+        <div class="li-kort li-kort-flode" style="--d:1.5">
+          <div class="li-kort-flyt">
+            <span class="li-kort-etikett"><i class="li-live"></i>Senaste aktivitet</span>
+            <ul class="li-flode" data-li-flode>
+              <li style="--r:0"><span class="li-ikon li-emo-ruta"><svg class="ikon" data-i="dokument" aria-hidden="true"><use href="#i-dokument"/></svg></span><span><strong>Offerten öppnad</strong><small>Bergmark Bygg · nyss</small></span></li>
+              <li style="--r:1"><span class="li-ikon li-emo-ruta"><svg class="ikon" data-i="underlag" aria-hidden="true"><use href="#i-underlag"/></svg></span><span><strong>Underlag påbörjat</strong><small>Västkust Åkeri · 5 deltagare</small></span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="li-kort li-kort-liten li-k1" style="--d:2.2">
+          <div class="li-kort-flyt"><span class="li-ikon li-ikon-gron li-emo-ruta"><svg class="ikon" data-i="medalj" aria-hidden="true"><use href="#i-medalj"/></svg></span><span><strong>Order signerad</strong><small>Nordlast Logistik</small></span></div>
+        </div>
+        <div class="li-kort li-kort-liten li-k2" style="--d:2.8">
+          <div class="li-kort-flyt"><span class="li-ikon li-emo-ruta"><svg class="ikon" data-i="kalender" aria-hidden="true"><use href="#i-kalender"/></svg></span><span><strong>Testdag bokad</strong><small>Västkust Åkeri · vecka 44</small></span></div>
+        </div>
+        <div class="li-kort li-kort-liten li-k3" style="--d:1.8">
+          <div class="li-kort-flyt"><span class="li-ikon li-ikon-orange li-emo-ruta"><svg class="ikon" data-i="klubb" aria-hidden="true"><use href="#i-klubb"/></svg></span><span><strong>Klubbmotorn</strong><small>10 % till klubben</small></span></div>
+        </div>
+      </div>
+      <!-- Nyckeltalen som EN glaspanel med hårfina avdelare (som CRM:ets sidhjältar) – räknas ur exempeldatan i logga-in.js -->
+      <div class="li-tal" data-li-tal>
+        <div class="li-glas"><span class="li-glas-etikett"><svg class="ikon"><use href="#i-salj"/></svg>Öppen pipeline</span><strong>1,2 Mkr</strong><small>6 öppna affärer</small></div>
+        <div class="li-glas"><span class="li-glas-etikett"><svg class="ikon"><use href="#i-medalj"/></svg>Signerat</span><strong>1,1 Mkr</strong><small>6 ordrar</small></div>
+        <div class="li-glas"><span class="li-glas-etikett"><svg class="ikon"><use href="#i-projekt"/></svg>Projekt</span><strong>3</strong><small>hos testteamet</small></div>
+        <div class="li-glas li-glas-orange"><span class="li-glas-etikett"><svg class="ikon"><use href="#i-klubb"/></svg>Klubbmotorn</span><strong>3 klubbar</strong><small>10 kunder via klubbar</small></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="toaster" data-toaster aria-live="polite"></div>
+</body>
+</html>

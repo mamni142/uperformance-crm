@@ -1,0 +1,131 @@
+/* Uperformance CRM – översiktens 3D-hjälte (scen-oversikt.js): arenan med resultattavlan.
+   På dator ligger hjälten i samma rutnätscell som översiktens hälsning (.hero3d, crm.css modul 22): texten till vänster och
+   WebGL-duken bakom. Smalare skärmar: ett mörkt band med rubriken ("Resultattavlan") uppe till vänster och arenan
+   bredvid/under. Inga HTML-etiketter i bilden – allt som står på tavlan ritas i scenen. Ständiga animationer rör bara
+   transform/opacitet och vilar utanför bild (data-vilar).
+   Lägen (satta från skriptet): data-ov-lage="bred" | data-ov-smal (< 640 px), data-ov-yta="hoger" | "under" | "hel" (var
+   arenan ramas), data-ov-tona + --ov-tona0/1 (arenan tonar ut under texten: åt vänster, eller uppåt när den ramas under
+   rubriken) och --ov-botten0/1 (under nyckelremsan), --ov-gx/--ov-gy/--ov-gr (ett stilla sken bakom resultattavlan). */
+
+.ov-hjalte { container: ov / inline-size; position: relative; isolation: isolate; overflow: hidden; display: grid; grid-template-columns: minmax(296px, 35%) minmax(0, 1fr);
+  height: clamp(360px, 27.5vw, 400px); margin-bottom: 16px; border-radius: 30px; color: var(--ben, #f6f4ef);
+  background:
+    radial-gradient(60% 85% at 70% 8%, rgba(38, 82, 128, .5), transparent 64%),
+    radial-gradient(48% 60% at 78% 104%, rgba(15, 110, 87, .3), transparent 72%),
+    radial-gradient(42% 80% at -6% 108%, rgba(24, 54, 83, .7), transparent 70%),
+    linear-gradient(176deg, #0f1e2e 0%, #0a1520 56%, #08121c 100%);
+  box-shadow: 0 60px 110px -50px rgba(11, 21, 32, .82), 0 22px 46px -28px rgba(11, 21, 32, .5), inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 0 0 1px rgba(255, 255, 255, .05); }
+/* vinjett över duken och en tunn ljuskant upptill */
+.ov-hjalte::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(90deg, rgba(6, 12, 19, .8) 0%, rgba(6, 12, 19, .46) 25%, rgba(6, 12, 19, 0) 40%), linear-gradient(0deg, rgba(8, 18, 28, .55), rgba(8, 18, 28, 0) 22%), radial-gradient(120% 90% at 62% 40%, transparent 55%, rgba(4, 8, 13, .42)); }
+.ov-hjalte::after { content: ''; position: absolute; left: 6%; right: 6%; top: 0; height: 1px; z-index: 4; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(167, 210, 255, .45) 30%, rgba(126, 224, 195, .7) 62%, transparent); }
+/* arenan ramad under rubriken (band utan text bredvid): vinjetten uppifrån i stället för från vänster */
+.ov-hjalte[data-ov-yta="under"]::before { background: linear-gradient(180deg, rgba(6, 12, 19, .7) 0%, rgba(6, 12, 19, .2) 22%, rgba(6, 12, 19, 0) 36%), linear-gradient(0deg, rgba(8, 18, 28, .45), rgba(8, 18, 28, 0) 16%); }
+
+/* ---- ihop med översiktens sidhuvud: ett kort i två delar med en ljusfog ---- */
+.ov-hjalte[data-scen3d]:has(+ .hero3d) { margin-bottom: 0; border-radius: 30px 30px 0 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 1px 0 0 rgba(255, 255, 255, .04), inset -1px 0 0 rgba(255, 255, 255, .04); }
+.ov-hjalte[data-scen3d] + .hero3d { border-top-left-radius: 0; border-top-right-radius: 0; }
+.ov-fog { display: none; }
+.ov-hjalte[data-scen3d]:has(+ .hero3d) .ov-fog { display: block; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; z-index: 4; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(167, 210, 255, .22) 18%, rgba(126, 224, 195, .5) 58%, rgba(167, 210, 255, .2) 84%, transparent); }
+.ov-hjalte[data-scen3d]:has(+ .hero3d) .ov-fog::after { content: ''; position: absolute; left: 30%; right: 22%; top: -10px; height: 20px;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(126, 224, 195, .14), transparent 70%); }
+
+/* Duken beskärs till ytan där arenan syns (--ov-scen-v/-o/-n sätts av skriptet): utanför är den ändå helt bortmaskad, och
+   färre pixlar ger plats för högre upplösning – skärpan. */
+.ov-scen { position: absolute; inset: var(--ov-scen-o, 0px) 0px var(--ov-scen-n, 0px) var(--ov-scen-v, 0px); }
+.ov-scen .scen3d-duk { border-radius: inherit; }
+/* ett stilla, djupt sken bakom resultattavlan (målas en gång – följer ramningen via --ov-gx/--ov-gy) */
+.ov-scen::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle var(--ov-gr, 300px) at var(--ov-gx, 74%) var(--ov-gy, 32%), rgba(64, 130, 210, .2), rgba(28, 78, 128, .09) 48%, transparent 74%); }
+/* Arenan fortsätter in bakom texten och nyckelremsan och tonas in mjukt: masken är långsam i början (texten står på nästan
+   mörk botten) och utjämnad i flera steg – ingen synlig kant. Nedtill tonar den ut in i remsans glas. Masken är stilla –
+   inga ommålningar. Med masken står scenen OVANFÖR vinjetten (texten skyddas av masken). Värdena är i dukens koordinater. */
+.ov-hjalte[data-ov-tona][data-ov-yta="hoger"] .ov-scen { z-index: 1; }
+.ov-hjalte[data-ov-tona] .ov-scen .scen3d-duk {
+  --t0: var(--ov-tona0, 0px); --t1: var(--ov-tona1, 0px); --b0: var(--ov-botten0, 100%); --b1: var(--ov-botten1, 100%);
+  --ts: calc(var(--t1) - var(--t0)); --bs: calc(var(--b1) - var(--b0));
+  --mask-x: linear-gradient(90deg, transparent var(--t0), rgba(0, 0, 0, .05) calc(var(--t0) + var(--ts) * .2), rgba(0, 0, 0, .17) calc(var(--t0) + var(--ts) * .4),
+    rgba(0, 0, 0, .4) calc(var(--t0) + var(--ts) * .6), rgba(0, 0, 0, .72) calc(var(--t0) + var(--ts) * .8), #000 var(--t1));
+  --mask-y: linear-gradient(180deg, #000 var(--b0), rgba(0, 0, 0, .9) calc(var(--b0) + var(--bs) * .2), rgba(0, 0, 0, .66) calc(var(--b0) + var(--bs) * .4),
+    rgba(0, 0, 0, .36) calc(var(--b0) + var(--bs) * .6), rgba(0, 0, 0, .12) calc(var(--b0) + var(--bs) * .8), transparent var(--b1));
+  -webkit-mask-image: var(--mask-x), var(--mask-y); -webkit-mask-composite: source-in;
+  mask-image: var(--mask-x), var(--mask-y); mask-composite: intersect; }
+.ov-hjalte[data-ov-tona][data-ov-yta="under"] .ov-scen .scen3d-duk {
+  --mask-x: linear-gradient(180deg, transparent var(--t0), rgba(0, 0, 0, .08) calc(var(--t0) + var(--ts) * .25), rgba(0, 0, 0, .32) calc(var(--t0) + var(--ts) * .5),
+    rgba(0, 0, 0, .7) calc(var(--t0) + var(--ts) * .75), #000 var(--t1)); }
+
+/* ---- textkolumnen (syns på smalare skärmar; på dator står översiktens hälsning här i stället) ---- */
+.ov-text { position: relative; z-index: 3; display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: clamp(22px, 2.2vw, 32px) 4px clamp(20px, 2vw, 28px) clamp(22px, 2.4vw, 36px); }
+.ov-ogon { display: flex; align-items: center; gap: 10px; font: 600 .66rem/1 var(--font-rubrik); letter-spacing: .16em; text-transform: uppercase; color: rgba(246, 244, 239, .62); }
+.ov-live { position: relative; width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--accent, #7ee0c3); box-shadow: 0 0 12px rgba(126, 224, 195, .7); }
+.ov-live::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--accent, #7ee0c3); animation: ov-puls 2.6s cubic-bezier(.22, 1, .36, 1) infinite; }
+@keyframes ov-puls { from { transform: scale(1); opacity: .65; } to { transform: scale(3.4); opacity: 0; } }
+.ov-rubrik { margin-top: 12px; font: 600 clamp(1.45rem, .85rem + 1.05vw, 1.85rem)/1.06 var(--font-rubrik); letter-spacing: -.04em; text-wrap: balance; }
+.ov-rubrik em { font-style: normal; background: linear-gradient(100deg, #9cf0d6 0%, var(--accent, #7ee0c3) 30%, var(--is, #a7d2ff) 75%, #e9f4ff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ov-ingress { margin-top: 9px; max-width: 30rem; color: rgba(246, 244, 239, .68); font-size: .82rem; line-height: 1.48; text-wrap: pretty; }
+.ov-ingress strong { color: var(--ben, #f6f4ef); font-weight: 600; }
+
+/* nyckeltalen (visas bara utan översiktens nyckelremsa) – kompakta glasplattor 2 × 2 */
+.ov-tal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin: 15px 0 0; }
+.ov-ruta { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 9px 11px 10px; border-radius: 14px; overflow: hidden;
+  background: linear-gradient(158deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .018) 60%), rgba(8, 16, 25, .46);
+  border: 1px solid rgba(255, 255, 255, .09); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 18px 30px -24px rgba(0, 0, 0, .8); }
+.ov-ruta::before { content: ''; position: absolute; left: 11px; right: 40%; top: 0; height: 1px; background: linear-gradient(90deg, rgba(126, 224, 195, .55), transparent); }
+.ov-ruta-orange::before { background: linear-gradient(90deg, rgba(255, 170, 90, .6), transparent); }
+.ov-ruta dt { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: .66rem; font-weight: 600; color: rgba(246, 244, 239, .6); letter-spacing: .01em; white-space: nowrap; }
+.ov-ruta dt .ikon { flex: none; width: 13px; height: 13px; color: var(--accent, #7ee0c3); }
+.ov-ruta-orange dt .ikon { color: #ffc58a; }
+.ov-ruta dd { margin: 6px 0 0; min-width: 0; }
+.ov-ruta strong { display: block; font: 600 1.14rem/1 var(--font-rubrik); letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+.ov-ruta small { display: block; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .64rem; line-height: 1.25; color: rgba(246, 244, 239, .54); }
+.ov-matare { position: absolute; left: 11px; right: 11px; bottom: 0; display: block; height: 2px; border-radius: 99px; background: rgba(255, 255, 255, .07); overflow: hidden; }
+.ov-matare b { display: block; height: 100%; width: 100%; border-radius: inherit; transform-origin: left; transform: scaleX(var(--andel, 0));
+  background: linear-gradient(90deg, rgba(126, 224, 195, .35), var(--accent, #7ee0c3)); box-shadow: 0 0 10px rgba(126, 224, 195, .55); }
+.ov-ruta-orange .ov-matare b { background: linear-gradient(90deg, rgba(217, 130, 43, .4), #ffb36b); box-shadow: 0 0 10px rgba(255, 160, 80, .5); }
+
+/* länken till säljtavlan sitter i ögonraden (sparar en hel rad) */
+.ov-lank { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 6px 10px 6px 12px; border-radius: 99px; text-decoration: none; color: #d4f7ec; white-space: nowrap;
+  font: 600 .7rem/1 var(--font-rubrik); letter-spacing: 0; text-transform: none; background: linear-gradient(180deg, rgba(126, 224, 195, .18), rgba(126, 224, 195, .06)); border: 1px solid rgba(126, 224, 195, .34);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 10px 22px -14px rgba(126, 224, 195, .6); transition: background-color .2s, border-color .2s, transform .2s var(--mjuk); }
+.ov-lank .ikon { width: 13px; height: 13px; transition: transform .25s var(--mjuk); }
+.ov-lank:hover { border-color: rgba(126, 224, 195, .7); transform: translateY(-1px); }
+.ov-lank:hover .ikon { transform: translateX(3px); }
+
+/* ---- bandet vecklas ut när det kommer efter vyn (första laddningen) – en gång, inte i loop ---- */
+.ov-hjalte[data-ov-veckla] { animation: ov-veckla .75s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes ov-veckla { from { height: 0; margin-bottom: 0; opacity: 0; } }
+
+/* ---- entré första gången (transform/opacitet) ---- */
+.ov-hjalte[data-ov-intro] .ov-text > * { animation: ov-in .9s cubic-bezier(.22, 1, .36, 1) both; }
+.ov-hjalte[data-ov-intro] .ov-text > :nth-child(2) { animation-delay: .08s; }
+.ov-hjalte[data-ov-intro] .ov-text > :nth-child(3) { animation-delay: .16s; }
+.ov-hjalte[data-ov-intro] .ov-text > :nth-child(4) { animation-delay: .24s; }
+.ov-hjalte[data-ov-intro] .ov-matare b { animation: ov-fyll 1.6s cubic-bezier(.22, 1, .36, 1) .6s both; }
+@keyframes ov-in { from { opacity: 0; transform: translateY(14px); } }
+@keyframes ov-fyll { from { transform: scaleX(0); } }
+
+/* ---- bred men smalare kort (surfplatta, liten laptop) ---- */
+@container ov (max-width: 900px) {
+  .ov-hjalte[data-ov-lage="bred"] { grid-template-columns: minmax(272px, 40%) minmax(0, 1fr); }
+  .ov-ingress { font-size: .78rem; }
+}
+
+/* ---- smal skärm (< 640 px, data-ov-smal): lågt band, rubriken överst och arenan under ---- */
+.ov-hjalte[data-ov-smal] { display: block; height: 300px; border-radius: 26px; }
+.ov-hjalte[data-ov-smal]:has(+ .hero3d) { border-radius: 26px 26px 0 0; }
+.ov-hjalte[data-ov-smal] .ov-text { display: block; padding: 18px 18px 0; }
+.ov-hjalte[data-ov-smal] .ov-ogon { font-size: .6rem; }
+.ov-hjalte[data-ov-smal] .ov-lank { padding: 5px 9px 5px 10px; font-size: .66rem; }
+.ov-hjalte[data-ov-smal] .ov-rubrik { margin-top: 10px; font-size: 1.14rem; letter-spacing: -.03em; }
+.ov-hjalte[data-ov-smal] .ov-ingress { margin-top: 5px; max-width: 21rem; font-size: .72rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ov-hjalte[data-ov-smal] .ov-tal { display: none; }
+.ov-hjalte[data-ov-smal]::before { background: linear-gradient(180deg, rgba(6, 12, 19, .7) 0%, rgba(6, 12, 19, .22) 24%, rgba(6, 12, 19, 0) 38%), linear-gradient(0deg, rgba(8, 18, 28, .45), rgba(8, 18, 28, 0) 16%); }
+
+/* ständiga animationer vilar när hjälten inte syns */
+.ov-hjalte[data-vilar] .ov-live::after { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .ov-live::after, .ov-hjalte[data-ov-intro] .ov-text > *, .ov-hjalte[data-ov-intro] .ov-matare b, .ov-hjalte[data-ov-veckla] { animation: none; }
+}

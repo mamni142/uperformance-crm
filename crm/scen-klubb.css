@@ -1,0 +1,316 @@
+/* Uperformance CRM – Klubbmotorn i 3D (scen-klubb.js). Hjältesektionen först i #/klubbmotorn.
+   Kompakt: ≈ 420 px på dator (crm.css kant i kant: upp till 480) och 300 px på mobil, och sammanfogad med vyns sidhuvud (.loop) direkt under
+   till ett kort – vyns nyckeltal och provisioner syns tidigt. Hjälten upprepar inte KPI-radens tal.
+   Dator: 3D-scenen fyller hela sektionen men modellen ramas in i ytan till höger om texten (kamerans
+   projektion förskjuts); texten ligger i en kolumn till vänster över en mörk slöja.
+   Mobil (≤ 760 px): scenen 300 px med rubriken överst och klubbknapparna nederst; vald klubb visas under scenen.
+   Ständiga animationer rör bara transform/opacity (Prestanda i CLAUDE.md). */
+
+.kb3d {
+  --kb-orange: #ff9a3d; --kb-orange-djup: #d9822b; --kb-guld: #f0b545;
+  position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: stretch;
+  height: clamp(360px, 46vh, 420px); margin-bottom: 16px; border-radius: 22px; color: var(--ben);
+  background:
+    radial-gradient(70% 80% at 72% 108%, rgba(217, 130, 43, .26), transparent 62%),
+    radial-gradient(60% 70% at 94% -6%, #1b3c5e 0%, transparent 60%),
+    radial-gradient(55% 70% at -6% 104%, rgba(15, 110, 87, .34), transparent 70%),
+    linear-gradient(180deg, #0d1a27 0%, #0b1520 55%, #08111a 100%);
+  box-shadow: 0 60px 110px -50px rgba(11, 21, 32, .8), 0 24px 50px -30px rgba(11, 21, 32, .5);
+}
+.kb3d::after { content: ''; position: absolute; inset: 0; z-index: 4; border-radius: inherit; pointer-events: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 0 0 1px rgba(255, 255, 255, .05); }
+
+/* sammanfogad med sidhuvudet: ett kort – 3D överst, vyns rubrik och loop under. Ingen söm: hjältens botten och
+   sidhuvudets topp har samma ton, det orange skenet under podiet fortsätter över skarven och en tunn ljuslinje som
+   tonar ut mot kanterna skiljer delarna. Sidhuvudet är kompaktare här (rubrik, text och bana tar mindre plats). */
+.kb3d[data-sammanfogad] { margin-bottom: 0; border-radius: 22px 22px 0 0; box-shadow: none; }
+.kb3d[data-sammanfogad]::after { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 1px 0 0 rgba(255, 255, 255, .04), inset -1px 0 0 rgba(255, 255, 255, .04); }
+#vy > .kb3d[data-sammanfogad] + .loop { border-top-left-radius: 0; border-top-right-radius: 0; padding-top: 14px; padding-bottom: 16px; row-gap: 14px;
+  background:
+    linear-gradient(90deg, transparent 6%, rgba(255, 210, 160, .08) 38%, rgba(255, 255, 255, .06) 62%, transparent 94%) top / 100% 1px no-repeat,
+    linear-gradient(180deg, #08111a 0, rgba(8, 17, 26, 0) 56px),
+    radial-gradient(42% 60% at 64% -8%, rgba(217, 130, 43, .14), transparent 70%),
+    radial-gradient(55% 140% at 100% 100%, rgba(217, 130, 43, .14), transparent 62%), radial-gradient(50% 120% at 0% 100%, rgba(15, 110, 87, .2), transparent 70%),
+    linear-gradient(180deg, #08111a 0%, #0b1520 60%);
+  box-shadow: 0 40px 80px -36px rgba(11, 21, 32, .6); }
+/* kortets mintsken flyttas ned från skarven (annars en tonskillnad mot hjältens botten) */
+#vy > .kb3d[data-sammanfogad] + .loop::before { opacity: .38; top: 6%; }
+#vy > .kb3d[data-sammanfogad] + .loop h1 { margin-top: 6px !important; font-size: clamp(1.4rem, 1.05rem + .9vw, 1.85rem); }
+#vy > .kb3d[data-sammanfogad] + .loop p { margin-top: 6px; font-size: .88rem; line-height: 1.5; max-width: 36rem; }
+@media (min-width: 561px) { #vy > .kb3d[data-sammanfogad] + .loop .bana { --r: 148px; height: 206px; } }
+@media (min-width: 1100px) { #vy > .kb3d[data-sammanfogad] + .loop .bana { --r: 172px; height: 210px; } }
+
+/* scenen (canvas, slöja, etiketter, teckenförklaring) */
+.kb3d-scenruta { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.kb3d-duk { position: absolute; inset: 0; }
+.kb3d-slojan { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(7, 13, 20, .94) 0%, rgba(7, 13, 20, .86) 30%, rgba(7, 13, 20, .5) 37%, rgba(7, 13, 20, .12) 43%, rgba(7, 13, 20, 0) 49%),
+    linear-gradient(180deg, transparent 76%, rgba(8, 15, 23, .5) 100%); }
+.kb3d-etiketter { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .9s ease; }
+.kb3d-etiketter[data-klar] { opacity: 1; }
+
+/* teckenförklaringen står i textkolumnen under klubbknapparna (scenen hålls fri) */
+.kb3d-legend { display: flex; flex: none; flex-wrap: wrap; gap: 6px 14px; margin-top: -2px;
+  font: 600 .66rem/1 var(--font-rubrik); letter-spacing: .04em; color: rgba(246, 244, 239, .6); pointer-events: none; }
+.kb3d-legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+/* myntikoner (teckenförklaring, detaljpanel) */
+.kb3d-mynt { position: relative; display: inline-block; width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.kb3d-mynt-utbetald { background: radial-gradient(circle at 35% 30%, #fff1c4, #f0b545 45%, #9a6512 100%); box-shadow: 0 0 0 1px rgba(255, 220, 150, .35); }
+.kb3d-mynt-att-betala { background: radial-gradient(circle at 35% 30%, #fff0d8, #ff9a3d 45%, #b4520b 100%); box-shadow: 0 0 10px rgba(255, 150, 60, .85), 0 0 0 1px rgba(255, 190, 120, .5); }
+.kb3d-mynt-upplupen { background: radial-gradient(circle at 35% 30%, #ffffff, #cdd5de 45%, #6f7c8a 100%); box-shadow: 0 0 0 1px rgba(167, 210, 255, .45); }
+.kb3d-mynt-prognos { background: rgba(255, 160, 74, .14); box-shadow: inset 0 0 0 1.5px rgba(255, 170, 90, .7); }
+
+/* textkolumnen */
+.kb3d-text { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: center; gap: 14px; width: min(410px, 37%); padding: clamp(22px, 3vw, 32px); }
+.kb3d-overrubrik { display: inline-flex; align-items: center; gap: 10px; font: 600 .7rem/1 var(--font-rubrik); letter-spacing: .15em; text-transform: uppercase; color: rgba(255, 196, 140, .86); }
+.kb3d-live { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--kb-orange); box-shadow: 0 0 10px rgba(255, 154, 61, .9); }
+.kb3d-live::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid rgba(255, 154, 61, .7); animation: kb3d-puls 2.4s ease-out infinite; }
+@keyframes kb3d-puls { from { transform: scale(.6); opacity: 1; } to { transform: scale(2.2); opacity: 0; } }
+.kb3d h2 { margin-top: 12px; font-size: clamp(1.7rem, 1rem + 1.35vw, 2.3rem); line-height: 1.04; letter-spacing: -.045em; font-weight: 600; text-wrap: balance; }
+.kb3d h2 em { font-style: normal; background: linear-gradient(95deg, #ffb46b 0%, #ffd7a3 38%, #fff4e6 52%, #ff9a3d 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.kb3d-ingress { margin-top: 10px; color: rgba(246, 244, 239, .7); font-size: .88rem; line-height: 1.5; max-width: 30rem; }
+/* Så fungerar det: tre steg med samma nummer som märkena i modellen (1 tornet, 2 märket, 3 kassan) */
+.kb3d-steg { display: grid; gap: 7px; margin: 10px 0 0; padding: 0; list-style: none; }
+.kb3d-steg:empty { display: none; }
+.kb3d-steg li { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; }
+.kb3d-steg b, .kb3d-nr { display: inline-grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: 50%; font: 700 .66rem/1 var(--font-rubrik); color: #1a0e03;
+  background: linear-gradient(180deg, #ffd29f, #ff9a3d); box-shadow: 0 0 0 3px rgba(255, 154, 61, .16), 0 0 12px rgba(255, 154, 61, .45); }
+.kb3d-steg span { display: grid; font: 600 .84rem/1.3 var(--font-rubrik); color: var(--ben); }
+.kb3d-steg small { font: 500 .7rem/1.3 var(--font-brod); color: rgba(246, 244, 239, .55); }
+.kb3d-nr { width: 16px; height: 16px; font-size: .58rem; margin-right: 1px; }
+.kb3d-pin-steg { pointer-events: none; }
+.kb3d-pin-steg::before { height: max(0px, calc(9px + var(--lyft, 0px))); background: linear-gradient(to top, rgba(255, 190, 120, 0), rgba(255, 190, 120, .7)); }
+.kb3d-pin-steg::after { width: 4px; height: 4px; left: -2px; top: -2px; }
+.kb3d-pin-steg .kb3d-pin-inre { bottom: 9px; padding: 4px 9px 4px 5px; border-radius: 999px; }
+.kb3d-pin-steg .kb3d-pin-namn { font-size: .66rem; gap: 6px; }
+.kb3d-pin-steg.kb3d-pin-nav::before { background: linear-gradient(to top, rgba(255, 190, 120, 0), rgba(255, 190, 120, .7)); }
+.kb3d-pin-steg.kb3d-pin-nav::after { background: #ffcf9e; box-shadow: 0 0 8px rgba(255, 154, 61, .9); }
+.kb3d-pin-steg.kb3d-pin-nav .kb3d-pin-inre { border-color: rgba(255, 170, 90, .28); }
+.kb3d-pin-steg.kb3d-pin-nav .kb3d-pin-namn { color: var(--ben); letter-spacing: -.01em; text-transform: none; font-size: .66rem; }
+.kb3d-etiketter[data-vald] .kb3d-pin-steg { opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility 0s linear .25s; }
+
+.kb3d-panel { display: grid; }
+
+/* klubbval */
+.kb3d-klubbval { display: flex; flex: none; flex-wrap: nowrap; gap: 6px; margin: 6px -6px 0; padding: 3px 6px 4px; overflow-x: auto; scrollbar-width: none; }
+.kb3d-klubbval::-webkit-scrollbar { display: none; }
+/* fler klubbar än det får plats: raden tonar ut i högerkanten (scrollas i sidled) */
+.kb3d-klubbval[data-skrollar] { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+.kb3d-val { display: inline-flex; flex: none; align-items: center; gap: 7px; min-height: 32px; padding: 5px 11px 5px 9px; border-radius: 999px; cursor: pointer;
+  background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .13); color: var(--ben); font: 600 .7rem/1.1 var(--font-rubrik); white-space: nowrap;
+  transition: background-color .25s, border-color .25s, box-shadow .35s, transform .35s var(--mjuk); }
+.kb3d-val:hover { background: rgba(255, 255, 255, .1); transform: translateY(-1px); }
+.kb3d-val b { font-weight: 600; color: #ffc58a; font-variant-numeric: tabular-nums; }
+.kb3d-val[aria-pressed="true"] { background: rgba(217, 130, 43, .24); border-color: rgba(255, 170, 90, .65); box-shadow: 0 0 0 3px rgba(217, 130, 43, .18), 0 12px 30px -14px rgba(255, 140, 40, .7); }
+.kb3d-val:focus-visible, .kb3d-knapp:focus-visible, .kb3d-stang:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.kb3d-val-prick { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+.kb3d-val-belopp { display: none; font-weight: 600; color: #ffc58a; font-variant-numeric: tabular-nums; }
+.kb3d-dold { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.kb3d-val-gras { background: linear-gradient(135deg, #5fd08f, #1f7a45); box-shadow: 0 0 8px rgba(95, 208, 143, .6); }
+.kb3d-val-is { background: linear-gradient(135deg, #ffffff, #a7d2ff); box-shadow: 0 0 8px rgba(167, 210, 255, .7); }
+
+/* detaljpanel för vald klubb (ersätter nyckeltalen) */
+.kb3d-detalj { display: grid; gap: 10px; padding: 12px 14px 13px; border-radius: 18px;
+  background: linear-gradient(165deg, rgba(255, 154, 61, .16), rgba(255, 255, 255, .03) 55%); border: 1px solid rgba(255, 170, 90, .26);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 24px 60px -30px rgba(0, 0, 0, .9); animation: kb3d-in-panel .55s var(--mjuk) both; }
+@keyframes kb3d-in-panel { from { opacity: 0; transform: translateY(10px) scale(.985); } }
+.kb3d-detalj-topp { display: flex; align-items: center; gap: 12px; }
+.kb3d-detalj-ikon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; flex: none; color: #ffd2a3; background: rgba(255, 154, 61, .16); box-shadow: inset 0 0 0 1px rgba(255, 170, 90, .35); }
+.kb3d-detalj-ikon .ikon { width: 18px; height: 18px; }
+.kb3d-ikon-is { color: #d8ecff; background: rgba(167, 210, 255, .14); box-shadow: inset 0 0 0 1px rgba(167, 210, 255, .35); }
+.kb3d-detalj-namn { display: grid; gap: 3px; min-width: 0; flex: 1; }
+.kb3d-detalj-namn strong { font: 600 1.02rem/1.15 var(--font-rubrik); letter-spacing: -.02em; }
+.kb3d-detalj-namn small { font-size: .7rem; color: rgba(246, 244, 239, .62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kb3d-stang { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .06); color: var(--ben); cursor: pointer; }
+.kb3d-stang:hover { background: rgba(255, 255, 255, .12); }
+.kb3d-stang .ikon { width: 16px; height: 16px; }
+.kb3d-tratt { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.kb3d-tratt li { position: relative; display: grid; gap: 2px; padding: 7px 8px 7px; border-radius: 12px; background: rgba(255, 255, 255, .05); overflow: hidden; }
+.kb3d-tratt li::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; transform-origin: left; transform: scaleX(var(--andel)); background: linear-gradient(90deg, var(--kb-orange), #ffd29e); animation: kb3d-fyll .9s var(--mjuk) backwards; animation-delay: calc(var(--i) * 90ms + 120ms); }
+@keyframes kb3d-fyll { from { transform: scaleX(0); } }
+.kb3d-tratt b { font: 600 .98rem/1 var(--font-rubrik); font-variant-numeric: tabular-nums; }
+.kb3d-tratt span { font-size: .6rem; letter-spacing: -.01em; color: rgba(246, 244, 239, .6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kb3d-status { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; margin: 0; }
+.kb3d-status div { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid rgba(255, 255, 255, .07); }
+.kb3d-status dt { display: inline-flex; align-items: center; gap: 7px; font-size: .74rem; color: rgba(246, 244, 239, .78); }
+.kb3d-status dd { margin: 0; font: 600 .8rem/1 var(--font-rubrik); font-variant-numeric: tabular-nums; }
+.kb3d-status .kb3d-noll dd, .kb3d-status .kb3d-noll dt { color: rgba(246, 244, 239, .38); }
+.kb3d-detalj-fot { margin: 0; font-size: .68rem; line-height: 1.35; color: rgba(246, 244, 239, .55); }
+.kb3d-knappar { display: flex; flex-wrap: wrap; gap: 8px; }
+.kb3d-knapp { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 7px 14px; border-radius: 999px; border: 0; cursor: pointer; text-decoration: none;
+  background: linear-gradient(135deg, #ffb46b, var(--kb-orange) 55%, var(--kb-orange-djup)); color: #1a0e03; font: 600 .78rem/1 var(--font-rubrik);
+  box-shadow: 0 12px 26px -12px rgba(255, 140, 40, .8), inset 0 1px 0 rgba(255, 255, 255, .35); transition: transform .3s var(--mjuk), box-shadow .3s; }
+.kb3d-knapp:hover { transform: translateY(-1px); box-shadow: 0 16px 32px -12px rgba(255, 140, 40, .9), inset 0 1px 0 rgba(255, 255, 255, .35); }
+.kb3d-knapp .ikon { width: 16px; height: 16px; transform: rotate(90deg); }
+.kb3d-knapp-spok { background: rgba(255, 255, 255, .07); color: var(--ben); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); }
+.kb3d-knapp-spok:hover { background: rgba(255, 255, 255, .12); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .24); }
+.kb3d[data-vald] .kb3d-ingress, .kb3d[data-vald] .kb3d-topp h2, .kb3d[data-vald] .kb3d-legend { display: none; }
+.kb3d[data-vald] .kb3d-text { gap: 12px; padding-top: clamp(18px, 2.4vw, 24px); padding-bottom: clamp(16px, 2.2vw, 22px); }
+
+/* projicerade etiketter: elementet sitter på ankarpunkten, rutan ovanför med en ledlinje */
+.kb3d-pin { position: absolute; left: 0; top: 0; width: 0; height: 0; padding: 0; margin: 0; border: 0; background: none; color: var(--ben); font: inherit; text-align: center;
+  will-change: transform; transition: opacity .35s ease; }
+.kb3d-pin[data-dold], .kb3d-pin[data-ute] { opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility 0s linear .25s; }
+/* annan klubb är vald: etiketten dämpas som modellen */
+.kb3d-pin[data-dimmad] { opacity: .3; }
+.kb3d-pin::before { content: ''; position: absolute; left: -.5px; bottom: 0; width: 1px; height: max(0px, calc(14px + var(--lyft, 0px))); background: linear-gradient(to top, rgba(255, 190, 120, 0), rgba(255, 190, 120, .85)); }
+.kb3d-pin::after { content: ''; position: absolute; left: -3px; top: -3px; width: 6px; height: 6px; border-radius: 50%; background: #ffcf9e; box-shadow: 0 0 8px rgba(255, 154, 61, .9); }
+.kb3d-pin-inre { position: absolute; left: 0; bottom: 14px; transform: translate(-50%, calc(-1 * var(--lyft, 0px))); display: grid; justify-items: center; gap: 2px; padding: 7px 12px 8px; border-radius: 13px; white-space: nowrap;
+  background: linear-gradient(170deg, rgba(20, 33, 47, .92), rgba(9, 16, 25, .9)); border: 1px solid rgba(255, 255, 255, .13);
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .85), inset 0 1px 0 rgba(255, 255, 255, .07); transition: border-color .3s, box-shadow .3s, transform .35s var(--mjuk); }
+.kb3d-pin-namn { display: inline-flex; align-items: center; gap: 6px; font: 600 .78rem/1.1 var(--font-rubrik); letter-spacing: -.01em; }
+.kb3d-pin-belopp { font: 600 1.02rem/1.1 var(--font-rubrik); letter-spacing: -.02em; color: #ffd2a3; font-variant-numeric: tabular-nums; }
+.kb3d-pin-belopp small { font: 500 .66rem/1 var(--font-brod); color: rgba(255, 210, 163, .7); letter-spacing: 0; }
+.kb3d-pin-under { font-size: .64rem; color: rgba(246, 244, 239, .6); }
+/* provision att betala: liten tagg på beloppsraden och orange kant (etiketten hålls två rader hög) */
+.kb3d-pin-betala-tagg { display: inline-block; margin-left: 7px; padding: 2px 7px; border-radius: 99px; vertical-align: 2px; font: 700 .58rem/1.3 var(--font-brod); font-style: normal; letter-spacing: .01em; color: #1a0e03; background: linear-gradient(135deg, #ffc485, var(--kb-orange)); box-shadow: 0 0 12px rgba(255, 154, 61, .55); }
+.kb3d-pin-betala .kb3d-pin-inre { border-color: rgba(255, 170, 90, .5); }
+.kb3d-pin-klubb { pointer-events: auto; cursor: pointer; }
+/* kompakt: namn, belopp (och att betala) – partnerraden står i panelen när klubben väljs */
+.kb3d-pin-klubb .kb3d-pin-under { font-size: .62rem; color: rgba(246, 244, 239, .66); }
+.kb3d-pin-noll { font: 500 .7rem/1.2 var(--font-brod); color: rgba(255, 210, 163, .72); }
+.kb3d-pin-klubb .kb3d-pin-inre { pointer-events: auto; }
+.kb3d-pin-klubb:hover .kb3d-pin-inre, .kb3d-pin-klubb[data-hover] .kb3d-pin-inre { border-color: rgba(255, 170, 90, .55); transform: translate(-50%, calc(-2px - var(--lyft, 0px))); }
+.kb3d-pin-klubb[data-vald] .kb3d-pin-inre { border-color: rgba(255, 170, 90, .8); box-shadow: 0 0 0 3px rgba(217, 130, 43, .22), 0 18px 36px -14px rgba(255, 130, 30, .6); }
+.kb3d-pin-foretag::before { height: calc(10px + var(--lyft, 0px)); background: linear-gradient(to top, rgba(167, 210, 255, 0), rgba(167, 210, 255, .7)); }
+.kb3d-pin-foretag::after { width: 4px; height: 4px; left: -2px; top: -2px; background: #cfe6ff; box-shadow: 0 0 6px rgba(167, 210, 255, .9); }
+.kb3d-pin-foretag .kb3d-pin-inre { bottom: 10px; padding: 5px 9px 6px; border-radius: 10px; }
+.kb3d-pin-foretag .kb3d-pin-namn { font-size: .68rem; }
+.kb3d-pin-foretag .kb3d-pin-under { font-size: .6rem; }
+.kb3d-pin-signerad .kb3d-pin-inre { border-color: rgba(126, 224, 195, .45); }
+.kb3d-pin-signerad .kb3d-pin-namn::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px rgba(126, 224, 195, .9); }
+.kb3d-pin-nav::before { background: linear-gradient(to top, rgba(126, 224, 195, 0), rgba(126, 224, 195, .85)); }
+.kb3d-pin-nav::after { background: #c9f5e7; box-shadow: 0 0 8px rgba(126, 224, 195, .9); }
+.kb3d-pin-nav .kb3d-pin-inre { border-color: rgba(126, 224, 195, .3); }
+.kb3d-pin-nav .kb3d-pin-namn { color: #c9f5e7; letter-spacing: .06em; text-transform: uppercase; font-size: .66rem; }
+/* etikett under ankaret (arenan längst fram: hänger under framkanten) */
+.kb3d-pin-nere::before { bottom: auto; top: 0; height: 14px; background: linear-gradient(to bottom, rgba(255, 190, 120, 0), rgba(255, 190, 120, .85)); }
+.kb3d-pin-nere .kb3d-pin-inre { bottom: auto; top: 14px; transform: translateX(-50%); }
+.kb3d-pin-klubb.kb3d-pin-nere:hover .kb3d-pin-inre, .kb3d-pin-klubb.kb3d-pin-nere[data-hover] .kb3d-pin-inre { transform: translate(-50%, 2px); }
+.kb3d-etiketter[data-vald] .kb3d-pin-nav { opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility 0s linear .25s; }
+
+/* entrén (bara första visningen) */
+.kb3d[data-intro] .kb3d-topp, .kb3d[data-intro] .kb3d-panel, .kb3d[data-intro] .kb3d-klubbval { animation: kb3d-in .95s var(--mjuk) backwards; }
+.kb3d[data-intro] .kb3d-panel { animation-delay: .14s; }
+.kb3d[data-intro] .kb3d-klubbval { animation-delay: .26s; }
+.kb3d[data-intro] .kb3d-legend { animation: kb3d-tona 1.2s ease 1.6s backwards; }
+@keyframes kb3d-in { from { opacity: 0; transform: translateY(16px); } }
+@keyframes kb3d-tona { from { opacity: 0; } }
+
+/* klubbkortet längre ned markeras när man hoppar dit från scenen */
+.klubbkort[data-kb3d-markerad] { animation: kb3d-markera 2.6s var(--mjuk); }
+@keyframes kb3d-markera { 0%, 100% { box-shadow: var(--skugga); } 14%, 62% { box-shadow: 0 0 0 3px rgba(217, 130, 43, .55), 0 26px 60px -24px rgba(217, 130, 43, .55); } }
+
+/* surfplatta: smalare textkolumn */
+@media (max-width: 1100px) and (min-width: 761px) {
+  .kb3d-text { width: min(360px, 44%); gap: 12px; }
+  .kb3d h2 { font-size: clamp(1.45rem, 1rem + 1.1vw, 1.8rem); }
+  .kb3d-ingress { font-size: .8rem; line-height: 1.45; }
+  .kb3d-legend { display: none; }
+}
+
+/* mobil: scenen 300 px med rubriken överst och klubbknapparna nederst; vald klubb under scenen */
+@media (max-width: 760px) {
+  .kb3d { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 300px auto; height: auto; border-radius: 20px; }
+  .kb3d[data-sammanfogad] { border-radius: 20px 20px 0 0; }
+  .kb3d-scenruta { position: relative; grid-area: 1 / 1; inset: auto; }
+  .kb3d-text { display: contents; }
+  .kb3d-topp { grid-area: 1 / 1; align-self: start; position: relative; z-index: 2; padding: 16px 16px 0; pointer-events: none; }
+  .kb3d-overrubrik { font-size: .6rem; gap: 8px; }
+  .kb3d h2 { margin-top: 7px; font-size: 1.12rem; line-height: 1.1; }
+  .kb3d[data-vald] .kb3d-topp h2 { display: block; }
+  .kb3d-ingress { display: none; }
+  .kb3d-slojan { background: linear-gradient(180deg, rgba(8, 15, 23, .9) 0%, rgba(8, 15, 23, .55) 21%, rgba(8, 15, 23, 0) 34%, rgba(8, 15, 23, 0) 78%, rgba(8, 15, 23, .8) 100%); }
+  .kb3d-legend { display: none; }
+  .kb3d-klubbval { grid-area: 1 / 1; align-self: end; position: relative; z-index: 2; flex-wrap: nowrap; overflow-x: auto; padding: 0 12px 12px; margin: 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .kb3d-klubbval::-webkit-scrollbar { display: none; }
+  .kb3d-val { min-height: 32px; padding: 5px 11px 5px 9px; font-size: .68rem; background: rgba(11, 21, 32, .78); }
+  .kb3d-val-belopp { display: inline; }
+  .kb3d-panel { grid-area: 2 / 1; position: relative; z-index: 2; }
+  .kb3d[data-vald] .kb3d-panel { padding: 2px 12px 14px; }
+  .kb3d-pin-inre { padding: 5px 9px 6px; border-radius: 11px; }
+  .kb3d-pin-namn { font-size: .68rem; }
+  .kb3d-pin-belopp { font-size: .84rem; }
+  .kb3d-pin-under { display: none; }
+  .kb3d-pin-nav { display: none; }
+}
+/* mobil: klubbens etikett är ett kompakt chip på en rad (namn + belopp); "att betala" bara för vald klubb */
+@media (max-width: 640px) {
+  .kb3d-pin-klubb .kb3d-pin-inre { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px 4px 8px; border-radius: 999px; }
+  .kb3d-pin-klubb .kb3d-pin-namn { font-size: .62rem; }
+  .kb3d-pin-klubb .kb3d-pin-belopp { font-size: .7rem; }
+  .kb3d-pin-klubb .kb3d-pin-belopp small { display: none; }
+  .kb3d-pin-foretag .kb3d-pin-inre { padding: 4px 8px 5px; }
+  .kb3d-pin-foretag .kb3d-pin-namn { font-size: .6rem; }
+}
+@media (max-width: 560px) {
+  #vy > .kb3d[data-sammanfogad] + .loop { padding-top: 14px; gap: 12px; }
+  #vy > .kb3d[data-sammanfogad] + .loop h1 { font-size: 1.3rem; }
+  #vy > .kb3d[data-sammanfogad] + .loop p { font-size: .82rem; line-height: 1.45; }
+  #vy > .kb3d[data-sammanfogad] + .loop .bana-lista { display: flex; gap: 8px; margin: 0 -22px; padding: 0 22px 4px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; }
+  #vy > .kb3d[data-sammanfogad] + .loop .bana-lista::-webkit-scrollbar { display: none; }
+  #vy > .kb3d[data-sammanfogad] + .loop .bana-lista li { flex: 0 0 auto; min-width: 138px; scroll-snap-align: start; }
+}
+@media (max-width: 380px) {
+  .kb3d-tratt span { font-size: .6rem; }
+  .kb3d h2 { font-size: 1.06rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kb3d *, .kb3d *::before, .kb3d *::after, .klubbkort[data-kb3d-markerad] { animation: none !important; transition: none !important; }
+}
+
+/* Skyltarna täcker inte modellen (2026-10-23, "ett smart sätt så inte skyltarna täcker animeringen"):
+   - klubbens skylt är ett kompakt chip (namn + belopp på en rad); detaljerna (provision, introducerade företag) när man hovrar arenan
+     eller skylten, fokuserar den eller väljer klubben,
+   - stegmärkena i modellen är bara siffran; texten visas när man hovrar märket eller samma steg i listan till vänster,
+   - och skyltarna läggs aldrig över märket i mitten (hinder i placeringen, scen-klubb.js). */
+.kb3d-pin-klubb .kb3d-pin-inre { display: flex; align-items: center; gap: 8px; padding: 5px 11px 5px 10px; border-radius: 999px; }
+.kb3d-pin-klubb .kb3d-pin-belopp { font-size: .84rem; }
+.kb3d-pin-klubb .kb3d-pin-belopp small, .kb3d-pin-klubb .kb3d-pin-under { display: none; }
+.kb3d-pin-klubb .kb3d-pin-noll { display: inline; font-size: .64rem; }
+.kb3d-pin-klubb:is(:hover, :focus-visible, [data-hover], [data-vald]) { z-index: 3; }
+.kb3d-pin-klubb:is(:hover, :focus-visible, [data-hover], [data-vald]) .kb3d-pin-inre { display: grid; justify-items: center; gap: 2px; padding: 7px 12px 8px; border-radius: 13px; }
+.kb3d-pin-klubb:is(:hover, :focus-visible, [data-hover], [data-vald]) .kb3d-pin-belopp { font-size: 1.02rem; }
+.kb3d-pin-klubb:is(:hover, :focus-visible, [data-hover], [data-vald]) .kb3d-pin-belopp small { display: inline; }
+.kb3d-pin-klubb:is(:hover, :focus-visible, [data-hover], [data-vald]) .kb3d-pin-under { display: block; }
+.kb3d-pin-steg .kb3d-pin-inre { padding: 3px; pointer-events: auto; cursor: default; }
+.kb3d-pin-steg .kb3d-pin-namn { gap: 0; }
+.kb3d-pin-steg .kb3d-steg-text { display: inline-block; max-width: 0; overflow: hidden; opacity: 0; transition: max-width .3s var(--mjuk), opacity .2s ease, margin .3s var(--mjuk); }
+.kb3d-pin-steg:hover .kb3d-steg-text,
+.kb3d:has(.kb3d-steg li:nth-child(1):hover) [data-kb3d-pin="steg1"] .kb3d-steg-text,
+.kb3d:has(.kb3d-steg li:nth-child(2):hover) [data-kb3d-pin="nav"] .kb3d-steg-text,
+.kb3d:has(.kb3d-steg li:nth-child(3):hover) [data-kb3d-pin="steg3"] .kb3d-steg-text { max-width: 12em; opacity: 1; margin: 0 6px 0 6px; }
+.kb3d:has(.kb3d-steg li:nth-child(1):hover) [data-kb3d-pin="steg1"],
+.kb3d:has(.kb3d-steg li:nth-child(2):hover) [data-kb3d-pin="nav"],
+.kb3d:has(.kb3d-steg li:nth-child(3):hover) [data-kb3d-pin="steg3"] { z-index: 3; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .kb3d-pin-steg .kb3d-steg-text { transition: none; } }
+
+/* Navigeringen (2026-10-23, "navigera bättre mellan alternativen … när man klickar så svarar den bättre"): ett klick väljer alltid
+   (inget "klicka igen för att stänga"), Alla klubbar först i raden, ‹ 2 / 3 › i panelen, ← → byter klubb och Esc visar alla.
+   Varje klick syns direkt (knappen trycks ned, panelen glider in igen vid byte), och företagens skyltar öppnar kundkortet. */
+.kb3d-val:active, .kb3d-bladdra button:active, .kb3d-stang:active { transform: scale(.95); transition-duration: .08s; }
+.kb3d-val-alla { padding-left: 11px; }
+.kb3d-val-alla[aria-pressed="true"] { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .34); box-shadow: 0 0 0 3px rgba(255, 255, 255, .08); }
+.kb3d-bladdra { display: inline-flex; align-items: center; gap: 2px; flex: none; padding: 2px; border-radius: 999px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .12);
+  font: 600 .66rem/1 var(--font-rubrik); color: rgba(246, 244, 239, .72); font-variant-numeric: tabular-nums; }
+.kb3d-bladdra > span { padding: 0 4px; }
+.kb3d-bladdra button { display: grid; place-items: center; width: 26px; height: 26px; border: 0; border-radius: 50%; background: none; color: var(--ben); cursor: pointer; transition: background-color .2s, transform .2s var(--mjuk); }
+.kb3d-bladdra button:hover { background: rgba(255, 170, 90, .22); }
+.kb3d-bladdra button:first-child .ikon { transform: scaleX(-1); }
+.kb3d-bladdra .ikon { width: 14px; height: 14px; }
+.kb3d-bladdra button:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+a.kb3d-pin-foretag { text-decoration: none; }
+a.kb3d-pin-foretag .kb3d-pin-inre { pointer-events: auto; cursor: pointer; }
+a.kb3d-pin-foretag:hover .kb3d-pin-inre { border-color: rgba(167, 210, 255, .6); transform: translate(-50%, calc(-2px - var(--lyft, 0px))); }
+a.kb3d-pin-foretag:hover { z-index: 3; }
+@media (pointer: coarse) { .kb3d-bladdra button { width: 40px; height: 40px; } }
+/* vald klubb: panelen ersätter stegförklaringen och färgförklaringen (mynten står i panelen) – rubriken, panelen och klubbraden får plats */
+.kb3d[data-vald] :is(.kb3d-ingress, .kb3d-steg, .kb3d-legend) { display: none; }
+/* klubbraden står still när man väljer klubb (annars hoppade den upp under pekaren och nästa klick hamnade fel): raden förankras
+   nederst i textkolumnen och färgförklaringen behåller sin plats (osynlig) när panelen visas */
+@media (min-width: 900px) {
+  .kb3d-text { justify-content: flex-start; }
+  .kb3d-klubbval { margin-top: auto; }
+  .kb3d[data-vald] .kb3d-legend { display: flex; visibility: hidden; }
+}

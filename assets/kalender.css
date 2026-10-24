@@ -1,0 +1,107 @@
+/* Uperformance – datumväljaren (ersätter webbläsarens kalender för <input type="date">). Delas av hemsidan och CRM:et.
+   Rutan behåller sitt utseende (.falt) men webbläsarens egen kalenderknapp göms och en egen kalendersymbol ritas till höger.
+   Kalendern är ett ljust glaskort som Väljarens lista (mörkt i mörka ytor) med veckonummer, och ett ark underifrån på mobilen.
+   Ständiga animationer: inga – bara entréer (transform/opacity). Färgerna har reservvärden så filen fungerar med både
+   hemsidans och CRM:ets tokens. Firefox har ingen ::-webkit-calendar-picker-indicator – där ligger den egna knappen kvar. */
+
+/* Rutan */
+.kal-falt::-webkit-calendar-picker-indicator { display: none; }
+.kal-falt::-webkit-inner-spin-button, .kal-falt::-webkit-clear-button { display: none; }
+.kal-falt.falt { padding-right: 38px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f6e57' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 17px 17px; }
+.kal-falt.falt[data-kal-oppen] { border-color: var(--ink, #0b1520); box-shadow: 0 0 0 4px var(--accent-ljus, #e0f6ee); }
+
+/* Kalendern */
+.kal-panel { position: fixed; inset: auto; margin: 0; z-index: 1000; width: 326px; max-width: calc(100vw - 16px); padding: 12px 12px 10px;
+  border-radius: 22px; border: 1px solid rgba(11, 21, 32, .08); background: rgba(255, 255, 255, .97); color: var(--ink, #0b1520); overflow: hidden;
+  -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 1px 2px rgba(11, 21, 32, .05), 0 12px 24px -12px rgba(11, 21, 32, .18), 0 34px 70px -24px rgba(24, 54, 83, .38);
+  font: 500 .92rem/1.3 var(--font-brod, 'Manrope', system-ui, sans-serif); transform-origin: top left; -webkit-user-select: none; user-select: none;
+  animation: kal-in .32s var(--mjuk, cubic-bezier(.22, 1, .36, 1)) both; }
+.kal-panel[data-uppat] { transform-origin: bottom left; animation-name: kal-in-upp; }
+.kal-panel[data-stanger] { animation: kal-ut .15s ease-in both; }
+@keyframes kal-in { from { opacity: 0; transform: translateY(-8px) scale(.97); } }
+@keyframes kal-in-upp { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+@keyframes kal-ut { to { opacity: 0; transform: scale(.98); } }
+
+.kal-huvud { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 2px 10px 10px; }
+.kal-manad { font: 600 1rem/1.2 var(--font-rubrik, 'Poppins', sans-serif); letter-spacing: -.015em; }
+.kal-stega { display: flex; gap: 2px; }
+.kal-steg { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; transition: background-color .15s, transform .15s; }
+.kal-steg:hover { background: var(--ben, #f6f4ef); }
+.kal-steg:active { transform: scale(.92); }
+.kal-steg:disabled { opacity: .3; cursor: default; transform: none; }
+.kal-steg svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.kal-steg:focus-visible, .kal-knapp:focus-visible { outline: 2px solid var(--accent-djup, #0f6e57); outline-offset: 2px; }
+
+.kal-rad { display: grid; grid-template-columns: 26px repeat(7, minmax(0, 1fr)); gap: 2px; align-items: center; }
+.kal-veckodagar { padding: 0 0 6px; text-align: center; font: 600 .64rem/1 var(--font-rubrik, 'Poppins', sans-serif); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3, #5f6a76); }
+.kal-v { text-align: center; font: 600 .62rem/1 var(--font-rubrik, 'Poppins', sans-serif); color: var(--text-3, #5f6a76); opacity: .75; }
+.kal-dag { position: relative; display: grid; place-items: center; height: 38px; border: 0; border-radius: 12px; background: transparent; color: inherit;
+  font: 500 .9rem/1 var(--font-brod, 'Manrope', system-ui, sans-serif); font-variant-numeric: tabular-nums; cursor: pointer; transition: background-color .15s, color .15s, transform .15s, box-shadow .2s; }
+.kal-dag:hover { background: var(--ben, #f6f4ef); }
+.kal-dag:active { transform: scale(.94); }
+.kal-dag[data-annan] { color: var(--text-3, #5f6a76); opacity: .5; }
+.kal-dag:disabled { opacity: .22; cursor: default; transform: none; }
+.kal-dag:disabled:hover { background: transparent; }
+.kal-dag[data-idag] { box-shadow: inset 0 0 0 1.5px var(--accent-djup, #0f6e57); color: var(--accent-djup, #0f6e57); font-weight: 700; opacity: 1; }
+.kal-dag[aria-pressed="true"] { background: var(--accent-djup, #0f6e57); color: #fff; font-weight: 700; opacity: 1; box-shadow: 0 10px 20px -10px rgba(15, 110, 87, .8); }
+.kal-dag[aria-pressed="true"]:hover { background: #0c5c49; }
+.kal-dag:focus-visible { outline: 2px solid var(--accent-djup, #0f6e57); outline-offset: 1px; z-index: 1; }
+/* Helgen dämpad (lördag, söndag) och markerade datum (data-kal-markera på rutan, t.ex. andra testdagar) med en prick under siffran */
+.kal-dag[data-helg]:not([aria-pressed="true"]):not([data-idag]) { color: var(--text-3, #5f6a76); background: rgba(11, 21, 32, .028); }
+.kal-dag[data-helg]:not([aria-pressed="true"]):not([data-idag]):hover { background: var(--ben, #f6f4ef); }
+.kal-veckodagar span:nth-last-child(-n + 2) { opacity: .6; }
+.kal-dag[data-markerad]::after { content: ''; position: absolute; left: 50%; bottom: 5px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #d9952b; }
+.kal-dag[data-markerad][aria-pressed="true"]::after { background: #fff; }
+.kal-forklaring { display: inline-flex; align-items: center; gap: 6px; font: 500 .74rem/1.2 var(--font-brod, 'Manrope', system-ui, sans-serif); color: var(--text-3, #5f6a76); }
+.kal-forklaring i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: #d9952b; }
+/* Entré rad för rad; månadsbyte glider in från sidan man går åt */
+.kal-dagar .kal-rad { animation: kal-rad-in .35s var(--mjuk, cubic-bezier(.22, 1, .36, 1)) backwards; animation-delay: calc(var(--r, 0) * 22ms + 30ms); }
+.kal-dagar[data-riktning="1"] .kal-rad { animation-name: kal-glid-v; animation-delay: calc(var(--r, 0) * 14ms); }
+.kal-dagar[data-riktning="-1"] .kal-rad { animation-name: kal-glid-h; animation-delay: calc(var(--r, 0) * 14ms); }
+@keyframes kal-rad-in { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes kal-glid-v { from { opacity: 0; transform: translateX(18px); } }
+@keyframes kal-glid-h { from { opacity: 0; transform: translateX(-18px); } }
+
+.kal-fot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--kant, rgba(11, 21, 32, .1)); }
+.kal-knapp { min-height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--text-2, #465260); font: 600 .82rem/1 var(--font-rubrik, 'Poppins', sans-serif); cursor: pointer; transition: background-color .15s, color .15s, transform .15s; }
+.kal-knapp:hover { background: var(--ben, #f6f4ef); color: var(--ink, #0b1520); }
+.kal-knapp:active { transform: scale(.96); }
+.kal-knapp:disabled { opacity: .4; cursor: default; transform: none; }
+.kal-knapp[hidden] { display: none; }
+.kal-idag { margin-left: auto; color: var(--accent-djup, #0f6e57); background: var(--accent-ljus, #e0f6ee); }
+.kal-idag:hover { background: #d3f2e7; color: var(--accent-djup, #0f6e57); }
+
+/* Mörka ytor: CRM:ets sidomeny, mörka kort och presentationsläget */
+.kal-panel[data-mork] { background: rgba(16, 29, 43, .96); border-color: rgba(246, 244, 239, .1); color: #f6f4ef; box-shadow: 0 34px 70px -24px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .06); }
+.kal-panel[data-mork] :is(.kal-veckodagar, .kal-v, .kal-dag[data-annan], .kal-knapp) { color: rgba(246, 244, 239, .55); }
+.kal-panel[data-mork] :is(.kal-steg:hover, .kal-dag:hover, .kal-knapp:hover) { background: rgba(246, 244, 239, .08); color: #f6f4ef; }
+.kal-panel[data-mork] .kal-dag[data-idag] { box-shadow: inset 0 0 0 1.5px var(--accent, #7ee0c3); color: var(--accent, #7ee0c3); }
+.kal-panel[data-mork] .kal-dag[aria-pressed="true"], .kal-panel[data-mork] .kal-dag[aria-pressed="true"]:hover { background: var(--accent, #7ee0c3); color: var(--ink, #0b1520); box-shadow: 0 10px 20px -10px rgba(126, 224, 195, .7); }
+.kal-panel[data-mork] .kal-fot { border-top-color: rgba(246, 244, 239, .1); }
+.kal-panel[data-mork] .kal-idag, .kal-panel[data-mork] .kal-idag:hover { background: rgba(126, 224, 195, .14); color: var(--accent, #7ee0c3); }
+.kal-panel[data-mork] :is(.kal-dag, .kal-steg, .kal-knapp):focus-visible { outline-color: var(--accent, #7ee0c3); }
+.kal-panel[data-mork] .kal-dag[data-helg]:not([aria-pressed="true"]):not([data-idag]) { color: rgba(246, 244, 239, .5); background: rgba(246, 244, 239, .03); }
+.kal-panel[data-mork] .kal-forklaring { color: rgba(246, 244, 239, .55); }
+
+/* Mobil: ett ark underifrån med stora tryckytor */
+.kal-panel[data-ark] { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-width: none; padding: 6px 14px calc(14px + env(safe-area-inset-bottom));
+  border-radius: 26px 26px 0 0; border-width: 1px 0 0; transform-origin: bottom center; animation: kal-ark-upp .45s var(--mjuk, cubic-bezier(.22, 1, .36, 1)) both; }
+.kal-panel[data-ark]::before { content: ''; display: block; width: 42px; height: 5px; margin: 6px auto 10px; border-radius: 5px; background: currentColor; opacity: .16; }
+.kal-panel[data-ark][data-stanger] { animation: kal-ark-ner .26s ease-in both; }
+.kal-panel[data-ark]::backdrop { background: rgba(11, 21, 32, .45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: kal-fon .3s both; }
+.kal-ark-titel { padding: 0 10px 6px; font: 600 1.05rem/1.2 var(--font-rubrik, 'Poppins', sans-serif); letter-spacing: -.01em; }
+.kal-panel[data-ark] .kal-rad { gap: 4px; }
+.kal-panel[data-ark] .kal-dag { height: 46px; font-size: 1rem; border-radius: 14px; }
+.kal-panel[data-ark] .kal-knapp { min-height: 44px; padding: 0 18px; font-size: .9rem; }
+@keyframes kal-ark-upp { from { transform: translateY(100%); } }
+@keyframes kal-ark-ner { to { transform: translateY(100%); } }
+@keyframes kal-fon { from { opacity: 0; } }
+.kal-panel[data-utan-popover][data-ark] { box-shadow: 0 0 0 100vmax rgba(11, 21, 32, .45); }
+
+@media (prefers-reduced-motion: reduce) {
+  .kal-panel, .kal-panel[data-ark], .kal-dagar .kal-rad { animation: none; }
+  .kal-dag, .kal-steg, .kal-knapp { transition: none; }
+}

@@ -1,0 +1,4 @@
+three.js r170 (MIT-licens, se LICENSE), hämtat 2026-10-16 från https://cdn.jsdelivr.net/npm/three@0.170.0/
+three.module.min.js = build/three.module.min.js. addons/ = examples/jsm/ (urval).
+Enda ändringen: importen "from 'three'" i addons/ är omskriven till en relativ sökväg till three.module.min.js
+(så att inget importkarta/byggsteg behövs). Används av 3D-scenerna i crm/ (scen3d.js m.fl.).

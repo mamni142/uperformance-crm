@@ -1,0 +1,299 @@
+/* Uperformance CRM – presentationsläge för kundmöten.
+   Bilderna ligger i en 3D-scen och vrids in och ut. Mörkt, lugnt och stort. */
+
+.mote { position: fixed; inset: 0; z-index: 300; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); color: var(--ben); overflow: hidden; isolation: isolate;
+  background: radial-gradient(90% 80% at 15% 0%, #16365a 0%, transparent 55%), radial-gradient(80% 90% at 100% 100%, rgba(15, 110, 87, .45), transparent 60%), var(--ink);
+  animation: mote-oppna .7s var(--mjuk) both; }
+@keyframes mote-oppna { from { opacity: 0; transform: scale(1.03); } }
+.mote[data-stanger] { animation: mote-stang .45s ease both; }
+@keyframes mote-stang { to { opacity: 0; transform: scale(.98); } }
+.mote::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .55;
+  background-image: radial-gradient(1.2px 1.2px at 10% 20%, rgba(255, 255, 255, .5), transparent), radial-gradient(1px 1px at 30% 75%, rgba(255, 255, 255, .35), transparent), radial-gradient(1.4px 1.4px at 55% 12%, rgba(255, 255, 255, .45), transparent), radial-gradient(1px 1px at 78% 58%, rgba(255, 255, 255, .3), transparent), radial-gradient(1.2px 1.2px at 92% 28%, rgba(255, 255, 255, .4), transparent), radial-gradient(1px 1px at 44% 92%, rgba(255, 255, 255, .3), transparent);
+  animation: glimt 7s ease-in-out infinite alternate; }
+
+.mote-topp { display: flex; align-items: center; gap: 14px; padding: 16px clamp(16px, 3vw, 36px); }
+.mote-topp .logga-vit svg { height: 30px; width: auto; color: var(--ben); }
+.mote-kund { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; background: rgba(246, 244, 239, .08); border: 1px solid var(--kant-ljus); font: 600 .78rem/1 var(--font-rubrik); }
+.mote-kund { min-width: 0; }
+.mote-kund i { position: relative; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.mote-kund i::after { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px rgba(126, 224, 195, .6); animation: live-ring-ljus 2s ease-out infinite; }
+.mote-topp .mote-hoger { margin-left: auto; display: flex; gap: 8px; }
+.mote-knapp { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--kant-ljus); background: rgba(246, 244, 239, .06); color: var(--ben); font: 600 .8rem/1 var(--font-rubrik); transition: background-color .2s, border-color .2s; }
+.mote-knapp:hover { background: rgba(246, 244, 239, .14); border-color: rgba(246, 244, 239, .3); }
+.mote-knapp .ikon { width: 16px; height: 16px; }
+.mote-knapp:active { transform: scale(.96); }
+.mote-knapp-ljus { background: transparent !important; color: var(--ben) !important; box-shadow: inset 0 0 0 1px var(--kant-ljus) !important; }
+
+/* Scenen */
+/* touch-action: lodrätt rullar webbläsaren (höga bilder, kalkylen), vågrätt svep byter bild i mote.js – med auto tog webbläsaren
+   gesten och skickade pointercancel i stället för pointerup, så svepet byte aldrig bild (2026-10-24). Nypa för att zooma finns kvar. */
+.mote-scen { position: relative; perspective: 1800px; perspective-origin: 50% 40%; touch-action: pan-y pinch-zoom; }
+.mote-bild { position: absolute; inset: 0 clamp(16px, 4vw, 64px); display: grid; align-content: safe center; transition: transform 1s var(--mjuk), opacity .7s ease, visibility 0s linear 1s; overflow-y: auto; scrollbar-width: none; touch-action: pan-y pinch-zoom; }
+.mote-bild::-webkit-scrollbar { display: none; }
+.mote-bild[data-lage="fore"] { transform: translateX(-55%) translateZ(-500px) rotateY(38deg); opacity: 0; visibility: hidden; pointer-events: none; }
+.mote-bild[data-lage="efter"] { transform: translateX(55%) translateZ(-500px) rotateY(-38deg); opacity: 0; visibility: hidden; pointer-events: none; }
+.mote-bild[data-lage="aktiv"] { transform: none; opacity: 1; visibility: visible; transition: transform 1s var(--mjuk), opacity .7s ease, visibility 0s; }
+.mote-bild .in { animation: none; }
+.mote-bild[data-lage="aktiv"] .in { animation: mote-in .85s var(--mjuk) backwards; animation-delay: calc(var(--i, 0) * 90ms + 320ms); }
+@keyframes mote-in { from { opacity: 0; transform: perspective(900px) rotateX(12deg) translateY(28px); } }
+.mote-innehall { width: min(1180px, 100%); margin: 0 auto; padding: 20px 0 30px; }
+.mote-eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 600 .78rem/1 var(--font-rubrik); letter-spacing: .18em; text-transform: uppercase; color: var(--text-ljus); }
+.mote-eyebrow::before { content: ''; width: 26px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--is), var(--accent)); }
+.mote-rubrik { margin-top: 14px; font-size: clamp(2.2rem, 1.2rem + 3.6vw, 4.6rem); line-height: 1; letter-spacing: -.045em; max-width: 16ch; }
+.mote-rubrik em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--is), #fff, var(--accent)); background-size: 300% 100%; background-position: 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mote-bild[data-lage="aktiv"] .mote-rubrik em { animation: namn-glans 2.4s var(--mjuk) .6s 1 both; }
+.mote-ingress { margin-top: 18px; max-width: 44rem; font-size: clamp(1rem, .9rem + .4vw, 1.3rem); color: var(--text-ljus); }
+
+/* Titel */
+.mote-titel { position: absolute; inset: 0; z-index: 0; overflow: hidden; border-radius: 32px; }
+.mote-titel img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.05) brightness(.55); transform: scale(1.06); animation: kenburns 24s ease-in-out infinite alternate; }
+@keyframes kenburns { to { transform: scale(1.14) translate(-2%, -1%); } }
+.mote-titel::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(11, 21, 32, .92) 25%, rgba(11, 21, 32, .35)), linear-gradient(0deg, rgba(11, 21, 32, .8), transparent 50%); }
+.mote-bild-titel > .mote-innehall { position: relative; z-index: 1; }
+.mote-bild-titel { inset: 0 clamp(12px, 2vw, 28px); padding: clamp(24px, 5vw, 70px); border-radius: 32px; }
+.mote-for { display: inline-flex; flex-wrap: wrap; gap: 2px 6px; margin-top: 26px; padding: 10px 16px; border-radius: 14px; background: rgba(246, 244, 239, .08); border: 1px solid var(--kant-ljus); font: 500 1rem/1.3 var(--font-rubrik); max-width: 100%; }
+.mote-for strong { color: var(--accent); }
+
+/* Citat */
+.mote-citat { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(24px, 5vw, 70px); align-items: center; }
+/* bilden är redan i gråskala (gustav-skog-gra.jpg) – ett CSS-filter under 3D-övergången gav ett eget filterlager per bild och hack */
+.mote-citat img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 60% 30%; border-radius: 28px; box-shadow: 0 34px 60px -34px rgba(0, 0, 0, .7); transform: perspective(1000px) rotateY(8deg); }
+.mote-citat blockquote p { font: 500 clamp(1.6rem, 1rem + 2.2vw, 3rem)/1.2 var(--font-rubrik); letter-spacing: -.03em; }
+.mote-citat blockquote p::before { content: '“'; display: block; font-size: 2.6em; line-height: .5; color: var(--accent); margin-bottom: .15em; }
+.mote-citat figcaption { margin-top: 22px; color: var(--text-ljus); }
+.mote-citat figcaption strong { display: block; color: var(--ben); font: 600 1.05rem/1.3 var(--font-rubrik); }
+
+/* Nyckeltal */
+.mote-tal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 34px; }
+.mote-talkort { position: relative; overflow: hidden; padding: clamp(20px, 2.6vw, 32px); border-radius: 24px; background: linear-gradient(160deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .02)); border: 1px solid rgba(255, 255, 255, .1); transform-style: preserve-3d; }
+.mote-talkort strong { display: block; font: 600 clamp(2.6rem, 1.6rem + 3vw, 4.6rem)/1 var(--font-rubrik); letter-spacing: -.05em; background: linear-gradient(180deg, #fff, var(--is)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mote-talkort p { margin-top: 12px; color: var(--text-ljus); font-size: 1rem; }
+.mote-talkort small { display: block; margin-top: 16px; font: 600 .7rem/1 var(--font-rubrik); letter-spacing: .12em; text-transform: uppercase; color: rgba(246, 244, 239, .45); }
+
+/* Tre steg / resa */
+.mote-steg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 34px; }
+.mote-stegkort { padding: clamp(20px, 2.4vw, 30px); border-radius: 24px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); }
+.mote-stegkort b { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(145deg, var(--accent), #2fae8a); color: var(--ink); font: 600 1.1rem/1 var(--font-rubrik); box-shadow: 0 16px 34px -14px rgba(126, 224, 195, .7); }
+.mote-stegkort h3 { margin-top: 20px; font-size: 1.35rem; }
+.mote-stegkort p { margin-top: 8px; color: var(--text-ljus); }
+.mote-resa { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-top: 40px; counter-reset: r; }
+.mote-resa li { position: relative; padding-top: 58px; color: var(--text-ljus); font-size: .92rem; }
+.mote-resa li::before { counter-increment: r; content: counter(r); position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent); color: var(--accent); font: 600 1rem/1 var(--font-rubrik); background: var(--ink); z-index: 1; }
+.mote-resa li::after { content: ''; position: absolute; left: 44px; right: -12px; top: 21px; height: 2px; background: linear-gradient(90deg, var(--accent), rgba(126, 224, 195, .1)); }
+.mote-resa li:last-child::after { display: none; }
+.mote-resa strong { display: block; margin-bottom: 4px; color: var(--ben); font: 600 1.05rem/1.25 var(--font-rubrik); }
+
+/* Paket */
+.mote-paket { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 30px; }
+.mote-paketkort { position: relative; padding: clamp(20px, 2.4vw, 30px); border-radius: 26px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); transition: transform .5s var(--mjuk); }
+.mote-paketkort:hover { transform: perspective(900px) translateZ(20px) rotateX(3deg); }
+.mote-paketkort.utvald { background: linear-gradient(160deg, rgba(126, 224, 195, .16), rgba(167, 210, 255, .08)); border-color: rgba(126, 224, 195, .35); }
+/* bara nivåetiketten – regeln på alla span gav plustecknen i rubriken (Bas+, Bas++) etikettens storlek, och de lästes som punkter */
+.mote-paketkort .paket-niva { font: 600 .72rem/1 var(--font-rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--text-ljus); }
+.mote-paketkort h3 { margin-top: 10px; font-size: 2rem; letter-spacing: -.03em; }
+.mote-paketkort .pris { margin-top: 12px; font: 600 2.2rem/1 var(--font-rubrik); letter-spacing: -.04em; }
+.mote-paketkort .pris small { font-size: .4em; color: var(--text-ljus); margin-left: 6px; letter-spacing: 0; }
+.mote-paketkort ul { margin-top: 18px; display: grid; gap: 8px; font-size: .95rem; color: rgba(246, 244, 239, .86); }
+.mote-paketkort li { display: flex; gap: 10px; }
+.mote-paketkort li .ikon { width: 16px; height: 16px; margin-top: 3px; color: var(--accent); stroke-width: 2.6; }
+
+/* Kalkylen */
+.mote-kalkyl { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(16px, 3vw, 36px); margin-top: 24px; align-items: start; }
+.mote-val { display: grid; gap: 22px; }
+.mote-val h4 { margin-bottom: 10px; font: 600 .72rem/1 var(--font-rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--text-ljus); }
+/* Paketvalet: tre lika stora kort i rad med innehållet centrerat. Det valda kortet får mintkant, svag minton och ett stilla
+   sken – ingen lutning eller förskjutning, så alla tre står kvar i samma linje och höjd. */
+.mote-paketval { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mote-paketval button { display: grid; justify-items: center; align-content: center; gap: 7px; min-height: 92px; padding: 16px 12px; border-radius: 18px; border: 1.5px solid rgba(255, 255, 255, .12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02)); color: var(--ben); text-align: center;
+  transition: border-color .2s, background-color .2s, box-shadow .3s, transform .15s var(--mjuk); }
+.mote-paketval button:hover:not([aria-pressed="true"]) { border-color: rgba(255, 255, 255, .28); }
+.mote-paketval button:active { transform: scale(.98); }
+.mote-paketval button strong { font: 600 1.25rem/1 var(--font-rubrik); letter-spacing: -.01em; }
+.mote-paketval button small { color: var(--text-ljus); font-size: .82rem; font-variant-numeric: tabular-nums; }
+.mote-paketval button[aria-pressed="true"] { border-color: var(--accent); background: linear-gradient(180deg, rgba(126, 224, 195, .16), rgba(126, 224, 195, .05));
+  box-shadow: 0 0 0 4px rgba(126, 224, 195, .08), 0 18px 34px -22px rgba(126, 224, 195, .6); }
+.mote-paketval button[aria-pressed="true"] small { color: #bff3e3; }
+.mote-antal { display: flex; align-items: center; gap: 16px; }
+.mote-antal input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 8px; border-radius: 99px; background: linear-gradient(90deg, var(--accent) 0 var(--p, 10%), rgba(255, 255, 255, .14) var(--p, 10%)); }
+.mote-antal input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 6px rgba(126, 224, 195, .25), 0 6px 16px rgba(0, 0, 0, .4); cursor: grab; }
+.mote-antal input[type="range"]::-moz-range-thumb { width: 28px; height: 28px; border-radius: 50%; border: 0; background: #fff; box-shadow: 0 0 0 6px rgba(126, 224, 195, .25); }
+.mote-antal input[type="number"] { width: 110px; min-height: 54px; padding: 8px 12px; border-radius: 16px; border: 1.5px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .06); color: var(--ben); font: 600 1.5rem/1 var(--font-rubrik); text-align: center; }
+.mote-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.mote-chips button { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 999px; border: 1px dashed rgba(255, 255, 255, .24); background: transparent; color: rgba(246, 244, 239, .85); font: 500 .88rem/1 var(--font-rubrik); transition: background-color .2s, border-color .2s, color .2s, transform .3s var(--mjuk); }
+.mote-chips button:hover:not(:disabled) { transform: translateY(-2px); border-color: rgba(255, 255, 255, .5); }
+.mote-chips button[aria-pressed="true"] { border-style: solid; border-color: var(--accent); background: rgba(126, 224, 195, .16); color: #fff; }
+.mote-chips button:disabled { opacity: .45; border-style: solid; cursor: default; }
+.mote-chips .ikon { width: 13px; height: 13px; stroke-width: 3; }
+.mote-summa { position: sticky; top: 0; padding: clamp(20px, 2.4vw, 30px); border-radius: 28px; background: linear-gradient(160deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .03)); border: 1px solid rgba(255, 255, 255, .14); box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .7); overflow: hidden; }
+.mote-summa::before { content: ''; position: absolute; right: -30%; top: -40%; width: 90%; height: 90%; background: radial-gradient(closest-side, rgba(126, 224, 195, .3), transparent); pointer-events: none; }
+.mote-summa-etikett { font: 600 .72rem/1 var(--font-rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--text-ljus); }
+.mote-summa-tal { margin-top: 10px; font: 600 clamp(2.6rem, 1.8rem + 2.6vw, 4.4rem)/1 var(--font-rubrik); letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.mote-summa-tal small { font-size: .32em; letter-spacing: 0; margin-left: 6px; color: var(--text-ljus); font-weight: 500; }
+.mote-summa-per { margin-top: 6px; color: var(--text-ljus); }
+.mote-rader { display: grid; gap: 8px; margin: 18px 0; padding: 16px 0; border-block: 1px solid var(--kant-ljus); font-size: .9rem; }
+.mote-rader div { display: flex; justify-content: space-between; gap: 12px; }
+.mote-rader span { color: var(--text-ljus); }
+.mote-rader b { font-family: var(--font-rubrik); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mote-betal { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.mote-betal div { padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, .05); font-size: .78rem; color: var(--text-ljus); }
+.mote-betal b { display: block; margin-top: 3px; color: var(--ben); font: 600 1rem/1.1 var(--font-rubrik); }
+.mote-spara { display: grid; gap: 8px; }
+.mote-spara .knapp { white-space: normal; text-align: center; line-height: 1.25; height: auto; padding-block: 12px; }
+.mote-spara select { min-height: 44px; border-radius: 12px; border: 1px solid var(--kant-ljus); background: rgba(255, 255, 255, .06); color: var(--ben); padding: 8px 12px; }
+.mote-spara select option { color: var(--ink); }
+.mote-sparad { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(126, 224, 195, .14); color: var(--accent); font-size: .85rem; }
+.mote-not { font-size: .72rem; color: rgba(246, 244, 239, .5); margin-top: 10px; }
+/* Kontaktperson saknas (2026-10-24): en lugn rad med fält under spara-knapparna – annars går offertlänken bara att kopiera */
+.mote-kontakt { display: grid; gap: 8px; padding: 10px 12px 12px; border-radius: 14px; background: rgba(167, 210, 255, .08); box-shadow: inset 0 0 0 1px rgba(167, 210, 255, .2); }
+.mote-kontakt p { display: flex; align-items: flex-start; gap: 8px; margin: 0; font-size: .8rem; line-height: 1.4; color: var(--text-ljus); }
+.mote-kontakt p .ikon { flex: none; width: 15px; height: 15px; margin-top: 1px; color: var(--is); }
+.mote-kontakt-rad { display: flex; flex-wrap: wrap; gap: 6px; }
+.mote-kontakt .falt { flex: 1 1 140px; min-width: 0; min-height: 40px; border-radius: 12px; border: 1px solid var(--kant-ljus); background: rgba(255, 255, 255, .06); color: var(--ben); padding: 8px 12px; font-size: .85rem; }
+.mote-kontakt .falt::placeholder { color: rgba(246, 244, 239, .45); }
+.mote-kontakt .knapp { flex: none; padding-block: 8px; }
+
+/* Plattform och team */
+.mote-plattform { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 70px); align-items: center; }
+.mote-plattform img { width: 100%; filter: drop-shadow(0 50px 70px rgba(0, 0, 0, .55)); animation: sva 8s ease-in-out infinite; }
+.mote-punkter { margin-top: 24px; display: grid; gap: 14px; }
+.mote-punkter li { display: flex; gap: 14px; font-size: 1.05rem; color: rgba(246, 244, 239, .86); }
+.mote-punkter .ikon { width: 22px; height: 22px; flex: none; color: var(--accent); }
+.mote-team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 32px; }
+.mote-person { overflow: hidden; border-radius: 26px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); }
+.mote-person img { width: 100%; aspect-ratio: 16 / 10; max-height: 34vh; object-fit: cover; filter: grayscale(1) contrast(1.05); transition: filter .8s; }
+.mote-person:hover img { filter: none; }
+.mote-person div { padding: 18px 20px 22px; }
+.mote-person span { font: 600 .7rem/1 var(--font-rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.mote-person h3 { margin-top: 8px; font-size: 1.35rem; }
+.mote-person p { margin-top: 8px; font-size: .9rem; color: var(--text-ljus); }
+.mote-loggor { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(24px, 5vw, 70px); margin-top: 50px; }
+.mote-loggor figure { display: grid; justify-items: center; gap: 14px; }
+.mote-loggor img { height: clamp(80px, 10vw, 130px); width: auto; filter: drop-shadow(0 20px 30px rgba(0, 0, 0, .5)); animation: sva 7s ease-in-out infinite; animation-delay: calc(var(--i) * -1.5s); }
+.mote-loggor figcaption { font: 600 1rem/1 var(--font-rubrik); color: var(--text-ljus); }
+
+/* Botten: navigering */
+.mote-botten { display: flex; align-items: center; gap: 14px; padding: 14px clamp(16px, 3vw, 36px) max(14px, env(safe-area-inset-bottom)); }
+.mote-bildnamn { font: 600 .85rem/1.2 var(--font-rubrik); color: var(--text-ljus); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mote-prickar { display: flex; gap: 6px; margin: 0 auto; }
+.mote-prickar button { width: 10px; height: 10px; padding: 0; border: 0; border-radius: 99px; background: rgba(246, 244, 239, .22); transition: width .45s var(--mjuk), background-color .3s; }
+.mote-prickar button[aria-current="true"] { width: 34px; background: var(--accent); }
+.mote-prickar button.kalkyl-prick { background: rgba(240, 181, 69, .5); }
+.mote-prickar button.kalkyl-prick[aria-current="true"] { background: var(--gul); }
+.mote-raknare { font: 600 .85rem/1 var(--font-rubrik); color: var(--text-ljus); font-variant-numeric: tabular-nums; }
+.mote-pil { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--kant-ljus); background: rgba(246, 244, 239, .06); color: var(--ben); transition: background-color .2s, transform .3s var(--mjuk); }
+.mote-pil:hover:not(:disabled) { background: var(--accent); color: var(--ink); transform: scale(1.06); }
+.mote-pil:disabled { opacity: .3; }
+
+.mote-resa-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mote-nasta { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, .8fr); gap: clamp(20px, 4vw, 56px); align-items: center; }
+.mote-nasta-spara { margin-top: 34px; max-width: 420px; }
+.mote-nasta-summa { padding: clamp(20px, 2.4vw, 30px); border-radius: 28px; background: linear-gradient(160deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .03)); border: 1px solid rgba(255, 255, 255, .14); box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .7); }
+.mote-nasta-summa dl { display: grid; gap: 8px; margin: 16px 0; padding-bottom: 16px; border-bottom: 1px solid var(--kant-ljus); font-size: .9rem; }
+.mote-nasta-summa dl div { display: flex; justify-content: space-between; gap: 12px; }
+.mote-nasta-summa dt { color: var(--text-ljus); }
+.mote-nasta-summa dd { font-family: var(--font-rubrik); font-weight: 600; text-align: right; }
+.mote-nasta-summa .mote-summa-tal { margin: 0 0 14px; font-size: clamp(2.2rem, 1.6rem + 2vw, 3.4rem); }
+@media (max-width: 900px) {
+  .mote-resa-3, .mote-nasta { grid-template-columns: minmax(0, 1fr); }
+  .mote-tal, .mote-steg, .mote-paket, .mote-team { grid-template-columns: minmax(0, 1fr); }
+  .mote-citat, .mote-plattform, .mote-kalkyl { grid-template-columns: minmax(0, 1fr); }
+  .mote-resa { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .mote-resa li { padding: 6px 0 14px 60px; min-height: 58px; }
+  .mote-resa li::after { display: none; }
+  .mote-bildnamn, .mote-raknare { display: none; }
+  .mote-summa { position: relative; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mote-bild { transition: opacity .2s; }
+  .mote-bild[data-lage="fore"], .mote-bild[data-lage="efter"] { transform: none; filter: none; }
+}
+
+/* Startsidan för kundmöte i CRM:et */
+.mote-start { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 1000px) { .mote-start { grid-template-columns: minmax(0, 1fr); } }
+/* Kortleken: korten ligger staplade bakåt-uppåt så att varje bilds namn syns i överkanten – klick startar där */
+.mote-lek { position: relative; height: 300px; margin: 6px clamp(18px, 2.2vw, 24px) 0; perspective: 1200px; perspective-origin: 50% 100%; }
+.mote-lek-kort { position: absolute; left: 6%; right: 6%; bottom: 18px; height: 150px; display: flex; align-items: flex-start; gap: 10px; padding: 11px 16px; border: 1px solid rgba(255, 255, 255, .1); border-radius: 16px; color: var(--ben); font: 600 .86rem/1.2 var(--font-rubrik); text-align: left; cursor: pointer;
+  background: radial-gradient(120% 90% at 10% 0%, #1d4166, transparent 55%), var(--ink); box-shadow: 0 -10px 30px -18px rgba(0, 0, 0, .55);
+  transform: translateY(calc(var(--i) * -36px)) translateZ(calc(var(--i) * -34px)); transform-origin: 50% 100%; transition: transform .45s var(--mjuk), border-color .25s; animation: lek-in .9s var(--mjuk) backwards; animation-delay: calc(var(--i) * 80ms); }
+.mote-lek-kort:hover, .mote-lek-kort:focus-visible { transform: translateY(calc(var(--i) * -36px - 10px)) translateZ(calc(var(--i) * -34px + 10px)); border-color: rgba(126, 224, 195, .5); }
+.mote-lek-kort small { flex: none; font: 600 .7rem/1.2 var(--font-rubrik); color: var(--accent); }
+@keyframes lek-in { from { opacity: 0; transform: translateY(calc(var(--i) * -36px + 40px)) translateZ(calc(var(--i) * -34px)); } }
+@media (max-width: 560px) { .mote-lek { height: 270px; } .mote-lek-kort { height: 130px; font-size: .78rem; } }
+.bildval { display: flex; flex-wrap: wrap; gap: 6px; }
+.bildval-rubrik { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; width: 100%; }
+.bildval-tal { font: 500 .75rem/1 var(--font-brod); color: var(--text-3); }
+.bildchip { position: relative; cursor: pointer; }
+.bildchip input { position: absolute; opacity: 0; }
+.bildchip span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px 7px 8px; border-radius: 999px; border: 1px solid var(--kant); background: var(--vit); font: 500 .8rem/1.1 var(--font-rubrik); color: var(--text-2); transition: background-color .2s, border-color .2s, color .2s; }
+.bildchip small { display: grid; place-items: center; min-width: 20px; height: 20px; border-radius: 50%; background: rgba(11, 21, 32, .06); font: 600 .66rem/1 var(--font-rubrik); }
+.bildchip input:checked + span { background: var(--accent-ljus); border-color: var(--accent-djup); color: var(--accent-djup); }
+.bildchip input:checked + span small { background: var(--accent-djup); color: #fff; }
+.bildchip input:focus-visible + span { outline: 3px solid var(--accent-djup); outline-offset: 2px; }
+.mote-valkort { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.valkort { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 18px; border: 0; background: linear-gradient(160deg, #fff, #f7f6f2); box-shadow: inset 0 0 0 1px var(--kant), 0 10px 22px -18px rgba(24, 54, 83, .5); text-align: left; transition: transform .35s var(--mjuk), box-shadow .3s; }
+.valkort:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgba(15, 110, 87, .3), 0 16px 30px -18px rgba(24, 54, 83, .5); }
+.valkort:active { transform: scale(.98); }
+.valkort strong { display: block; font: 600 .95rem/1.25 var(--font-rubrik); }
+.valkort small { display: block; margin-top: 2px; font-size: .78rem; color: var(--text-3); }
+.valkort-accent { background: linear-gradient(160deg, #e9fbf4, var(--accent-ljus)); box-shadow: inset 0 0 0 1.5px var(--accent-djup), 0 12px 26px -16px rgba(15, 110, 87, .55); }
+@media (max-width: 560px) { .mote-valkort { grid-template-columns: minmax(0, 1fr); } }
+.mote-hoger { display: grid; gap: 16px; min-width: 0; }
+.infor-lista { display: grid; gap: 10px; padding: 14px clamp(18px, 2.2vw, 24px) 20px; }
+.infor-lista li { display: flex; align-items: flex-start; gap: 12px; }
+.infor-lista small { display: block; font: 600 .66rem/1.2 var(--font-rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
+.infor-lista strong { display: block; margin-top: 2px; font: 500 .88rem/1.4 var(--font-brod); color: var(--ink); overflow-wrap: anywhere; }
+
+/* Toppens logga, egna notiser och smala skärmar */
+.mote-logga { display: inline-flex; align-items: center; gap: 10px; font: 600 1.05rem/1 var(--font-rubrik); letter-spacing: -.02em; }
+.mote-logga svg { width: 30px; height: 30px; color: var(--accent); }
+/* Notiserna nere till vänster ovanför bottenraden (2026-10-24) – centrerade under toppraden låg de över bildens rubrik framför
+   kunden. Inspelningskortet står nere till höger; på smala skärmar, där båda inte ryms bredvid varandra, går notiserna upp under
+   toppraden medan kortet är öppet. */
+.mote-toaster { position: absolute; left: clamp(16px, 3vw, 36px); bottom: calc(max(14px, env(safe-area-inset-bottom)) + 74px); z-index: 5; display: grid; align-content: end; gap: 8px; width: min(440px, calc(100% - 32px)); pointer-events: none; }
+@media (max-width: 900px) { .mote:has(> .insp-kort[data-in]:not([data-ut])) .mote-toaster { top: 72px; bottom: auto; align-content: start; } }
+@media (max-width: 640px) { .mote-toaster { bottom: calc(max(14px, env(safe-area-inset-bottom)) + 64px); } }
+.mote .toast { background: rgba(246, 244, 239, .12); border: 1px solid var(--kant-ljus); color: var(--ben); box-shadow: 0 24px 50px -24px rgba(0, 0, 0, .8); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.mote .toast[data-varning] { border-color: rgba(240, 181, 69, .45); }
+@media (max-width: 640px) {
+  .mote-topp { gap: 10px; }
+  .mote-logga { font-size: 0; gap: 0; }
+  .mote-knapp span { display: none; }
+  .mote-knapp { padding: 7px 11px; }
+  .mote-helskarm { display: none; }
+  .mote-kund { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Topplisten ryms från 320 px: knapparna står kvar (Spela in blir bara ikon) och kundpillret krymper med "…" – förut blev
+     presentationen bredare än skärmen och Avsluta hamnade utanför */
+  .mote-topp > * { flex: none; }
+  .mote-topp .mote-kund { display: block; flex: 0 1 auto; }
+  .mote-kund i { display: inline-block; margin-right: 8px; vertical-align: 1px; }
+  .mote-topp .mote-hoger { gap: 6px; }
+  .mote-knapp-insp .insp-knapp-text { display: none; }
+  .mote-knapp-insp { padding: 7px 11px; }
+  .mote-bild { inset: 0 16px; }
+  .mote-bild-titel { inset: 0 8px; padding: 24px 18px; }
+  .mote-paketval button { min-height: 76px; padding: 12px 8px; }
+  .mote-paketval button strong { font-size: 1.05rem; }
+  .mote-antal input[type="number"] { width: 84px; }
+  .mote-pil { width: 42px; height: 42px; }
+  /* Bildprickarna: 10 px synligt, en osynlig pekyta på 40 px höjd (bredden begränsas av grannarna) */
+  .mote-prickar { gap: 10px; }
+  .mote-prickar button { position: relative; }
+  .mote-prickar button::after { content: ''; position: absolute; inset: -15px -5px; }
+}
+/* På smala skärmar hamnar summan under valen – en klistrad minisumma visar totalen hela tiden */
+.mote-minisumma { display: none; }
+@media (max-width: 900px) {
+  .mote-minisumma { position: sticky; bottom: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; margin-top: 16px; padding: 14px 18px; border-radius: 18px; border: 1px solid rgba(126, 224, 195, .35); background: rgba(11, 21, 32, .88); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); color: var(--ben); font: 500 .8rem/1.2 var(--font-rubrik); box-shadow: 0 -10px 30px -10px rgba(0, 0, 0, .6); }
+  .mote-minisumma span { color: var(--text-ljus); }
+  .mote-minisumma b { font: 600 1.3rem/1 var(--font-rubrik); letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--accent); }
+  .mote-minisumma { transition: opacity .25s, transform .3s var(--mjuk); }
+  .mote-minisumma[data-dold] { opacity: 0; transform: translateY(12px); pointer-events: none; }
+}
+.mote-tips { display: grid; gap: 12px; padding-top: 0; color: var(--text-2); font-size: .9rem; }
+.mote-tips .tips-pek { display: none; }
+@media (pointer: coarse) { .mote-tips .tips-mus { display: none; } .mote-tips .tips-pek { display: flex; } }
+.mote-tips li { display: flex; align-items: flex-start; gap: 12px; }
+.mote-tips .ikon { flex: none; width: 18px; height: 18px; margin-top: 2px; color: var(--accent-djup); }
+@keyframes sva { 50% { transform: translateY(-12px); } }

@@ -1,0 +1,105 @@
+/* Uperformance CRM – paketbilden i presentationsläget: Bas+ och Bas++ med hemsidans premiumeffekter
+   (assets/up.css modul 20 – samma lager och regler, anpassade till presentationens mörka kort; markup och gnistor/lutning
+   i mote.js, premiumKort()). Allt som rör sig hela tiden är transform/opacity; kometerna är en konisk gradient som målas
+   en gång och vrids. Dolda bilder får data-vilar på rutnätet (mote.js visa()) så att inget rör sig i bakgrunden. */
+.mote-paketkort { isolation: isolate; }
+.mote-paketkort .paket-niva { font: 600 .72rem/1 var(--font-rubrik); letter-spacing: .14em; text-transform: uppercase; color: var(--text-ljus); }
+.mote-paketkort .paket-lista { margin-top: 18px; display: grid; gap: 8px; font-size: .95rem; color: rgba(246, 244, 239, .86); }
+.mote-paketkort .paket-lista li { display: flex; gap: 10px; }
+.mote-paketkort .paket-lista .ikon { width: 16px; height: 16px; margin-top: 3px; color: var(--accent); stroke-width: 2.6; flex: none; }
+
+.mote-paketkort.paket-premium { --rx: 0deg; --ry: 0deg; overflow: visible; will-change: transform; transition: transform .6s var(--mjuk); border-color: transparent;
+  background: radial-gradient(55% 40% at 85% 10%, rgba(126, 224, 195, .38), transparent), radial-gradient(45% 40% at 15% 100%, rgba(167, 210, 255, .2), transparent), var(--ink); }
+.mote-paketkort.paket-premium::before { content: ''; position: absolute; inset: 0; z-index: -2; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .5s var(--mjuk);
+  box-shadow: 0 70px 120px -50px rgba(11, 21, 32, .6), 0 40px 90px -40px rgba(126, 224, 195, .55); }
+.mote-paketkort.paket-premium:hover { transform: perspective(1100px) rotateX(calc(var(--rx) * var(--luta, 1))) rotateY(calc(var(--ry) * var(--luta, 1))) translateY(var(--lyft, -10px)); transition: transform .22s ease-out; }
+.mote-paketkort.paket-premium:hover::before { opacity: 1; }
+
+/* Ljusramen och glödet: maskade till kanten (masken är stilla), kometerna vrids inuti */
+.mote-paketkort .premium-ram, .mote-paketkort .premium-glod i {
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; }
+.mote-paketkort .premium-ram::before, .mote-paketkort .premium-ram::after, .mote-paketkort .premium-glod i::before, .mote-paketkort .premium-glod i::after {
+  content: ''; position: absolute; left: 50%; top: 50%; width: max(200%, 900px); aspect-ratio: 1;
+  margin: calc(-1 * max(100%, 450px)) 0 0 calc(-1 * max(100%, 450px)); animation: premium-snurr 4.5s linear infinite; }
+.mote-paketkort .premium-ram::after, .mote-paketkort .premium-glod i::after { opacity: 0; transition: opacity .5s var(--mjuk); animation-duration: 1.8s; }
+@keyframes premium-snurr { to { transform: rotate(1turn); } }
+.mote-paketkort .premium-ram { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; border-radius: inherit; padding: 2.5px; background: rgba(126, 224, 195, .38); transition: padding .3s var(--mjuk); }
+.mote-paketkort .premium-ram::before { background: conic-gradient(transparent 0deg 15deg, rgba(126, 224, 195, .35) 55deg, var(--accent) 105deg, #fff 120deg 128deg, transparent 132deg 195deg, rgba(167, 210, 255, .35) 235deg, var(--is) 285deg, #fff 300deg 308deg, transparent 312deg); }
+.mote-paketkort .premium-ram::after { background: conic-gradient(rgba(126, 224, 195, .35) 0deg 30deg, var(--accent) 105deg, #fff 118deg 126deg, rgba(126, 224, 195, .35) 130deg 210deg, var(--is) 285deg, #fff 298deg 306deg, rgba(126, 224, 195, .35) 310deg); }
+.mote-paketkort .premium-glod { position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit; filter: blur(10px); transition: filter .5s var(--mjuk); }
+.mote-paketkort .premium-glod i { position: absolute; inset: -6px; overflow: hidden; border-radius: inherit; padding: 10px; }
+.mote-paketkort .premium-glod i::before { background: conic-gradient(transparent 0deg 30deg, #2fd3a5 100deg, #bff5e3 126deg, transparent 140deg 210deg, #5aa9ff 280deg, #d6eaff 306deg, transparent 320deg); }
+.mote-paketkort .premium-glod i::after { background: conic-gradient(transparent 0deg 40deg, #2fd3a5 105deg, #fff 124deg, transparent 136deg 220deg, #5aa9ff 285deg, #fff 304deg, transparent 316deg); }
+
+/* Ljuset som följer musen (flyttas med translate, målas inte om) */
+.mote-paketkort .premium-ljus { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; border-radius: inherit; opacity: 0; transition: opacity .6s var(--mjuk); }
+.mote-paketkort .premium-ljus::before { content: ''; position: absolute; left: 0; top: 0; width: 760px; height: 760px; margin: -380px 0 0 -380px; translate: var(--lx, 200px) var(--ly, 120px);
+  background: radial-gradient(closest-side, rgba(126, 224, 195, .26), rgba(167, 210, 255, .1) 50%, transparent); }
+
+/* Ljussvepet */
+.mote-paketkort .premium-svep { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; border-radius: inherit; }
+.mote-paketkort .premium-svep::before { content: ''; position: absolute; top: -10%; bottom: -10%; left: -60%; width: 50%; transform: skewX(-16deg);
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, .07) 40%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .07) 60%, transparent 80%); }
+@keyframes premium-svep { to { transform: translateX(420%) skewX(-16deg); } }
+
+/* Gnistor (skapas i mote.js med slumpad plats, storlek, fart och färg) */
+.mote-paketkort .premium-gnistor { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; border-radius: inherit; opacity: 0; transition: opacity .6s; }
+.mote-paketkort .premium-gnistor i { position: absolute; left: var(--x); bottom: -16px; width: var(--s); aspect-ratio: 1; filter: drop-shadow(0 0 4px var(--c)); animation: premium-gnista var(--t) linear var(--f) infinite paused; }
+.mote-paketkort .premium-gnistor i::before { content: ''; position: absolute; inset: 0; background: var(--c); clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+@keyframes premium-gnista { 0% { transform: none; opacity: 0; } 12% { opacity: 1; } 70% { opacity: .85; } 100% { transform: translate(var(--dx), -640px) rotate(200deg); opacity: 0; } }
+
+/* "Premium"-märket: stilla gradient, glansen glider förbi (transform) */
+.mote-paketkort .paket-mark { position: absolute; top: 20px; right: 20px; z-index: 3; display: inline-flex; align-items: center; gap: 6px; overflow: hidden; padding: 7px 12px 7px 10px; border-radius: 999px;
+  background: linear-gradient(110deg, var(--accent), var(--is)); color: var(--ink); font: 600 .6875rem/1 var(--font-rubrik); letter-spacing: .06em; text-transform: uppercase; box-shadow: 0 10px 30px -10px rgba(126, 224, 195, .75); }
+.mote-paketkort .premium-mark::before { content: ''; width: 9px; height: 9px; background: var(--ink); clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+.mote-paketkort .premium-mark::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .75) 50%, transparent 70%); transform: translateX(-110%); animation: premium-merke 4s ease-in-out infinite; }
+@keyframes premium-merke { 55%, 100% { transform: translateX(110%); } }
+
+/* "+"/"++" i gradient, snurrar vid hovring; bockarna tänds en i taget */
+.mote-paketkort .premium-plus { display: inline-flex; margin-left: .03em; }
+.mote-paketkort .premium-plus span { display: inline-block; background: linear-gradient(160deg, #fff, var(--accent) 60%, var(--is)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@keyframes premium-plus { 0% { transform: none; } 40% { transform: translateY(-.28em) rotate(90deg) scale(1.3); filter: drop-shadow(0 0 10px rgba(126, 224, 195, .9)); } 100% { transform: rotate(180deg); filter: drop-shadow(0 0 6px rgba(126, 224, 195, .55)); } }
+@keyframes premium-bock { 45% { transform: scale(1.55) rotate(-10deg); color: #fff; filter: drop-shadow(0 0 6px rgba(126, 224, 195, .95)); } 100% { transform: none; color: var(--accent); filter: drop-shadow(0 0 4px rgba(126, 224, 195, .6)); } }
+
+/* Med musen över */
+.mote-paketkort.paket-premium:hover .premium-ram { padding: 3.5px; }
+.mote-paketkort.paket-premium:hover .premium-ram::after, .mote-paketkort.paket-premium:hover .premium-glod i::after { opacity: 1; }
+.mote-paketkort.paket-premium:hover .premium-glod { filter: blur(14px); }
+.mote-paketkort.paket-premium:hover .premium-ljus { opacity: 1; }
+.mote-paketkort.paket-premium:hover .premium-svep::before { animation: premium-svep 1.4s var(--mjuk) .05s both; }
+.mote-paketkort.paket-premium:hover .premium-gnistor { opacity: 1; }
+.mote-paketkort.paket-premium:hover .premium-gnistor i { animation-play-state: running; }
+.mote-paketkort.paket-premium:hover .premium-plus span { animation: premium-plus .9s var(--mjuk) both; }
+.mote-paketkort.paket-premium:hover .premium-plus span + span { animation-delay: .12s; }
+.mote-paketkort.paket-premium:hover .paket-lista .ikon { animation: premium-bock .7s var(--mjuk) calc(.15s + var(--j, 0) * 90ms) both; }
+
+/* Bas+: samma effekter, lite svagare – tunnare kant, lugnare kometer, mindre glöd, färre gnistor, mindre lutning */
+.mote-paketkort.premium-svagare { --luta: .6; --lyft: -7px; }
+.mote-paketkort.premium-svagare::before { box-shadow: 0 60px 110px -50px rgba(11, 21, 32, .55), 0 34px 80px -40px rgba(126, 224, 195, .35); }
+.mote-paketkort.premium-svagare .premium-ram { padding: 2px; opacity: .85; transition: padding .3s var(--mjuk), opacity .5s; }
+.mote-paketkort.premium-svagare .premium-glod { opacity: .62; filter: blur(9px); transition: filter .5s var(--mjuk), opacity .5s; }
+.mote-paketkort.premium-svagare .premium-ram::before, .mote-paketkort.premium-svagare .premium-glod i::before { animation-duration: 6s; }
+.mote-paketkort.premium-svagare .premium-ram::after, .mote-paketkort.premium-svagare .premium-glod i::after { animation-duration: 2.6s; }
+.mote-paketkort.premium-svagare .premium-svep { opacity: .7; }
+.mote-paketkort.premium-svagare:hover .premium-ram { padding: 2.5px; opacity: 1; }
+.mote-paketkort.premium-svagare:hover .premium-glod { opacity: .8; filter: blur(12px); }
+.mote-paketkort.premium-svagare:hover .premium-ljus { opacity: .6; }
+.mote-paketkort.premium-svagare:hover .premium-gnistor { opacity: .7; }
+
+/* Dolda bilder står still (visa() sätter data-vilar på rutnätet) */
+[data-paket-rutnat][data-vilar] *, [data-paket-rutnat][data-vilar] *::before, [data-paket-rutnat][data-vilar] *::after { animation-play-state: paused !important; }
+
+/* Pekskärm: ramen och gnistorna direkt (ingen hovring), glödet som ett stilla sken – suddighet över rörelse är dyrt på telefoner */
+@media (hover: none) {
+  .mote-paketkort .premium-gnistor { opacity: .55; }
+  .mote-paketkort .premium-gnistor i { animation-play-state: running; filter: none; }
+  .mote-paketkort .premium-gnistor i:nth-child(n+9) { display: none; }
+  .mote-paketkort.premium-svagare .premium-gnistor { opacity: .35; }
+}
+@media (hover: none), (max-width: 900px) {
+  .mote-paketkort .premium-glod { display: none; }
+  .mote-paketkort.paket-premium::before { opacity: 1; box-shadow: 0 0 44px -8px rgba(126, 224, 195, .5), 0 30px 70px -40px rgba(11, 21, 32, .5); }
+  .mote-paketkort.premium-svagare::before { box-shadow: 0 0 36px -10px rgba(126, 224, 195, .35), 0 30px 70px -40px rgba(11, 21, 32, .45); }
+}
+@media (prefers-reduced-motion: reduce) { .mote-paketkort .premium-gnistor, .mote-paketkort .premium-svep { display: none; } }

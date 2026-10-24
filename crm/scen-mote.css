@@ -1,0 +1,62 @@
+/* Uperformance CRM – mötesrummet i 3D (scen-mote.js laddar filen). Gäller bara när WebGL-scenen är aktiv:
+   .motescen[data-ms-3d] (sätts av scenen), [data-ms-3d-klar] när första bilden är ritad och CSS-scenen dold.
+   Breda skärmar: rummet fyller hela kortet bakom texten (bordet står i den fria ytan till höger, kameran förskjuts
+   och bordets ändar får beskäras). Mellanbredd: rummet under texten. Mobil (≤640 px): rubrik, text och chips först,
+   sedan rummet och knapparna under det; platserna visar bara initialer och vald kund står på en rad under bordet.
+   Platserna placeras i px av scenen (bordets främre kant). */
+.motescen[data-ms-3d] { min-height: 620px; }
+.motescen[data-ms-3d] .ms-duk { border-radius: inherit; }
+.motescen[data-ms-3d-klar] .ms-scen { display: none; }
+
+@media (min-width: 981px) {
+  .motescen[data-ms-3d] .ms-rum { position: absolute; inset: 0; min-height: 0; }
+  .motescen[data-ms-3d] .ms-ord::before { content: ''; position: absolute; inset: 0 -46% 0 0; z-index: -1; pointer-events: none;
+    background: linear-gradient(90deg, rgba(5, 10, 16, .9) 0%, rgba(5, 10, 16, .78) 46%, rgba(5, 10, 16, .34) 74%, rgba(5, 10, 16, 0) 100%); }
+  .motescen[data-ms-3d] .ms-scen { left: 70%; }
+}
+@media (max-width: 980px) {
+  .motescen[data-ms-3d] { min-height: 0; }
+  .motescen[data-ms-3d] .ms-rum { min-height: 440px; margin-top: -18px; }
+  .motescen[data-ms-3d] .ms-duk { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 76px); mask-image: linear-gradient(180deg, transparent 0, #000 76px); }
+}
+
+/* Mobil: scenen direkt under rubriken (syns i första vyn), knapparna under scenen */
+@media (max-width: 640px) {
+  .motescen[data-ms-3d] .ms-ord { display: contents; }
+  .motescen[data-ms-3d] .ms-ord > * { position: relative; z-index: 2; margin-left: 22px; margin-right: 22px; }
+  .motescen[data-ms-3d] .ms-etikett { order: 1; margin-top: 24px; }
+  .motescen[data-ms-3d] .ms-rubrik { order: 2; margin-top: 12px; }
+  .motescen[data-ms-3d] .ms-text { order: 3; margin-top: 12px; }
+  .motescen[data-ms-3d] :is(.ms-chips, .ms-talrad) { order: 4; margin-top: 12px; }
+  .motescen[data-ms-3d] .ms-rum { order: 5; min-height: 372px; margin-top: -10px; }
+  .motescen[data-ms-3d] .ms-knappar { order: 6; margin-top: 2px; }
+  .motescen[data-ms-3d] .ms-not { order: 7; margin-top: 12px; margin-bottom: 24px; }
+  .motescen[data-ms-3d] .ms-duk { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 64px); mask-image: linear-gradient(180deg, transparent 0, #000 64px); }
+  .motescen[data-ms-3d] .ms-namn, .motescen[data-ms-3d] .ms-steg { display: none; }
+  .motescen[data-ms-3d] .ms-plats { padding: 6px; }
+  .motescen[data-ms-3d] .ms-plats.vald .ms-avatar { transform: scale(1.12); }
+  .motescen[data-ms-3d] .ms-valrad { display: flex; }
+}
+
+/* Platserna vid bordskanten: avataren sitter på kanten, namnet hänger under */
+.motescen[data-ms-3d] .ms-plats { transform: translate(-50%, -24px); animation-delay: calc(.35s + var(--n) * 90ms); }
+.motescen[data-ms-3d] .ms-plats:hover { transform: translate(-50%, -28px); }
+.motescen[data-ms-3d] .ms-avatar { background: linear-gradient(140deg, #2a5a7c, #13283d 70%); transition: transform .4s cubic-bezier(.22, 1, .36, 1);
+  box-shadow: 0 0 0 2px rgba(5, 10, 16, .95), 0 0 0 3.5px rgba(167, 210, 255, .42), 0 12px 24px -8px rgba(0, 0, 0, .9); }
+.motescen[data-ms-3d] .ms-namn { background: rgba(5, 10, 16, .8); box-shadow: inset 0 0 0 1px rgba(167, 210, 255, .14), 0 8px 18px -10px #000;
+  white-space: normal; max-width: 112px; text-align: center; line-height: 1.18; padding: 4px 10px; border-radius: 12px; }
+.motescen[data-ms-3d] .ms-steg { text-shadow: 0 1px 6px rgba(0, 0, 0, .9); }
+.motescen[data-ms-3d] .ms-plats.vald .ms-namn { background: var(--ms-mint); color: var(--ms-ink); box-shadow: 0 0 22px rgba(126, 224, 195, .45), 0 8px 18px -10px #000; }
+.motescen[data-ms-3d] .ms-plats.vald .ms-avatar { background: linear-gradient(135deg, #3aa9c9, var(--ms-mint));
+  box-shadow: 0 0 0 2px #06101a, 0 0 0 4px var(--ms-mint), 0 0 34px rgba(126, 224, 195, .75), 0 12px 24px -8px #000; }
+
+/* Vald kund på en rad under bordet (mobil) */
+.motescen[data-ms-3d] .ms-valrad { position: absolute; left: 16px; right: 16px; bottom: 12px; z-index: 3; align-items: center; justify-content: center; gap: 10px;
+  min-height: 42px; padding: 6px 14px 6px 6px; border-radius: 999px; pointer-events: none;
+  background: rgba(5, 10, 16, .78); box-shadow: inset 0 0 0 1px rgba(167, 210, 255, .16), 0 10px 24px -12px #000; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.motescen[data-ms-3d] .ms-valrad-avatar { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  font: 600 .7rem/1 'Poppins', sans-serif; color: var(--ms-ink); background: linear-gradient(135deg, #3aa9c9, var(--ms-mint)); }
+.motescen[data-ms-3d] .ms-valrad-text { min-width: 0; display: grid; gap: 2px; }
+.motescen[data-ms-3d] .ms-valrad-text b { font: 600 .8rem/1.2 'Poppins', sans-serif; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.motescen[data-ms-3d] .ms-valrad-text small { font: 600 .62rem/1.2 'Manrope', sans-serif; letter-spacing: .05em; text-transform: uppercase; color: var(--ms-mint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.motescen[data-ms-3d] .ms-valrad-tips { padding-left: 8px; font: 500 .74rem/1.3 'Manrope', sans-serif; color: rgba(246, 244, 239, .7); }

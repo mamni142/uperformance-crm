@@ -1,0 +1,77 @@
+/* Uperformance – väljare (ersätter webbläsarens rullgardinslistor). Delas av hemsidan och CRM:et.
+   Knappen ärver rutans klasser (t.ex. .falt) och ser ut som ett fält; listan är ett ljust glaskort
+   (mörkt i mörka ytor) och ett ark underifrån på mobilen. Färgerna har reservvärden så filen fungerar
+   med både hemsidans och CRM:ets tokens. */
+
+.valj-dold { display: block !important; width: 1px !important; height: 1px !important; min-height: 0 !important; margin: 0 0 -1px !important; padding: 0 !important; border: 0 !important; opacity: 0 !important; overflow: hidden !important; clip-path: inset(50%) !important; pointer-events: none !important; flex: none !important; }
+
+/* Knappen */
+.valj-knapp { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; text-align: left; cursor: pointer; -webkit-appearance: none; appearance: none; }
+.valj-knapp:disabled { opacity: .55; cursor: not-allowed; }
+.valj-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.valj-text[data-tom] { color: var(--text-3, #7b8591); }
+.valj-pil { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .55; transition: transform .45s var(--mjuk, cubic-bezier(.22, 1, .36, 1)), opacity .2s; }
+.valj-knapp:hover .valj-pil { opacity: .9; }
+.valj-knapp[aria-expanded="true"] .valj-pil { transform: rotate(180deg); opacity: 1; }
+.valj-knapp.falt[aria-expanded="true"], .valj-knapp.falt:focus-visible { outline: none; border-color: var(--ink, #0b1520); box-shadow: 0 0 0 4px var(--accent-ljus, #e0f6ee); }
+.valj-knapp[data-ogiltig] { border-color: var(--rod, #e5674f) !important; box-shadow: 0 0 0 4px rgba(229, 103, 79, .15) !important; }
+.valj-overlay { position: absolute !important; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; opacity: 0; }
+.mote-spara .valj-knapp { min-height: 44px; padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(246, 244, 239, .16); background: rgba(255, 255, 255, .06); color: #f6f4ef; }
+
+/* Listan */
+.valj-panel { position: fixed; inset: auto; margin: 0; z-index: 1000; display: flex; flex-direction: column; min-width: 210px; max-width: min(440px, calc(100vw - 16px)); max-height: 380px; padding: 6px;
+  border-radius: 18px; border: 1px solid rgba(11, 21, 32, .08); background: rgba(255, 255, 255, .97); color: var(--ink, #0b1520); overflow: hidden;
+  -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 1px 2px rgba(11, 21, 32, .05), 0 12px 24px -12px rgba(11, 21, 32, .18), 0 34px 70px -24px rgba(24, 54, 83, .38);
+  font: 500 .92rem/1.35 var(--font-brod, 'Manrope', system-ui, sans-serif); transform-origin: top center;
+  animation: valj-in .32s var(--mjuk, cubic-bezier(.22, 1, .36, 1)) both; }
+.valj-panel[data-uppat] { transform-origin: bottom center; animation-name: valj-in-upp; }
+.valj-panel[data-stanger] { animation: valj-ut .15s ease-in both; }
+@keyframes valj-in { from { opacity: 0; transform: translateY(-8px) scale(.97); } }
+@keyframes valj-in-upp { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+@keyframes valj-ut { to { opacity: 0; transform: scale(.98); } }
+.valj-lista { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 2px; scrollbar-width: thin; scrollbar-color: rgba(11, 21, 32, .18) transparent; }
+.valj-alt { position: relative; display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 9px 12px; border-radius: 12px; cursor: pointer; user-select: none; transition: background-color .15s, color .15s;
+  animation: valj-alt-in .35s var(--mjuk, cubic-bezier(.22, 1, .36, 1)) backwards; animation-delay: calc(var(--r, 0) * 18ms + 40ms); }
+@keyframes valj-alt-in { from { opacity: 0; transform: translateY(-4px); } }
+.valj-alt-text { display: grid; min-width: 0; flex: 1; }
+.valj-alt-text > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.valj-alt-text small { margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .76rem; font-weight: 500; color: var(--text-3, #7b8591); }
+.valj-alt[data-aktiv] { background: var(--ben, #f6f4ef); }
+.valj-alt[aria-selected="true"] { color: var(--accent-djup, #0f6e57); background: var(--accent-ljus, #e0f6ee); font-weight: 600; }
+.valj-alt[aria-selected="true"][data-aktiv] { background: #d3f2e7; }
+.valj-alt[aria-disabled="true"] { opacity: .45; cursor: default; }
+.valj-bock { width: 17px; height: 17px; flex: none; margin-left: auto; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transform: scale(.4) rotate(-30deg); transition: opacity .25s, transform .45s cubic-bezier(.2, 1.5, .4, 1); }
+.valj-alt[aria-selected="true"] .valj-bock { opacity: 1; transform: none; }
+.valj-grupp { padding: 12px 12px 4px; font: 600 .64rem/1 var(--font-rubrik, 'Poppins', sans-serif); letter-spacing: .14em; text-transform: uppercase; color: var(--text-3, #7b8591); }
+.valj-tom { padding: 18px 12px; text-align: center; font-size: .85rem; color: var(--text-3, #7b8591); }
+.valj-sok { display: flex; align-items: center; gap: 8px; flex: none; margin: 0 0 6px; padding: 0 12px; border-radius: 12px; background: var(--ben, #f6f4ef); border: 1px solid transparent; transition: border-color .2s, background-color .2s; }
+.valj-sok:focus-within { border-color: rgba(15, 110, 87, .35); background: #fff; }
+.valj-sok svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; opacity: .5; }
+.valj-sok input { flex: 1; min-width: 0; min-height: 40px; border: 0; background: transparent; color: inherit; font: inherit; outline: none; }
+.valj-sok input::-webkit-search-cancel-button { display: none; }
+
+/* Mörka ytor: CRM:ets sidomeny, mörka kort och presentationsläget */
+.valj-panel[data-mork] { background: rgba(16, 29, 43, .96); border-color: rgba(246, 244, 239, .1); color: #f6f4ef; box-shadow: 0 34px 70px -24px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .06); scrollbar-color: rgba(246, 244, 239, .2) transparent; }
+.valj-panel[data-mork] .valj-alt[data-aktiv] { background: rgba(246, 244, 239, .07); }
+.valj-panel[data-mork] .valj-alt[aria-selected="true"] { background: rgba(126, 224, 195, .14); color: var(--accent, #7ee0c3); }
+.valj-panel[data-mork] .valj-alt-text small, .valj-panel[data-mork] .valj-grupp, .valj-panel[data-mork] .valj-tom { color: rgba(246, 244, 239, .55); }
+.valj-panel[data-mork] .valj-sok { background: rgba(246, 244, 239, .07); }
+
+/* Mobil: ett ark underifrån med stora tryckytor */
+.valj-panel[data-ark] { left: 0; right: 0; bottom: 0; top: auto; width: auto; min-width: 0; max-width: none; max-height: min(74vh, 600px); padding: 6px 10px calc(14px + env(safe-area-inset-bottom));
+  border-radius: 26px 26px 0 0; border-width: 1px 0 0; animation: valj-ark-upp .45s var(--mjuk, cubic-bezier(.22, 1, .36, 1)) both; }
+.valj-panel[data-ark]::before { content: ''; flex: none; width: 42px; height: 5px; margin: 6px auto 10px; border-radius: 5px; background: currentColor; opacity: .16; }
+.valj-panel[data-ark][data-stanger] { animation: valj-ark-ner .26s ease-in both; }
+.valj-panel[data-ark]::backdrop { background: rgba(11, 21, 32, .45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: valj-fon .3s both; }
+.valj-panel[data-ark] .valj-alt { min-height: 54px; font-size: 1rem; }
+.valj-ark-titel { flex: none; padding: 0 12px 10px; font: 600 1.05rem/1.2 var(--font-rubrik, 'Poppins', sans-serif); letter-spacing: -.01em; }
+@keyframes valj-ark-upp { from { transform: translateY(100%); } }
+@keyframes valj-ark-ner { to { transform: translateY(100%); } }
+@keyframes valj-fon { from { opacity: 0; } }
+.valj-panel[data-utan-popover][data-ark] { box-shadow: 0 0 0 100vmax rgba(11, 21, 32, .45); }
+
+@media (prefers-reduced-motion: reduce) {
+  .valj-panel, .valj-alt, .valj-panel[data-ark] { animation: none; }
+  .valj-pil, .valj-bock { transition: none; }
+}
