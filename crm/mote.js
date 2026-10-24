@@ -12,6 +12,7 @@
 
   const BILDER = [
     { id: 'titel', namn: 'Hälsa med elitstandard' },
+    { id: 'film', namn: 'Filmen' },
     { id: 'citat', namn: 'Vår mission' },
     { id: 'varfor', namn: 'Varför kartlägga hälsan?' },
     { id: 'metod', namn: 'Så fungerar kartläggningen' },
@@ -113,6 +114,14 @@
         <span class="mote-eyebrow in">Uperformance</span><h1 class="mote-rubrik in" style="--i:1">Hälsa med <em>elitstandard.</em></h1>
         <p class="mote-ingress in" style="--i:2">Elitidrottens testmetodik – för hela arbetsplatsen. Vi visar var riskerna finns innan de blir skador, sjukskrivningar och produktionsbortfall.</p>
         ${kundObj ? `<p class="mote-for in" style="--i:3"><span>Förslag för</span><strong>${e(kundObj.namn)}</strong></p>` : ''}</div>`;
+      // Filmen (film.js): affischen öppnar biografspelaren, kapitlen hoppar direkt dit – filmens egna rubriker, inget mer
+      case 'film': return window.UPFilm ? `<div class="mote-innehall mote-film">
+        <div class="mote-film-text"><span class="mote-eyebrow in">Filmen</span><h2 class="mote-rubrik in" style="--i:1">Hälsa med elitstandard – <em>på en minut.</em></h2>
+          <p class="mote-ingress in" style="--i:2">Från elitidrottens testmetodik till hela arbetsplatsen.</p>
+          <ol class="mote-film-kapitel in" style="--i:3">${UPFilm.KAPITEL.map((k, i) => `<li><button type="button" data-film data-film-kapitel="${i}"><small>${String(i + 1).padStart(2, '0')}</small><span>${e(k.namn)}</span></button></li>`).join('')}</ol></div>
+        <button type="button" class="mote-film-ram in" style="--i:2" data-film aria-label="Spela filmen – ${e(UPFilm.tid(UPFilm.LANGD))}"><img src="${e(UPFilm.POSTER)}" alt="" decoding="async">
+          <span class="mote-film-spela" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+          <span class="mote-film-langd" aria-hidden="true">${ik('film')}Spela filmen<b>${e(UPFilm.tid(UPFilm.LANGD))}</b></span></button></div>` : '';
       case 'citat': return `<div class="mote-innehall mote-citat"><img class="in" src="bilder/gustav-skog-gra.jpg" alt="Gustav Svensson" decoding="async"><figure class="in" style="--i:1"><blockquote><p>Vi hjälper företag att minska sjukfrånvaro och öka produktiviteten genom förebyggande hälsoarbete.</p></blockquote><figcaption><strong>Gustav Svensson</strong>Vd, Uperformance · f.d. landslagsspelare och lagkapten i IFK Göteborg</figcaption></figure></div>`;
       case 'varfor': return `<div class="mote-innehall"><span class="mote-eyebrow in">Varför kartlägga hälsan?</span><h2 class="mote-rubrik in" style="--i:1">Sjukfrånvaro kostar mer än de flesta räknar med.</h2>
         <div class="mote-tal">
@@ -170,7 +179,7 @@
 
   /* Rendering och navigering ----------------------------------------------------------- */
   const toppHtml = () => `<div class="mote-topp"><span class="mote-logga"><svg aria-hidden="true"><use href="#u-mark"/></svg>Uperformance</span>${st.kundId ? `<span class="mote-kund"><i></i>${e(C.kund(st.kundId).namn)}</span>` : ''}
-        <div class="mote-hoger">${window.UPInspelning && UPInspelning.stod() ? `<span data-insp-kund="${e(st.kundId || '')}" data-insp-affar="${e(st.affarId || '')}">${UPInspelning.knappHtml('mote-knapp-insp')}</span>` : ''}${st.bilder.includes('kalkyl') ? `<button class="mote-knapp" type="button" data-m="till" data-bild="kalkyl">${ik('pengar')}<span>Kalkyl</span></button>` : ''}<button class="mote-knapp mote-helskarm" type="button" data-m="helskarm" aria-label="${document.fullscreenElement ? 'Avsluta helskärm' : 'Helskärm'}">${ik(document.fullscreenElement ? 'helskarm-ut' : 'helskarm')}<span>${document.fullscreenElement ? 'Avsluta helskärm' : 'Helskärm'}</span></button><button class="mote-knapp" type="button" data-m="avsluta" aria-label="Avsluta presentationen">${ik('stang')}<span>Avsluta</span></button></div></div>`;
+        <div class="mote-hoger">${window.UPInspelning && UPInspelning.stod() ? `<span data-insp-kund="${e(st.kundId || '')}" data-insp-affar="${e(st.affarId || '')}">${UPInspelning.knappHtml('mote-knapp-insp')}</span>` : ''}${window.UPFilm ? `<button class="mote-knapp mote-knapp-film" type="button" data-film title="Spela filmen (F)">${ik('film')}<span>Filmen</span></button>` : ''}${st.bilder.includes('kalkyl') ? `<button class="mote-knapp" type="button" data-m="till" data-bild="kalkyl">${ik('pengar')}<span>Kalkyl</span></button>` : ''}<button class="mote-knapp mote-helskarm" type="button" data-m="helskarm" aria-label="${document.fullscreenElement ? 'Avsluta helskärm' : 'Helskärm'}">${ik(document.fullscreenElement ? 'helskarm-ut' : 'helskarm')}<span>${document.fullscreenElement ? 'Avsluta helskärm' : 'Helskärm'}</span></button><button class="mote-knapp" type="button" data-m="avsluta" aria-label="Avsluta presentationen">${ik('stang')}<span>Avsluta</span></button></div></div>`;
   function rendera() {
     const aktuella = st.bilder;
     st.el.innerHTML = `${toppHtml()}
@@ -379,11 +388,12 @@
     else if (ev.key === 'Home') visa(0);
     else if (ev.key === 'End') visa(st.bilder.length - 1);
     else if ((ev.key === 'k' || ev.key === 'K') && st.bilder.includes('kalkyl')) visa(st.bilder.indexOf('kalkyl'));
+    else if ((ev.key === 'f' || ev.key === 'F') && window.UPFilm && !ev.ctrlKey && !ev.metaKey && !ev.altKey) { ev.preventDefault(); UPFilm.spela({ fran: $('.mote-knapp-film', st.el) }); }
   }
   /* Svep med fingret mellan bilderna. Bilderna har touch-action: pan-y (mote.css) – lodrätt rullar webbläsaren, vågrätt är vårt.
      Tar webbläsaren ändå över gesten kommer pointercancel i stället för pointerup: då räknas svepet från senaste pointermove. */
   let svep = null;
-  const svepStart = (ev) => { if (ev.pointerType !== 'touch' || !ev.isPrimary || ev.target.closest('input, button, select, textarea, a, [role="listbox"], .insp-kort')) { svep = null; return; } svep = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, sx: ev.clientX, sy: ev.clientY }; };
+  const svepStart = (ev) => { if (ev.pointerType !== 'touch' || !ev.isPrimary || ev.target.closest('input, button, select, textarea, a, [role="listbox"], .insp-kort, .film')) { svep = null; return; } svep = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, sx: ev.clientX, sy: ev.clientY }; };
   const svepFlytt = (ev) => { if (svep && ev.pointerId === svep.id) { svep.sx = ev.clientX; svep.sy = ev.clientY; } };
   const svepSlut = (ev) => {
     if (!svep || ev.pointerId !== svep.id || !st) return;
@@ -394,7 +404,8 @@
   // säger en notis att Esc en gång till avslutar: i helskärm går första Esc alltid åt till att lämna den (hanteraTangent).
   const helskarmByte = () => {
     if (!st) return; const pa = !!document.fullscreenElement;
-    if (!pa && st.iHelskarm && !st.helskarmKnapp && matchMedia('(hover: hover)').matches) meddela('Helskärmen är av – tryck Esc en gång till för att avsluta presentationen');
+    // Filmen öppen: Esc lämnade helskärmen men nästa Esc stänger filmen, inte presentationen – ingen notis då
+    if (!pa && st.iHelskarm && !st.helskarmKnapp && !(window.UPFilm && UPFilm.oppen) && matchMedia('(hover: hover)').matches) meddela('Helskärmen är av – tryck Esc en gång till för att avsluta presentationen');
     st.iHelskarm = pa; st.helskarmKnapp = false;
     const k = $('.mote-helskarm', st.el); if (!k) return; k.innerHTML = `${ik(pa ? 'helskarm-ut' : 'helskarm')}<span>${pa ? 'Avsluta helskärm' : 'Helskärm'}</span>`; k.setAttribute('aria-label', pa ? 'Avsluta helskärm' : 'Helskärm');
   };
@@ -432,7 +443,8 @@
     if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
   }
   let viaBakat = false;
-  function vidBakat() { if (!st) return; viaBakat = true; try { avsluta(); } finally { viaBakat = false; } }
+  // Står historiken kvar på presentationens post har bara något ovanpå stängts (filmen, film.js) – mötet fortsätter
+  function vidBakat() { if (!st || (history.state && history.state.upMote)) return; viaBakat = true; try { avsluta(); } finally { viaBakat = false; } }
   // Har mötet redan loggats som möte under presentationen – en sparad kalkyl eller en sparad inspelning (aktivitet typ möte)?
   const moteLoggat = () => !!st.sparadAffar || C.db.aktiviteter.some((x) => x.kundId === st.kundId && x.typ === 'mote' && String(x.tid || '') >= st.startIso);
   function avsluta(tyst) {

@@ -875,13 +875,13 @@ body.drar, body.drar * { cursor: grabbing !important; user-select: none; -webkit
       förskjutet efter kortets --d så att de aldrig rör sig samtidigt).
    Bara transform på hela ikonen. Vilar utanför bild (data-vilar via vilaObs), står still med reducerad rörelse. */
 .ikon[data-i] { --ik: ik-lyft; --ik-p: ik-lyft-p; transform-origin: 50% 50%; }
-.ikon:is([data-i="samtal"], [data-i="larm"], [data-i="klocka"]) { --ik: ik-ring; --ik-p: ik-ring-p; }
+.ikon:is([data-i="samtal"], [data-i="larm"], [data-i="klocka"], [data-i="bjallra"]) { --ik: ik-ring; --ik-p: ik-ring-p; }
 .ikon:is([data-i="omtest"], [data-i="system"], [data-i="aterstall"], [data-i="sol"]) { --ik: ik-snurr; --ik-p: ik-snurr-p; }
 .ikon:is([data-i="plats"], [data-i="uppgradera"], [data-i="trend"], [data-i="grodd"], [data-i="hopp"], [data-i="inkorg"], [data-i="salj"], [data-i="soluppgang"]) { --ik: ik-hopp; --ik-p: ik-hopp-p; }
-.ikon:is([data-i="hjarta"], [data-i="puls"], [data-i="gnista"], [data-i="glodlampa"], [data-i="mal"], [data-i="klar"], [data-i="stetoskop"], [data-i="skold"]) { --ik: ik-puls; --ik-p: ik-puls-p; }
+.ikon:is([data-i="hjarta"], [data-i="puls"], [data-i="gnista"], [data-i="glodlampa"], [data-i="mal"], [data-i="klar"], [data-i="stetoskop"], [data-i="skold"], [data-i="film"]) { --ik: ik-puls; --ik-p: ik-puls-p; }
 .ikon:is([data-i="flagga"], [data-i="klubb"], [data-i="medalj"], [data-i="nal"], [data-i="mane"], [data-i="vag"], [data-i="nyckel"], [data-i="kompass"], [data-i="timglas"]) { --ik: ik-svaj; --ik-p: ik-svaj-p; }
 .ikon:is([data-i="mynt"], [data-i="pengar"], [data-i="faktura"]) { --ik: ik-vand; --ik-p: ik-vand-p; }
-.ikon:is([data-i="medalj"], [data-i="nal"]) { transform-origin: 50% 8%; }
+.ikon:is([data-i="medalj"], [data-i="nal"], [data-i="bjallra"]) { transform-origin: 50% 8%; }
 .ikon:is([data-i="flagga"], [data-i="klubb"]) { transform-origin: 20% 92%; }
 
 /* 1. framritningen */

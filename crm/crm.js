@@ -3882,6 +3882,7 @@
   const MK_TRE = (y, h, inre) => [14, 61, 108].map((x) => `<rect class="k" x="${x}" y="${y}" width="38" height="${h}" rx="6"/>${inre(x)}`).join('');
   const MOTE_MINI = {
     titel: `${MK_OGON}<rect class="l" x="14" y="24" width="68" height="8" rx="4"/><rect class="a" x="14" y="36" width="50" height="8" rx="4"/><rect class="d" x="14" y="53" width="72" height="3" rx="1.5"/><rect class="d" x="14" y="60" width="58" height="3" rx="1.5"/><rect class="d" x="14" y="67" width="40" height="3" rx="1.5"/><rect class="f" x="98" y="12" width="48" height="76" rx="8"/><circle class="d" cx="122" cy="39" r="8.5"/><path class="d" d="M106.5 76c1.7-10.6 7.8-16.2 15.5-16.2s13.8 5.6 15.5 16.2z"/>`, // fotot i rundad ram (ingen målad play – bara ▶-knappen ser ut som play)
+    film: '<rect class="f" x="14" y="14" width="132" height="74" rx="8"/><circle class="a" cx="80" cy="47" r="12"/><path class="l" d="M76.5 41.5v11l9-5.5z"/><rect class="d" x="24" y="76" width="112" height="2.6" rx="1.3"/><rect class="a" x="24" y="76" width="40" height="2.6" rx="1.3"/>',
     citat: '<circle class="f" cx="38" cy="50" r="25"/><path class="a" d="M66 38c0-6 3-10 9-12l1 3c-3 1-5 3-5 6h5v8H66zm16 0c0-6 3-10 9-12l1 3c-3 1-5 3-5 6h5v8H82z"/><rect class="l" x="66" y="52" width="78" height="5" rx="2.5"/><rect class="l" x="66" y="61" width="68" height="5" rx="2.5"/><rect class="l" x="66" y="70" width="44" height="5" rx="2.5"/><rect class="d" x="66" y="81" width="38" height="2.6" rx="1.3"/>',
     varfor: MK_RUBRIK(98) + MK_TRE(40, 46, (x) => `<rect class="a" x="${x + 6}" y="48" width="20" height="8" rx="3"/><rect class="d" x="${x + 6}" y="63" width="26" height="2.4" rx="1.2"/><rect class="d" x="${x + 6}" y="69" width="22" height="2.4" rx="1.2"/><rect class="d" x="${x + 6}" y="75" width="15" height="2.4" rx="1.2"/>`),
     metod: MK_RUBRIK(104) + MK_TRE(40, 46, (x) => `<circle class="a" cx="${x + 11}" cy="51" r="5"/><rect class="l" x="${x + 6}" y="62" width="24" height="3" rx="1.5"/><rect class="d" x="${x + 6}" y="69" width="26" height="2.4" rx="1.2"/><rect class="d" x="${x + 6}" y="75" width="18" height="2.4" rx="1.2"/>`),
@@ -3895,7 +3896,7 @@
   };
   const MK_SPELA = '<svg class="ikon mk-spela" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
   const MK_KALKYL = '<svg class="ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h1.5M12 12h1.5M15.5 12h.01M8.5 16h1.5M12 16h1.5M15.5 16h.01"/></svg>';
-  const MK_EXTRA = { kalkyl: 'Live med prislistan', nasta: 'Spara och skapa offerten' };
+  const MK_EXTRA = { film: 'En minut, utan ljud', kalkyl: 'Live med prislistan', nasta: 'Spara och skapa offerten' };
   const moteBildTal = (n, alla) => (n === alla ? `${alla} bilder` : `${n} av ${alla}`);
   const moteBilderHtml = (bilder) => {
     const valda = moteUi.bilder ? new Set(moteUi.bilder) : null;
@@ -3910,6 +3911,7 @@
           <li class="mk-tips"><p class="mk-tips-rubrik">I mötet</p>
             <p class="mk-tips-mus"><span class="mk-tangenter"><kbd aria-label="Pil vänster">←</kbd><kbd aria-label="Pil höger">→</kbd></span>byter bild</p>
             <p class="mk-tips-mus"><span class="mk-tangenter"><kbd>K</kbd></span>hoppar till kalkylen</p>
+            ${window.UPFilm ? '<p class="mk-tips-mus"><span class="mk-tangenter"><kbd>F</kbd></span>spelar filmen – när som helst</p>' : ''}
             <p class="mk-tips-mus"><span class="mk-tangenter"><kbd>Esc</kbd></span>lämnar helskärmen – en gång till avslutar</p>
             <p class="mk-tips-pek">Svep åt sidan för att byta bild – kalkylen har en egen knapp överst.</p></li></ol>
         </section>`;
@@ -3934,7 +3936,7 @@
         <div class="mk-docka-ram"><div class="mk-docka" data-mk-docka>
           <div class="mk-docka-vem" data-mk-vem>${moteDockaVem()}</div>
           <div class="mk-docka-knappar">
-            ${window.UPInspelning && UPInspelning.stod() ? `<span data-insp-kund="${e(moteUi.kundId || '')}" data-insp-affar="${e(moteUi.affarId || '')}">${UPInspelning.knappHtml()}</span>` : ''}<button class="mk-knapp mk-knapp-glas" type="button" data-g="starta-mote-kalkyl">${MK_KALKYL}<span class="mk-knapp-text">Öppna kalkylen</span></button>
+            ${window.UPInspelning && UPInspelning.stod() ? `<span data-insp-kund="${e(moteUi.kundId || '')}" data-insp-affar="${e(moteUi.affarId || '')}">${UPInspelning.knappHtml()}</span>` : ''}${window.UPFilm ? `<button class="mk-knapp mk-knapp-glas mk-knapp-film" type="button" data-film title="Spela filmen – ${e(UPFilm.tid(UPFilm.LANGD))}, utan ljud"><span class="mk-film-bild" aria-hidden="true">${MK_SPELA}</span><span class="mk-knapp-text">Filmen</span></button>` : ''}<button class="mk-knapp mk-knapp-glas" type="button" data-g="starta-mote-kalkyl">${MK_KALKYL}<span class="mk-knapp-text">Öppna kalkylen</span></button>
             <button class="mk-knapp mk-knapp-mint" type="submit" data-mk-start aria-disabled="${!nValda}">${MK_SPELA}<span class="mk-start-text">Starta<span class="mk-bara-bred"> presentation</span></span><span class="mk-start-inga">Välj minst en bild</span><span class="mk-knapp-tal" data-bildval-tal>${moteBildTal(nValda, bilder.length)}</span></button>
           </div></div></div></div>
       </form>`;
@@ -7027,7 +7029,7 @@
           ${LED ? `<div class="mer-par"><button class="knapp knapp-kontur" type="button" data-g="lp-status">${ik('puls')}${e(LED.statusText(anv(jag), false))}</button><a class="knapp knapp-kontur" href="#/profil">${ik('anstallda')}Min profil</a></div>` : ''}
           ${SKARP ? `<div class="mer-inloggad">${avatar(jag)}<span class="lank-rad-text"><strong>${e(anv(jag).namn)}</strong><small>${e(rollText(anv(jag)))}</small></span></div>`
             : LED ? `<span class="etikett">Byt konto</span>${LED.kontoListaHtml()}` : `<label><span class="etikett">Inloggad som</span><select class="falt" data-anvandarval>${anvAlternativ(jag)}</select></label>`}
-          <div class="mer-par"><a class="knapp knapp-kontur" href="https://www.uperformance.se/">${ik('hem')}Hemsidan</a><button class="knapp knapp-kontur" type="button" data-g="logga-ut">${ik('logga-ut')}Logga ut</button></div>
+          <div class="mer-par"><a class="knapp knapp-kontur" href="../">${ik('hem')}Hemsidan</a><button class="knapp knapp-kontur" type="button" data-g="logga-ut">${ik('logga-ut')}Logga ut</button></div>
           ${kanAterstalla() ? `<button class="knapp knapp-spok knapp-bred" type="button" data-g="aterstall">${ik('aterstall')}Återställ exempeldata</button>` : ''}</div></div>`);
     },
     'logga-ut': async () => {

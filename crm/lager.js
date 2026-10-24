@@ -18,7 +18,9 @@
   const S = window.UP_SKARPT && typeof window.UP_SKARPT === 'object' && window.UP_SKARPT.lage === 'skarp' ? window.UP_SKARPT : null;
   const skarp = !!S;
   const lage = Object.freeze(skarp
-    ? { lage: 'skarp', miljo: String(S.miljo || 'lokal'), version: String(S.version || ''), halsoformular: !!S.halsoformular, aterstallning: !!S.aterstallning, filer: S.filer !== false }
+    ? { lage: 'skarp', miljo: String(S.miljo || 'lokal'), version: String(S.version || ''), halsoformular: !!S.halsoformular, aterstallning: !!S.aterstallning, filer: S.filer !== false,
+      // Uperformances kontaktväg på kundsidorna (KONTAKT_EPOST/KONTAKT_TEL i server/konfig.js) – null när den inte är ifylld
+      kontakt: S.kontakt && typeof S.kontakt === 'object' ? Object.freeze({ epost: typeof S.kontakt.epost === 'string' ? S.kontakt.epost : null, tel: typeof S.kontakt.tel === 'string' ? S.kontakt.tel : null }) : null }
     : { lage: 'demo', miljo: 'demo', version: 'demo', halsoformular: true, aterstallning: true, filer: false });
   let inloggadNu = skarp ? !!S.inloggad : false;
   let jagNu = skarp && S.jag ? { ...S.jag } : null;

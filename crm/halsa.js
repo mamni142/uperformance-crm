@@ -35,6 +35,18 @@
   // Ändringar efter "Ändra mina svar" sparas som utkast – de är inte skickade. Tacksidan visar alltid de skickade svaren (form.svar)
   // och säger till när ett utkast med andra svar väntar; "Fortsätt ändra" tar upp det, Avbryt går tillbaka till de skickade.
   let vantandeUtkast = false;
+  // Uperformances kontaktväg (skarpt läge: KONTAKT_EPOST/KONTAKT_TEL i server/konfig.js) – null när den inte är ifylld
+  const UPK = (L && L.lage && L.lage.kontakt) || null;
+  const kontaktVagar = () => [
+    saljare && saljare.epost ? { typ: 'mejl', text: saljare.epost, href: `mailto:${saljare.epost}` } : null,
+    UPK && UPK.epost && UPK.epost !== (saljare && saljare.epost) ? { typ: 'mejl', text: UPK.epost, href: `mailto:${UPK.epost}` } : null,
+    UPK && UPK.tel ? { typ: 'samtal', text: UPK.tel, href: `tel:${String(UPK.tel).replace(/[^\d+]/g, '')}` } : null,
+  ].filter(Boolean);
+  // Vikt och längd sparas med punkt (för testteamet) men visas med decimalkomma för deltagaren
+  const NUMMER = new Set(HALSOFRAGOR.filter((f) => f.typ === 'number').map((f) => f.id));
+  const visaTal = (v) => String(v ?? '').replace('.', ',');
+  const medKomma = (o) => { const ut = { ...(o || {}) }; NUMMER.forEach((id) => { if (ut[id] != null) ut[id] = visaTal(ut[id]); }); return ut; };
+  const likaSvar = (k, a, b) => (NUMMER.has(k) ? visaTal(a) === visaTal(b) : String(a ?? '') === String(b ?? ''));
   const tid = () => new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
   const sparatText = () => (form && form.status === 'besvarad' && lage === 'form' ? `Utkast sparat ${tid()} – inte skickat` : `Sparat ${tid()}`);
   const fornamn = () => String(svar.namn || '').trim().split(' ')[0];
@@ -58,11 +70,12 @@
   /* Lägen innan formuläret finns: en mening om varför och en väg vidare ------------------------- */
   const OGILTIG = {
     utgangen: ['Länken har gått ut', 'Länken till hälsoformuläret gällde lika länge som beställningen och har nu gått ut. Kontakta den som skickade den till dig om du fortfarande behöver svara.'],
-    makulerad: ['Den här länken gäller inte längre', 'Du kan ha tagits bort från deltagarlistan eller fått en ny länk. Kontakta den som skickade den till dig om du har frågor.'],
+    // Svaren ligger kvar hos testteamet (makulerad = länken slutar gälla) – texten lovar ingen radering, bara det som stämmer
+    makulerad: ['Den här länken gäller inte längre', 'Du kan ha tagits bort från deltagarlistan eller fått en ny länk. Svar du redan har lämnat delas inte med din arbetsgivare. Kontakta den som skickade länken till dig om du har frågor.'],
     sparrad: ['Länken är stängd', 'Beställningen som formuläret hör till har stängts. Du behöver inte göra något – kontakta den som skickade länken om du har frågor.'],
     saknas: ['Länken hittades inte', 'Kontrollera att hela adressen kom med – långa länkar bryts ibland i e-postprogram. Fungerar den ändå inte, kontakta den som skickade länken till dig.'],
   };
-  const tillStart = `<div class="knapprad"><a class="knapp knapp-kontur" href="https://www.uperformance.se/">${ik('hem')}Till uperformance.se</a></div>`;
+  const tillStart = `<div class="knapprad"><a class="knapp knapp-kontur" href="../">${ik('hem')}Till hemsidan</a></div>`;
   const stanna = () => { stoppad = true; clearTimeout(sparTimer); clearTimeout(nyttForsok); $('[data-saker]').hidden = true; sparstatus.hidden = true; };
   function visaOgiltig(fel) {
     stanna();
@@ -174,6 +187,7 @@
     const delar = DELAR().map((x, i) => { const [k, t] = delAndel(x.id); const klar = k === t;
       return `<li><button type="button" class="hp-del" data-g="hoppa" data-mal="halsa-del-${x.id}" data-hp-del="${x.id}" ${klar ? 'data-klar' : ''}><span class="hp-nr">${klar ? ik('bock') : i + 1}</span><span class="hp-del-text"><strong>${e(x.namn)}</strong><small data-hp-tal>${k} av ${t}</small></span><i class="hp-del-fyll" style="--f:${(k / t).toFixed(3)}" aria-hidden="true"></i></button></li>`; }).join('');
     const kontakt = saljare && saljare.namn && saljare.namn !== 'Uperformance' ? saljare.namn : '';
+    const vagar = kontaktVagar();
     return `<aside class="halsa-panel" aria-label="Ditt formulär">
       <section class="hp-kort hp-status" data-mork-yta>
         <p class="hp-etikett">Ditt formulär</p>
@@ -185,7 +199,7 @@
       <section class="hp-kort hp-vem"><p class="hp-etikett">Vem ser dina svar?</p>
         <div class="hp-vem-rad" data-ja><span>${ik('bock')}</span><div><strong>Uperformances testteam</strong><small>Förbereder undersökningen inför testdagen</small></div></div>
         <div class="hp-vem-rad"><span>${ik('las')}</span><div><strong>${e(foretag || 'Din arbetsgivare')}</strong><small>Ser bara att du är klar – inte dina svar</small></div></div></section>
-      ${kontakt ? `<section class="hp-kort hp-kontakt"><p class="hp-etikett">Frågor om testdagen?</p><div class="hp-person"><span aria-hidden="true">${e(kontakt.split(/\s+/).slice(0, 2).map((x) => x[0]).join('').toUpperCase())}</span><div><strong>${e(kontakt)}</strong><small>Uperformance · kontaktperson${foretag ? ` för ${e(foretag)}` : ''}</small></div></div>${saljare.epost ? `<a class="hp-mejl" href="mailto:${e(saljare.epost)}">${ik('mejl')}<span>${e(saljare.epost)}</span></a>` : ''}</section>` : ''}
+      ${kontakt || vagar.length ? `<section class="hp-kort hp-kontakt"><p class="hp-etikett">Frågor om testdagen?</p><div class="hp-person"><span aria-hidden="true">${e((kontakt || 'Uperformance').split(/\s+/).slice(0, 2).map((x) => x[0]).join('').toUpperCase())}</span><div><strong>${e(kontakt || 'Uperformance')}</strong><small>${kontakt ? `Uperformance · kontaktperson${foretag ? ` för ${e(foretag)}` : ''}` : 'Uperformance AB'}</small></div></div>${vagar.map((x) => `<a class="hp-mejl" href="${e(x.href)}">${ik(x.typ)}<span>${e(x.text)}</span></a>`).join('')}</section>` : ''}
     </aside>`;
   }
   // Delarna i panelen och i rubrikerna uppdateras medan man fyller i – utan att formuläret ritas om
@@ -229,6 +243,20 @@
       ${f.enhet ? `<span class="med-enhet">${input}<span>${e(f.enhet)}</span></span>` : input}
       ${felText ? `<span class="falt-hjalp" id="fel-${e(f.id)}">${e(felText)}</span>` : ''}</label>`;
   }
+  // Felraden ovanför Skicka följer rättningarna (förut ritades den bara vid en hel omritning och stod kvar med 10/10 i panelen)
+  const felSummaHtml = (fel) => { const n = Object.keys(fel).length; return visaFel && n ? `<p class="chip chip-rod chip-prick" style="white-space:normal" data-fel-summa>${n} svar saknas eller behöver rättas</p>` : `<p class="falt-hint" style="margin:0" data-fel-summa>${visaFel ? 'Allt är ifyllt – nu kan du skicka dina svar.' : 'Alla frågor behöver besvaras.'}</p>`; };
+  function uppdateraFelSumma() {
+    const el = $('[data-fel-summa]'); if (!el) return;
+    const ny = felSummaHtml(kontrolleraHalsosvar(svar)); if (el.outerHTML !== ny) el.outerHTML = ny;
+  }
+  // Samtyckets fel står under rutan (utanför etiketten): tas bort när rutan kryssas, tillbaka om den avkryssas igen
+  function samtyckeFel(ruta) {
+    const l = ruta.closest('label'); const fel = !ruta.checked ? kontrolleraHalsosvar(svar).samtycke : '';
+    const h = document.getElementById('fel-samtycke');
+    if (l) l.toggleAttribute('data-fel', !!fel);
+    if (fel) { ruta.setAttribute('aria-invalid', 'true'); ruta.setAttribute('aria-describedby', 'fel-samtycke'); if (!h && l) l.insertAdjacentHTML('afterend', `<span class="falt-hjalp" id="fel-samtycke">${e(fel)}</span>`); }
+    else { ruta.removeAttribute('aria-invalid'); ruta.removeAttribute('aria-describedby'); if (h) h.remove(); }
+  }
   function visaFormular() {
     const fel = kontrolleraHalsosvar(svar);
     const grupper = Object.keys(HALSOGRUPPER);
@@ -242,14 +270,14 @@
       <section class="kort halsa-grupp" id="halsa-del-samtycke"><div class="panel-huvud"><div><h2><span class="halsa-nr" data-del="samtycke" ${svar.samtycke ? 'data-klar' : ''}>${svar.samtycke ? ik('bock') : grupper.length + 1}</span>Samtycke</h2><p>Dina svar går till Uperformances testteam och delas inte med ${e(foretag || 'din arbetsgivare')}.</p></div></div>
         <div class="panel-kropp"><label class="kryss" data-fraga="samtycke" ${visaFel && fel.samtycke ? 'data-fel' : ''}><input type="checkbox" name="samtycke" ${svar.samtycke ? 'checked' : ''} ${visaFel && fel.samtycke ? 'aria-invalid="true" aria-describedby="fel-samtycke"' : ''}><span>Jag samtycker till att Uperformance behandlar uppgifterna ovan för att genomföra min hälsokartläggning.</span></label>
           ${visaFel && fel.samtycke ? `<span class="falt-hjalp" id="fel-samtycke">${e(fel.samtycke)}</span>` : ''}</div>
-        <div class="halsa-skicka">${visaFel && Object.keys(fel).length ? `<p class="chip chip-rod chip-prick" style="white-space:normal">${Object.keys(fel).length} ${Object.keys(fel).length === 1 ? 'svar saknas eller behöver rättas' : 'svar saknas eller behöver rättas'}</p>` : `<p class="falt-hint" style="margin:0">Alla frågor behöver besvaras.</p>`}
+        <div class="halsa-skicka">${felSummaHtml(fel)}
           <span class="halsa-skicka-knappar">${form.status === 'besvarad' ? '<button class="knapp knapp-spok" type="button" data-g="avbryt-andring">Avbryt</button>' : ''}<button class="knapp knapp-accent" type="submit" data-skicka-svar>${ik('bock')}${form.status === 'besvarad' ? 'Spara ändringarna' : 'Skicka mina svar'}</button></span></div></section>
     </form>`;
   }
   function visaKlart() {
     // Personal som förhandsgranskar får formuläret utan svar – visa då bara att det är klart
     const harSvar = !!form.svar; const sv = form.svar || {};
-    const rader = !harSvar ? [] : HALSOFRAGOR.map((f) => [f.etikett.replace(/\?$/, ''), f.typ === 'val' ? svarText(f.id, sv[f.id]) : f.typ === 'date' ? new Date(sv[f.id] + 'T12:00:00').toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' }) : `${sv[f.id]}${f.enhet ? ' ' + f.enhet : ''}`]);
+    const rader = !harSvar ? [] : HALSOFRAGOR.map((f) => [f.etikett.replace(/\?$/, ''), f.typ === 'val' ? svarText(f.id, sv[f.id]) : f.typ === 'date' ? new Date(sv[f.id] + 'T12:00:00').toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' }) : `${f.typ === 'number' ? visaTal(sv[f.id]) : sv[f.id]}${f.enhet ? ' ' + f.enhet : ''}`]);
     return `<section class="kort skickat" style="margin-top:16px"><div class="skickat-bock">${ik('bock')}</div>
       <h2>${andrade ? 'Dina ändringar är sparade.' : 'Dina svar är skickade.'}</h2>
       <p>Svaren har gått till Uperformances testteam. ${e(foretag || 'Din arbetsgivare')} ser bara att du är klar${period ? ` – testteamet bekräftar testdagen (önskad period: ${e(period)})` : ' – testteamet bekräftar testdagen'}.</p>
@@ -274,7 +302,7 @@
       <section class="valkommen">
         <div>
           <span class="etikett-liten">Hälsoformulär${foretag ? ` · ${e(foretag)}` : ''}</span>
-          ${klart ? `<h1>Tack${fornamn() ? ` ${e(fornamn())}` : ''} – du är <em>klar</em>.</h1>
+          ${klart ? `<h1 tabindex="-1" data-rubrik>Tack${fornamn() ? ` ${e(fornamn())}` : ''} – du är <em>klar</em>.</h1>
           <p>${form.besvarad ? `Dina svar ${andrade ? 'sparades' : 'skickades'} ${e(datumTid(form.besvarad))}. ` : ''}Svaren finns hos Uperformances testteam – du behöver inte göra något mer.</p>`
             : `<h1>${fornamn() ? `Hej ${e(fornamn())}, några` : 'Några'} frågor <em>inför testdagen</em>.</h1>
           <p>${e(foretag || 'Din arbetsgivare')} planerar en hälsokartläggning med Uperformance. Innan testerna behöver vi veta lite om dig – ${HALSOFRAGOR.length} frågor och ett samtycke.</p>`}
@@ -283,12 +311,14 @@
         <div class="valkommen-hoger">${UPPortal.ring(klart ? 100 : pct, { tal: klart ? HALSOFRAGOR.length : n, enhet: `/${HALSOFRAGOR.length}`, etikett: 'besvarade', aria: klart ? 'Alla frågor är besvarade' : ringAria(n), tyst: klart })}</div>
       </section>
       <div class="halsa-rum" ${klart ? 'data-klart' : ''}><div class="halsa-huvud">${klart ? visaKlart() : visaFormular()}</div>${panelHtml(klart)}</div>
-      <footer class="portal-fot"><span>Frågor om testdagen? Kontakta Uperformance${saljare && saljare.namn && saljare.namn !== 'Uperformance' ? ` – ${e(saljare.namn)} är kontaktperson${foretag ? ` för ${e(foretag)}` : ''}` : ''}${saljare && saljare.epost ? `, <a href="mailto:${e(saljare.epost)}">${e(saljare.epost)}</a>` : ''}.</span><span>Dina svar delas inte med ${e(foretag || 'din arbetsgivare')}.</span></footer>`;
+      <footer class="portal-fot"><span>Frågor om testdagen? Kontakta Uperformance${saljare && saljare.namn && saljare.namn !== 'Uperformance' ? ` – ${e(saljare.namn)} är kontaktperson${foretag ? ` för ${e(foretag)}` : ''}` : ''}${kontaktVagar().map((x) => `, <a href="${e(x.href)}">${e(x.text)}</a>`).join('')}.</span><span>Dina svar delas inte med ${e(foretag || 'din arbetsgivare')}.</span></footer>`;
     UPPortal.startaRing(); UPPortal.forstaVisning(); framsteg(klart ? 1 : totalAndel()); folj();
   }
   function uppdateraRing() {
-    const n = besvarade(); UPPortal.satRing((n / HALSOFRAGOR.length) * 100, n, ringAria(n)); uppdateraDelar();
+    const n = besvarade(); UPPortal.satRing((n / HALSOFRAGOR.length) * 100, n, ringAria(n)); uppdateraDelar(); uppdateraFelSumma();
   }
+  // Efter en omritning som byter läge (skickat, Avbryt): fokus på rubriken, så att tangentbord och skärmläsare vet var de är
+  const fokusRubrik = () => { const h = $('[data-rubrik]'); if (h) h.focus({ preventScroll: true }); };
 
   /* Händelser -------------------------------------------------------------------------------- */
   document.addEventListener('input', (ev) => {
@@ -307,8 +337,8 @@
     // Rita om just den frågan (vald knapp, ev. följdtext) utan att tappa fokus i resten av formuläret
     const f = HALSOFRAGOR.find((x) => x.id === t.name);
     if (f) { const gammal = t.closest('[data-fraga]'); const tmp = document.createElement('div'); tmp.innerHTML = faltHtml(f, kontrolleraHalsosvar(svar)); gammal.replaceWith(tmp.firstElementChild); const vald = $(`input[name="${sel(f.id)}"][value="${sel(t.value)}"]`); if (vald) vald.focus(); }
-    // Samtycket: felmarkeringen tas bort på plats (en hel omritning tappade fokus på rutan)
-    else if (visaFel && t.name === 'samtycke') { const l = t.closest('label'); t.toggleAttribute('aria-invalid', !t.checked); if (l) { l.removeAttribute('data-fel'); const h = l.querySelector('.falt-hjalp'); if (h && t.checked) h.remove(); } }
+    // Samtycket: felmarkeringen ändras på plats (en hel omritning tappade fokus på rutan). Felet ligger utanför etiketten.
+    else if (visaFel && t.name === 'samtycke') samtyckeFel(t);
     else if (visaFel) rendera();
     uppdateraRing();
   });
@@ -339,7 +369,7 @@
     else { form.status = 'besvarad'; form.besvarad = new Date().toISOString(); }
     clearTimeout(nyttForsok); vantandeUtkast = false;
     andrade = varBesvarad;
-    lage = 'klart'; visaFel = false; sparText(sparatText()); rendera(); scrollTo({ top: 0, behavior: lugn ? 'auto' : 'smooth' });
+    lage = 'klart'; visaFel = false; sparText(sparatText()); rendera(); scrollTo({ top: 0, behavior: lugn ? 'auto' : 'smooth' }); fokusRubrik();
     if (varBesvarad) toast('Ändringarna är sparade', { under: 'Testteamet ser de nya svaren.' });
     else setTimeout(() => UPPortal.konfettiFran($('.skickat-bock')), 900);
   });
@@ -357,13 +387,17 @@
     if (!form || stoppad) return;
     if (el.dataset.g === 'avbryt-andring') {
       // Tillbaka till de skickade svaren – utkastet skrivs över med dem, så inget väntar vid nästa besök
-      svar = { ...(form.forifyllt || {}), ...(form.svar || {}) }; vantandeUtkast = false; visaFel = false; lage = 'klart';
+      svar = { ...(form.forifyllt || {}), ...medKomma(form.svar) }; vantandeUtkast = false; visaFel = false; lage = 'klart';
       clearTimeout(sparTimer); form.utkast = rentUtkast(); smutsig = true; sparaNu();
-      rendera(); scrollTo({ top: 0, behavior: lugn ? 'auto' : 'smooth' }); return;
+      rendera(); scrollTo({ top: 0, behavior: lugn ? 'auto' : 'smooth' }); fokusRubrik(); return;
     }
     if (el.dataset.g !== 'andra') return;
     if (vantandeUtkast) { svar = { ...svar, ...(form.utkast || {}) }; vantandeUtkast = false; }
-    lage = 'form'; rendera(); scrollTo({ top: 0, behavior: lugn ? 'auto' : 'smooth' });
+    lage = 'form'; rendera();
+    // Fokus i första fältet (förut hamnade det på body och sidan rullade till toppen) – delen rullas in under toppraden
+    const forsta = $('#halsoform input:not([type=hidden])');
+    if (forsta) { forsta.focus({ preventScroll: true }); const del = forsta.closest('.halsa-grupp'); (del || forsta).scrollIntoView({ block: 'start', behavior: lugn ? 'auto' : 'smooth' }); }
+    else scrollTo({ top: 0, behavior: lugn ? 'auto' : 'smooth' });
   });
 
   /* Start: hämta formuläret via lagret ------------------------------------------------------- */
@@ -383,8 +417,9 @@
     saljare = vy.saljare || { namn: 'Uperformance' };
     // Besvarat: de skickade svaren gäller; ett utkast med andra svar väntar tills deltagaren väljer Fortsätt ändra
     const besvarat = form.status === 'besvarad';
-    svar = { ...(form.forifyllt || {}), ...(form.svar || {}), ...(besvarat ? {} : form.utkast || {}) };
-    vantandeUtkast = besvarat && !!form.utkast && Object.keys(form.utkast).some((k) => k !== 'samtycke' && String(form.utkast[k]) !== String((form.svar || {})[k] ?? ''));
+    svar = { ...(form.forifyllt || {}), ...medKomma(form.svar), ...(besvarat ? {} : form.utkast || {}) };
+    // 58,5 i utkastet och 58.5 i de skickade svaren är samma svar
+    vantandeUtkast = besvarat && !!form.utkast && Object.keys(form.utkast).some((k) => k !== 'samtycke' && !likaSvar(k, form.utkast[k], (form.svar || {})[k]));
     lage = besvarat ? 'klart' : 'form';
     $('[data-saker]').hidden = false; sparstatus.hidden = false;
     $('[data-saker-text]').textContent = 'Personlig länk';

@@ -119,18 +119,26 @@ function offertRader(o) {
 }
 
 /* Personnummer: ÅÅÅÅMMDD-NNNN med kontrollsiffra (Luhn). Samordningsnummer (dag + 60) godtas. */
+// Kontrollsiffran (Luhn) över tio siffror – samma för personnummer och organisationsnummer
+const luhnGiltig = (tio) => { let summa = 0; for (let i = 0; i < 10; i++) { let x = +tio[i] * (i % 2 === 0 ? 2 : 1); if (x > 9) x -= 9; summa += x; } return summa % 10 === 0; };
+const PNR_MONSTER = /^(\d{2})?(\d{2})(\d{2})(\d{2})([-+]?)(\d{4})$/;
+const pnrDatumOk = (m) => { const manad = +m[3], dag = +m[4] > 60 ? +m[4] - 60 : +m[4]; return manad >= 1 && manad <= 12 && dag >= 1 && dag <= 31; };
 function normaliseraPnr(varde) {
-  const m = String(varde || '').replace(/\s/g, '').match(/^(\d{2})?(\d{2})(\d{2})(\d{2})([-+]?)(\d{4})$/);
+  const m = String(varde || '').replace(/\s/g, '').match(PNR_MONSTER);
   if (!m) return null;
   let sekel = m[1];
   if (!sekel) { const nu = new Date().getFullYear() % 100; sekel = m[5] === '+' || +m[2] > nu - 15 ? '19' : '20'; } // anställda är minst 15 år
-  const manad = +m[3], dag = +m[4] > 60 ? +m[4] - 60 : +m[4];
-  if (manad < 1 || manad > 12 || dag < 1 || dag > 31) return null;
-  const tio = m[2] + m[3] + m[4] + m[6];
-  let summa = 0;
-  for (let i = 0; i < 10; i++) { let x = +tio[i] * (i % 2 === 0 ? 2 : 1); if (x > 9) x -= 9; summa += x; }
-  if (summa % 10 !== 0) return null;
+  if (!pnrDatumOk(m)) return null;
+  if (!luhnGiltig(m[2] + m[3] + m[4] + m[6])) return null;
   return `${sekel}${m[2]}${m[3]}${m[4]}-${m[6]}`;
+}
+// Varför ett personnummer inte godtas, i klartext (samma kontroller som normaliseraPnr). Alla texter börjar med "Ogiltigt personnummer".
+function pnrFelText(varde) {
+  const m = String(varde || '').replace(/\s/g, '').match(PNR_MONSTER);
+  if (!m) return 'Ogiltigt personnummer – skriv ÅÅÅÅMMDD-NNNN';
+  if (!pnrDatumOk(m)) return 'Ogiltigt personnummer – datumet stämmer inte';
+  if (!luhnGiltig(m[2] + m[3] + m[4] + m[6])) return 'Ogiltigt personnummer – kontrollsiffran stämmer inte';
+  return null;
 }
 const maskeraPnr = (pnr) => (pnr ? String(pnr).slice(0, 8) + '-••••' : '');
 
@@ -152,10 +160,17 @@ function kontrolleraForetag(f) {
   if (f && f.epost && !EPOST_MONSTER.test(String(f.epost).trim())) fel.push('E-postadressen till kontaktpersonen ser inte rätt ut');
   return fel;
 }
+// Varningar som inte stoppar inskickningen: ett organisationsnummer i rätt format vars kontrollsiffra (Luhn) inte stämmer.
+// Exempeldatans organisationsnummer är påhittade och har med flit fel kontrollsiffra (då kan de inte tillhöra ett riktigt företag).
+function foretagVarningar(f) {
+  const v = []; const org = String((f && f.orgnr) || '').trim();
+  if (/^\d{6}-?\d{4}$/.test(org) && !luhnGiltig(org.replace('-', ''))) v.push('Kontrollsiffran i organisationsnumret stämmer inte – kontrollera numret');
+  return v;
+}
 // Samma kontroller som kolumnen "Kontroll" i Excelarket.
 // Skarpt läge: säljarna får personnumren maskerade (ÅÅÅÅMMDD-••••) och servern räknar pnrStatus (server/personnummer.js) –
 // då gäller statusen, eftersom numret inte går att kontrollera här. Ett nytt nummer som någon skriver in kontrolleras som vanligt.
-const PNR_STATUS_FEL = { saknas: 'Personnummer saknas', ogiltigt: 'Ogiltigt personnummer', dubbel: 'Personnumret finns två gånger' };
+const PNR_STATUS_FEL = { saknas: 'Personnummer saknas', ogiltigt: 'Ogiltigt personnummer – kontrollera numret', dubbel: 'Personnumret finns två gånger' };
 const pnrMaskerat = (d) => typeof d.pnrStatus === 'string' && String(d.pnr || '').includes('•');
 function kontrolleraDeltagare(lista) {
   const pnrAntal = {}; const epostAntal = {};
@@ -170,7 +185,7 @@ function kontrolleraDeltagare(lista) {
     if (!m) fel.push('E-post saknas'); else if (!EPOST_MONSTER.test(m)) fel.push('Ogiltig e-post'); else if (epostAntal[m] > 1) fel.push('E-posten finns två gånger');
     if (pnrMaskerat(d)) { if (PNR_STATUS_FEL[d.pnrStatus]) fel.push(PNR_STATUS_FEL[d.pnrStatus]); }
     else if (!String(d.pnr || '').trim()) fel.push('Personnummer saknas');
-    else { const p = normaliseraPnr(d.pnr); if (!p) fel.push('Ogiltigt personnummer'); else if (pnrAntal[p] > 1) fel.push('Personnumret finns två gånger'); }
+    else { const p = normaliseraPnr(d.pnr); if (!p) fel.push(pnrFelText(d.pnr) || 'Ogiltigt personnummer'); else if (pnrAntal[p] > 1) fel.push('Personnumret finns två gånger'); }
     return fel;
   });
 }
@@ -187,7 +202,7 @@ function summeraUnderlag(lank) {
   const fel = kontrolleraDeltagare(lista);
   const foretagFel = kontrolleraForetag(lank && lank.foretag);
   const varningar = fel.filter((x) => x.length).length;
-  return { antal: lista.length, perPaket, tillval, hjartkarl, total, snitt: lista.length ? total / lista.length : 0, fel, varningar, foretagFel, komplett: lista.length > 0 && !varningar && !foretagFel.length };
+  return { antal: lista.length, perPaket, tillval, hjartkarl, total, snitt: lista.length ? total / lista.length : 0, fel, varningar, foretagFel, foretagVarningar: foretagVarningar(lank && lank.foretag), komplett: lista.length > 0 && !varningar && !foretagFel.length };
 }
 
 /* Hälsoformulär – frågebatteriet som varje deltagare besvarar innan testerna ----------

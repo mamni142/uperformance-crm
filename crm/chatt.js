@@ -1,8 +1,9 @@
 /* Uperformance CRM – chatten (#/chatt, #/chatt/<id>), 2026-10-23.
    Privata samtal och grupper mellan kollegorna: skriv, reagera, ändra eller ta bort det egna, bifoga filer och bilder (gemet, dra och släpp eller klistra in –
-   varje fil går genom filskannern först), emoji, bjud in fler till en grupp, byt namn och lämna. Olästa räknas per konto; när
-   något nytt kommer till dig plingar det mjukt (WebAudio, går att stänga av) och kontokortet i sidomenyn lyser upp med avsändaren
-   och texten – ett klick på kortet då öppnar samtalet. Data i db.chatt { kanaler, meddelanden, last, tyst } i demoläget
+   varje fil går genom filskannern först), emoji, bjud in fler till en grupp, byt namn och lämna. Olästa räknas per konto (även i
+   fliktiteln); när något nytt kommer till dig plingar det mjukt (WebAudio, går att stänga av) och kontokortet i sidomenyn lyser upp
+   med avsändaren och texten – ett klick på kortet då öppnar samtalet. Valfritt: avisering på skrivbordet när fliken inte syns.
+   Data i db.chatt { kanaler, meddelanden, last, tyst } i demoläget
    (localStorage, flikarna synkar). Bilder sparas nedskalade (JPEG), dokument upp till 900 kB sparas i datan (tak 2,5 MB för alla
    chattfiler), större filer finns bara under sessionen. Skarp version: kräver stöd i servern (samlingen chatt, filer med
    antivirus på servern) – chatten visas inte i skarpt läge än. Laddas före crm.js; crm.js anropar window.UPChatt(K, LED). */
@@ -120,6 +121,7 @@ window.UPChatt = (K, LED) => {
           <span class="ch-rad-under"><span class="ch-forh">${e(forh)}</span>${n && iKanal(x.id).some((m) => !m.system && m.av !== jag() && m.tid > lastTill(x.id) && namnerMig(m)) ? '<b class="ch-bricka ch-bricka-omn" title="Du är nämnd">@</b>' : ''}${n ? `<b class="ch-bricka">${n}</b>` : tystad(x.id) ? `<span class="ch-tystad" title="Ljudet av">${ik('ljud-av')}</span>` : ''}</span></span></a>`;
     };
     const ljudAv = (() => { try { return localStorage.getItem('up-crm-pling') === 'av'; } catch (err) { return false; } })();
+    const avis = aviseringLage();
     const lista = `<aside class="ch-lista" aria-label="Samtal">
         <header class="ch-lista-topp"><div class="ch-lista-titel"><h1>Meddelanden</h1><small>${olastaTotalt() ? plural(olastaTotalt(), 'oläst', 'olästa') : 'Allt är läst'}</small></div>
           <div class="ch-lista-knappar"><button type="button" class="ch-ikonknapp ch-ljudknapp" data-g="ch-pling" aria-pressed="${!ljudAv}" title="${ljudAv ? 'Plinget är av – klicka för att slå på' : 'Plinget är på – klicka för att stänga av'}">${ik(ljudAv ? 'ljud-av' : 'ljud')}</button><button type="button" class="ch-ikonknapp ch-ljudknapp" data-g="chf-minimera-sida" title="Minimera – chatten blir en ikon och följer med mellan sidorna" aria-label="Minimera chatten">${ik('minimera')}</button><button type="button" class="ch-ny" data-g="ch-ny" title="Nytt samtal">${ik('plus')}<span>Nytt</span></button></div></header>
@@ -127,6 +129,7 @@ window.UPChatt = (K, LED) => {
         <label class="ch-sok">${ik('sok')}<input type="search" placeholder="Sök i samtalen …" value="${e(ui.sok)}" data-ch-sok aria-label="Sök i samtalen"></label>
         ${sok ? '' : `<div class="ch-team-ram">${teamRad()}</div>`}
         <nav class="ch-rader">${listan.map(rad).join('') || `<p class="ch-lista-tom">${sok ? 'Inget samtal matchar.' : 'Inga samtal än – starta ett med Nytt.'}</p>`}</nav>
+        ${avis === 'saknas' || pekskarm() ? '' : `<button type="button" class="ch-avis-rad" data-g="ch-avisera" role="switch" aria-checked="${avis === 'pa'}"${avis === 'blockerad' ? ' data-blockerad' : ''} title="${e(AVIS_TITEL[avis])}"><span class="ch-avis-ikon">${ik(avis === 'pa' ? 'bjallra' : 'bjallra-av')}</span><span class="ch-avis-text"><strong>Avisering på skrivbordet</strong><small>${e(AVIS_UNDER[avis])}</small></span><i class="chf-vaxel" aria-hidden="true"></i></button>`}
         <div class="chf-tips ch-lista-tips"><span class="chf-tips-ikon">${ik('glodlampa')}</span><span><strong>Tips</strong><small>${pekskarm() ? 'Bifoga filer och bilder med gemet – de virusskannas först. Tryck på ett meddelande för att svara, reagera eller ändra det.' : 'Dra in eller klistra in filer i ett samtal – de virusskannas först. Håll musen över ett meddelande för att svara, reagera eller ändra ditt eget.'} Knappen med minus gör chatten till en ikon som följer med dig.</small></span></div>
       </aside>`;
     const trad = k ? tradHtml(k) : `<div class="ch-tom">${K.emo ? K.emo('prat', { ruta: true }) : ik('prat')}<h2>${mina.length ? 'Välj ett samtal' : 'Starta ditt första samtal'}</h2><p>Skriv privat till en kollega eller samla flera i en grupp. Filer och bilder virusskannas innan de skickas.</p><button type="button" class="knapp knapp-accent" data-g="ch-ny">${ik('plus')}Nytt samtal</button></div>`;
@@ -475,9 +478,10 @@ window.UPChatt = (K, LED) => {
     } catch (err) { /* inget ljud i den här webbläsaren */ }
   }
   let effektT = 0; let senasteNotis = null;
+  const notisText = (m) => (m.text ? `${namnerMig(m) ? 'nämnde dig · ' : ''}${klartext(m.text).replace(/\s+/g, ' ').slice(0, 80)}` : (m.filer || []).length ? ((m.filer[0].typ || '').startsWith('image/') ? 'Skickade en bild' : 'Skickade en fil') : '');
   function effekt(m, n) {
     const u = anv(m.av); const k = kanal(m.kanal);
-    const text = m.text ? `${namnerMig(m) ? 'nämnde dig · ' : ''}${klartext(m.text).replace(/\s+/g, ' ').slice(0, 80)}` : (m.filer || []).length ? ((m.filer[0].typ || '').startsWith('image/') ? 'Skickade en bild' : 'Skickade en fil') : '';
+    const text = notisText(m);
     senasteNotis = { kanal: m.kanal };
     const kort = $('.anvandarval');
     const synligt = kort && kort.getClientRects().length && matchMedia('(min-width: 1000px)').matches && !document.documentElement.hasAttribute('data-sido-dold');
@@ -490,6 +494,37 @@ window.UPChatt = (K, LED) => {
       const lev = $('[data-ch-levande]') || (() => { const x = document.createElement('p'); x.className = 'sr'; x.setAttribute('data-ch-levande', ''); x.setAttribute('aria-live', 'polite'); document.body.appendChild(x); return x; })();
       lev.textContent = `Nytt meddelande från ${u.namn}: ${text}`;
     } else toast(`${u.kort}: ${text}${n > 1 ? ` (+${n - 1})` : ''}`, { href: `#/chatt/${m.kanal}`, text: 'Öppna' }, 'prat');
+  }
+  /* 04b-aviseringar på skrivbordet (valfritt, av från början): raden ovanför tipset i samtalslistan slår på dem (dator – på
+     mobilen kräver webbläsarna en installerad app) – webbläsaren frågar en gång.
+     En avisering kommer bara när fliken inte syns (annars räcker kortet/toasten), aldrig med Stör ej eller från ett tystat samtal,
+     och den är tyst (plinget sköter ljudet). Den visar avsändaren och början av meddelandet; ett klick öppnar samtalet. Samma
+     samtal ersätter sin förra avisering (tag), så två flikar ger inte dubbla. Valet gäller webbläsaren (up-crm-avisering). */
+  const AVISERA = 'up-crm-avisering';
+  const AVIS_TITEL = {
+    pa: 'Aviseringar på skrivbordet är på – klicka för att stänga av',
+    av: 'Avisering på skrivbordet när fliken inte syns – klicka för att slå på',
+    blockerad: 'Webbläsaren blockerar aviseringar för sidan – tillåt dem i webbläsarens inställningar',
+  };
+  const AVIS_UNDER = { pa: 'På – när fliken inte syns', av: 'Av – få veta när något kommer medan du är i en annan flik', blockerad: 'Blockerad i webbläsarens inställningar' };
+  function aviseringLage() {
+    if (!('Notification' in window)) return 'saknas';
+    let pa = false; try { pa = localStorage.getItem(AVISERA) === 'pa'; } catch (err) { /* ok */ }
+    if (Notification.permission === 'denied') return 'blockerad';
+    return pa && Notification.permission === 'granted' ? 'pa' : 'av';
+  }
+  const satAvisering = (pa) => { try { if (pa) localStorage.setItem(AVISERA, 'pa'); else localStorage.removeItem(AVISERA); } catch (err) { /* ok */ } };
+  function avisera(m, n) {
+    if (aviseringLage() !== 'pa' || document.visibilityState === 'visible') return;
+    const u = anv(m.av); const k = kanal(m.kanal);
+    try {
+      const a = new Notification(`${u.namn}${k && k.typ === 'grupp' ? ` · ${k.namn}` : ''}`, { body: `${notisText(m)}${n > 1 ? ` (+${n - 1})` : ''}`, tag: `up-chatt-${m.kanal}`, silent: true });
+      a.onclick = () => {
+        try { window.focus(); } catch (err) { /* ok */ }
+        a.close();
+        if (fl.lage === 'oppen' && !paChattSidan()) oppnaFonster(m.kanal); else location.hash = `#/chatt/${m.kanal}`;
+      };
+    } catch (err) { /* t.ex. Chrome på Android kräver en service worker – då blir det ingen avisering, räknaren och plinget finns kvar */ }
   }
   function uppdateraRaknare() {
     const n = SKARP || !jag() ? 0 : olastaTotalt();
@@ -527,7 +562,7 @@ window.UPChatt = (K, LED) => {
     if (!nya.length) return;
     if (ikon) { ikon.removeAttribute('data-ny'); void ikon.offsetWidth; ikon.setAttribute('data-ny', ''); }
     if (fl.storEj) return;
-    pling(); effekt(nya[nya.length - 1], nya.length);
+    pling(); effekt(nya[nya.length - 1], nya.length); avisera(nya[nya.length - 1], nya.length);
   }
   // Kontobyte i demoläget (crm.js bytAnvandare): förra kontots sökning, öppna samtal, svar, bilagor, utkast och notis följer
   // inte med – det nya kontot börjar med tom sökning, sitt eget senaste samtal och sina egna notiser (kolla körs strax efter)
@@ -750,7 +785,7 @@ window.UPChatt = (K, LED) => {
   }
   document.addEventListener('pointerdown', (ev) => { if (ikonMeny && !ikonMeny.contains(ev.target) && !(ikon && ikon.contains(ev.target))) stangIkonMeny(); }, true);
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && ikonMeny) { stangIkonMeny(); if (ikon) ikon.focus(); } });
-  addEventListener('resize', () => { placeraIkon(); if (fonster && !smal()) { const r = fonster.getBoundingClientRect(); if (r.left > innerWidth - 100) fonster.style.left = `${innerWidth - r.width - 16}px`; if (r.top > innerHeight - 52) fonster.style.top = `${Math.max(8, innerHeight - r.height - 16)}px`; klamFonster(); } });
+  addEventListener('resize', () => { placeraIkon(); uppdateraRaknare(); if (fonster && !smal()) { const r = fonster.getBoundingClientRect(); if (r.left > innerWidth - 100) fonster.style.left = `${innerWidth - r.width - 16}px`; if (r.top > innerHeight - 52) fonster.style.top = `${Math.max(8, innerHeight - r.height - 16)}px`; klamFonster(); } });
   new MutationObserver(() => { placeraIkon(); setTimeout(placeraIkon, 650); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sido-dold'] });
   // senaste sidan utanför chatten – dit går man när chatten minimeras eller blir ett fönster (aldrig ut ur CRM:et)
   let senasteSida = paChattSidan() ? '#/' : location.hash || '#/';
@@ -884,6 +919,16 @@ window.UPChatt = (K, LED) => {
       const c = C(); const l = c.tyst[jag()] || []; const kid = el.dataset.id;
       c.tyst[jag()] = l.includes(kid) ? l.filter((x) => x !== kid) : [...l, kid]; spara(); rita();
       toast(tystad(kid) ? 'Ljudet är av för samtalet' : 'Ljudet är på för samtalet', null, tystad(kid) ? 'ljud-av' : 'ljud');
+    },
+    'ch-avisera': async () => {
+      if (!('Notification' in window)) { toast('Webbläsaren kan inte visa aviseringar', null, 'info'); return; }
+      if (aviseringLage() === 'pa') { satAvisering(false); rita(); toast('Aviseringarna på skrivbordet är av', null, 'bjallra-av'); return; }
+      let p = Notification.permission;
+      if (p === 'default') { try { p = await Notification.requestPermission(); } catch (err) { p = 'denied'; } }
+      if (p === 'default') { toast('Aviseringarna slogs inte på – webbläsaren frågar igen nästa gång', null, 'info'); return; } // frågan stängdes utan svar
+      if (p !== 'granted') { satAvisering(false); rita(); toast('Webbläsaren blockerar aviseringar för sidan – tillåt dem i webbläsarens inställningar och slå på aviseringen igen', null, 'varning'); return; }
+      satAvisering(true); rita();
+      toast('Aviseringar är på – när fliken inte syns får du en avisering med avsändaren och början av meddelandet', null, 'bjallra');
     },
     'ch-pling': () => {
       let av2 = false; try { av2 = localStorage.getItem('up-crm-pling') === 'av'; if (av2) localStorage.removeItem('up-crm-pling'); else localStorage.setItem('up-crm-pling', 'av'); } catch (err) { /* ok */ }

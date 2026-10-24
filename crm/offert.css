@@ -381,3 +381,22 @@ html[data-dold] .offert-bakgrund span { animation-play-state: paused; }
   .resa-nu { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .offert-panel, .op-ring-del, .op-stapel i { animation: none; } }
+
+/* Efter testkörningen (2026-10-24): Tab-ordningen, fokus under verktygsraden, kontaktvägen och kvittensen.
+   Panelen står före papperet i DOM:en (Tab når panelens knapp och innehållet tidigt) och läggs till höger med grid;
+   verktygsradens Godkänn och Skriv ut döljs när panelen syns – förut kom tre Godkänn i rad och innehållet sist. */
+html:has(.offert-sida) { scroll-padding-top: 80px; }
+@media (min-width: 1180px) {
+  .offert-verktyg .knapprad { display: none; }
+  .offert-ram > .offert-panel { grid-column: 2; grid-row: 1; }
+  .offert-ram > .dokument { grid-column: 1; grid-row: 1; }
+}
+.op-lank { display: flex; align-items: center; gap: 8px; margin-top: 10px; min-height: 40px; padding: 8px 12px; border-radius: 12px; background: var(--ben); color: var(--navy); font: 600 .82rem/1.2 var(--font-rubrik); text-decoration: none; }
+.op-lank span { min-width: 0; overflow-wrap: anywhere; }
+.op-lank .ikon { flex: none; width: 15px; height: 15px; }
+.op-lank:hover { background: var(--navy-ljus); }
+.op-lank + .op-lank { margin-top: 6px; }
+/* stämpeln får fokus efter Godkänn/Signera (tabindex=-1): ring bara för tangentbordet */
+.stampel:focus { outline: none; }
+.stampel:focus-visible { outline: 2px solid var(--accent-djup); outline-offset: 3px; }
+.ogiltig-offert h1:focus { outline: none; }

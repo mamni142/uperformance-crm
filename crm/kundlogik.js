@@ -87,7 +87,23 @@ var KUNDLOGIK = (() => {
         halsoformular[t] = v;
       });
     }
-    return { nyckel, lank: kopia(lank), kund: { namn: kund ? kund.namn : '' }, saljare: hittaSaljare(db, hittaAffar(db, lank.affarId)), halsoformular, halsoformularPa: pa };
+    return { nyckel, lank: kopia(lank), kund: { namn: kund ? kund.namn : '' }, saljare: hittaSaljare(db, hittaAffar(db, lank.affarId)), halsoformular, halsoformularPa: pa, dokument: dokumentLage(db, lank.affarId) };
+  }
+  /* Affärens offert och order som kundlänkens resa visar (2026-10-24): den nyaste versionen av varje som inte är makulerad eller
+     ersatt – bara nummer, läge och datum. Nyckeln till dokumentet följer aldrig med (kundlänken länkar inte till offerten). */
+  function dokumentLage(db, affarId) {
+    const ut = { offert: null, order: null };
+    if (!affarId) return ut;
+    Object.keys(db.offerter || {}).forEach((t) => {
+      const d = db.offerter[t];
+      if (!arObjekt(d) || d.affarId !== affarId || d.makulerad || d.status === 'ersatt' || d.status === 'makulerad' || d.ersattAv) return;
+      const typ = d.typ === 'order' ? 'order' : 'offert';
+      if (ut[typ] && String(ut[typ].skapad || '') >= String(d.skapad || '')) return;
+      const v = { nummer: String(d.nummer || ''), status: String(d.status || ''), skapad: d.skapad || null, giltigTill: d.giltigTill || null };
+      if (d.godkand) v.godkand = d.godkand;
+      ut[typ] = v;
+    });
+    return ut;
   }
   // Kundens vy av offerten/ordern: kundlänkens nyckel (offert.underlag) leder till deltagarlistan med personnummer och följer aldrig
   // med, och en makulering syns bara som att dokumentet inte gäller längre – vem som makulerade och varför stannar hos Uperformance.
@@ -112,7 +128,31 @@ var KUNDLOGIK = (() => {
     // Ersatt eller en nyare version finns: kundens sida säger att den här inte gäller längre – bara den nya versionens nummer följer med
     if (off && off.ersattAv) off.ersattAv = { nummer: String(off.ersattAv.nummer || ''), tid: off.ersattAv.tid || null };
     else if (off) { const ny = nyareVersion(db, kalla); if (ny) off.nyareVersion = { nummer: String(ny.nummer || '') }; }
+    if (off) Object.assign(off, underlagLage(db, kalla));
     return { nyckel, offert: off };
+  }
+  /* Kundunderlaget på samma affär, som offertsidan säger något om (2026-10-24) – bara som sant/falskt och, för en offert som
+     bygger på det inskickade underlaget, deltagarnas namn, paket och tillval (som orderns bilaga – aldrig e-post eller personnummer).
+     harUnderlag: underlaget är inskickat. underlagPagar: en kundlänk är skickad men inte inskickad. Nyckeln följer aldrig med. */
+  function underlagLage(db, kalla) {
+    const ut = { harUnderlag: false, underlagPagar: false };
+    if (!arObjekt(kalla) || !kalla.affarId) return ut;
+    const idag = idagFran();
+    Object.keys(db.kundlankar || {}).forEach((t) => {
+      const l = db.kundlankar[t];
+      if (!arObjekt(l) || l.affarId !== kalla.affarId || l.sparrad) return;
+      if (l.status === 'inskickad') ut.harUnderlag = true;
+      else if (!l.utgar || l.utgar >= idag) ut.underlagPagar = true;
+    });
+    const o = arObjekt(kalla.offert) ? kalla.offert : {};
+    const l = typeof o.underlag === 'string' && har(db.kundlankar, o.underlag) ? db.kundlankar[o.underlag] : null;
+    const rader = Array.isArray(o.deltagare) ? o.deltagare : [];
+    // Namnen bara när offerten byggdes på just den listan (samma antal och paket, rad för rad)
+    if ((kalla.typ || 'offert') === 'offert' && arObjekt(l) && l.status === 'inskickad' && Array.isArray(l.deltagare) && rader.length && l.deltagare.length === rader.length
+      && l.deltagare.every((d, i) => arObjekt(d) && arObjekt(rader[i]) && d.paket === rader[i].paket)) {
+      ut.deltagarBilaga = l.deltagare.map((d) => ({ namn: String(d.namn || '').trim(), paket: d.paket, tillval: Array.isArray(d.tillval) ? d.tillval.filter((x) => typeof x === 'string') : [] }));
+    }
+    return ut;
   }
   function vyHalsa(db, nyckel) {
     const form = har(db && db.halsoformular, nyckel) ? db.halsoformular[nyckel] : {};

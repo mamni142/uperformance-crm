@@ -34,7 +34,7 @@
   /* Sidhuvudet – samma i alla lägen, även medan sidan hämtas och vid fel ------------------------ */
   const logga = () => `<span class="logga-liten"><svg class="logga-hel" viewBox="0 0 1274.2 395" role="img" aria-label="Uperformance"><use href="#logo"/></svg><svg class="logga-mark" viewBox="0 0 396 395" aria-hidden="true"><use href="#logo" width="1274.2" height="395"/></svg></span>`;
   const skal = (innehall) => { yta.innerHTML = `<div class="offert-verktyg offert-verktyg-enkel">${logga()}</div><div class="offert-yta">${innehall}</div>`; };
-  const tillStart = `<a class="knapp knapp-kontur" href="https://www.uperformance.se/">${ik('hem')}Till uperformance.se</a>`;
+  const tillStart = `<a class="knapp knapp-kontur" href="../">${ik('hem')}Till hemsidan</a>`;
   // Ett dokument som inte gäller: en mening om varför, vem man kontaktar och en väg vidare
   function ogiltig(rubrik, text, { ikon = 'dokument', ton = '' } = {}) {
     if (ark.open) ark.close();
@@ -82,10 +82,21 @@
 
   // Vad som händer efter godkännandet – samma steg som i "Så går det till". Bygger offerten redan på deltagarna (kundunderlaget)
   // skickas ingen ny länk för deltagarlistan.
+  // harUnderlag/underlagPagar (vyOffert, bara sant/falskt): kundunderlaget på samma affär är inskickat, eller en kundlänk väntar på er
   const medDeltagare = () => !!(off.offert && Array.isArray(off.offert.deltagare) && off.offert.deltagare.length);
+  const underlagFinns = () => medDeltagare() || !!off.harUnderlag;
+  const deltagareText = () => (medDeltagare() ? 'deltagarna finns redan med i offerten' : 'ert underlag med deltagarna har redan kommit in');
   const vadHanderNu = () => (arOrder
     ? ['Vi fakturerar förskottet – 25 % av ordervärdet.', 'Vårt testteam kontaktar er och bokar testdagen.', 'Efter testdagen: riskprofil till varje medarbetare och slutfaktura efter avstämning.']
-    : [medDeltagare() ? `${off.saljare || 'Uperformance'} skickar PUB-avtalet och ordern – deltagarna finns redan med i offerten.` : `${off.saljare || 'Uperformance'} skickar en säker länk där ni fyller i deltagarlistan.`, 'Ni signerar ordern och vi fakturerar förskottet (25 %).', 'Vårt testteam bokar testdagen med er.']);
+    : [underlagFinns() ? `${off.saljare || 'Uperformance'} skickar PUB-avtalet och ordern – ${deltagareText()}.`
+      : off.underlagPagar ? 'Fyll i deltagarlistan i den säkra länk ni har fått från Uperformance – ordern bygger på den.' : `${off.saljare || 'Uperformance'} skickar en säker länk där ni fyller i deltagarlistan.`, 'Ni signerar ordern och vi fakturerar förskottet (25 %).', 'Vårt testteam bokar testdagen med er.']);
+  // Uperformances kontaktväg (skarpt läge: KONTAKT_EPOST/KONTAKT_TEL, server/konfig.js) – personalens egna adresser visas aldrig här
+  const UPK = (L && L.lage && L.lage.kontakt) || null;
+  const kontaktVagar = () => [
+    UPK && UPK.epost ? { typ: 'mejl', text: UPK.epost, href: `mailto:${UPK.epost}` } : null,
+    UPK && UPK.tel ? { typ: 'samtal', text: UPK.tel, href: `tel:${String(UPK.tel).replace(/[^\d+]/g, '')}` } : null,
+  ].filter(Boolean);
+  const kontaktLopText = () => kontaktVagar().map((x) => ` <a href="${e(x.href)}">${e(x.text)}</a>`).join(' ·');
 
   /* Sidopanelen (bara på breda skärmar, aldrig i utskriften): läget som en ring (dagar kvar eller klar), summan med
      betalplanen, knappen och innehållet – sektionerna i papperet, den som syns markeras medan man läser. Ingen loop. */
@@ -121,8 +132,11 @@
     const harHjartkarl = rader.some((r) => r.offert);
     const fp = Math.round(PRISER.forskott * 100); const fd = fakturaDelar(pr.total);
     const marke = '<svg class="paketkort-marke" viewBox="0 0 396 395" aria-hidden="true"><use href="#logo" width="1274.2" height="395"/></svg>';
+    // Deltagarbilagan: orderns deltagare, eller – för en offert som bygger på ert inskickade underlag – samma namn och paket
+    // (vyOffert ger bara namn, paket och tillval; aldrig e-post eller personnummer)
+    const bilaga = arOrder ? (Array.isArray(off.deltagare) ? off.deltagare : []) : Array.isArray(off.deltagarBilaga) ? off.deltagarBilaga : [];
     const sektioner = [arOrder && ['dok-leverans', 'Leverans'], ['dok-spec', 'Specifikation'], ['dok-betal', 'Betalningsplan'],
-      (paketIOfferten.length || o.typ === 'uppfoljning' || o.app || o.insights) && ['dok-ingar', 'Det här ingår'], arOrder && off.deltagare && off.deltagare.length && ['dok-bilaga', 'Deltagare'],
+      (paketIOfferten.length || o.typ === 'uppfoljning' || o.app || o.insights) && ['dok-ingar', 'Det här ingår'], bilaga.length && ['dok-bilaga', 'Deltagare'],
       ['dok-resa', 'Så går det till'], ['dok-villkor', 'Villkor'], ['dok-signering', godkand ? ORD.klarText : ORD.kort]].filter(Boolean);
     const kvar = dagarMellan(idag, off.giltigTill); const totalt = Math.max(1, dagarMellan(off.skapad || idag, off.giltigTill));
     const panelHtml = () => `<aside class="offert-panel" aria-label="Sammanfattning av ${ORD.bestamd}">
@@ -137,7 +151,7 @@
       </section>
       <nav class="op-kort op-innehall" aria-label="Innehåll"><span class="op-rubrik">Innehåll</span><ol>${sektioner.map(([id, t], i) => `<li><button type="button" data-g="hoppa" data-op-lank="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${e(t)}</button></li>`).join('')}</ol></nav>
       <section class="op-kort op-kontakt"><span class="op-rubrik">Din kontakt</span><div class="op-person"><span class="op-ava" aria-hidden="true">${e(initialer(off.saljare))}</span><div><strong>${e(off.saljare || 'Uperformance')}</strong><small>Uperformance AB</small></div></div>
-        <p>Frågor om ${ORD.bestamd}? Kontakta ${e(off.saljare || 'oss')} på Uperformance.</p></section>
+        <p>Frågor om ${ORD.bestamd}? Kontakta ${e(off.saljare || 'oss')} på Uperformance.</p>${kontaktVagar().map((x) => `<a class="op-lank" href="${e(x.href)}">${ik(x.typ)}<span>${e(x.text)}</span></a>`).join('')}</section>
     </aside>`;
     const upplagg = o.eget != null ? 'Specialoffert' : o.typ === 'uppfoljning' ? 'Uppföljning & coaching' : paketIOfferten.map((p) => PRISER.paket[p].namn).join(' · ');
 
@@ -154,6 +168,7 @@
       <div class="offert-yta" data-med-panel>
         ${varningHtml()}
         <div class="offert-ram">
+        ${panelHtml()}
         <article class="dokument ${arOrder ? 'dokument-order' : ''}" aria-label="${ORD.namn} ${e(off.nummer)}">
           <header class="dok-huvud">
             <span class="dok-logga"><svg viewBox="0 0 1274.2 395" role="img" aria-label="Uperformance"><use href="#logo"/></svg></span>
@@ -206,13 +221,13 @@
               ${o.app ? `<div class="paketkort paketkort-program"><span>Program</span><h3>UPerformance App</h3><ul><li>${ik('bock')}Individuell riskprofil</li><li>${ik('bock')}Anpassat träningsprogram</li><li>${ik('bock')}Påminnelser mellan testtillfällena</li></ul><p class="paketkort-fot">${ik('kalender')}${antal ? `${e(antal)} medarbetare · ` : ''}12 månader</p>${marke}</div>` : ''}
               ${o.insights ? `<div class="paketkort paketkort-program"><span>Program</span><h3>Team Insights</h3><ul><li>${ik('bock')}Avidentifierad rapport till HR och ledning</li><li>${ik('bock')}Utveckling över tid</li><li>${ik('bock')}Jämförelse mot branschsnittet</li></ul>${marke}</div>` : ''}
             </div></section>` : ''}
-            ${arOrder && off.deltagare && off.deltagare.length ? `<section class="dok-avsnitt" id="dok-bilaga"><h2>Bilaga: deltagare</h2><div class="spec-rulla"><table class="spec deltagarbilaga"><thead><tr><th scope="col">#</th><th scope="col">Namn</th><th scope="col">Paket</th><th scope="col">Tillval</th></tr></thead>
-              <tbody>${off.deltagare.map((d, i) => { const r = prisaDeltagare(d.paket, d.tillval); const tv = (d.tillval || []).filter((t) => !r.ingar.has(t) && PRISER.tillval[t]).map((t) => PRISER.tillval[t].namn); return `<tr><td>${e(i + 1)}</td><td><strong>${e(d.namn || '–')}</strong></td><td>${e((PRISER.paket[d.paket] || {}).namn || '')}</td><td>${e(tv.join(', ') || '–')}</td></tr>`; }).join('')}</tbody></table></div>
-              <p class="falt-hint">Personnummer och e-post hanteras separat och visas inte i ordern.</p></section>` : ''}
+            ${bilaga.length ? `<section class="dok-avsnitt" id="dok-bilaga"><h2>Bilaga: deltagare</h2>${arOrder ? '' : `<p class="falt-hint">Offerten bygger på ert inskickade underlag med ${e(bilaga.length)} deltagare.</p>`}<div class="spec-rulla"><table class="spec deltagarbilaga"><thead><tr><th scope="col">#</th><th scope="col">Namn</th><th scope="col">Paket</th><th scope="col">Tillval</th></tr></thead>
+              <tbody>${bilaga.map((d, i) => { const r = prisaDeltagare(d.paket, d.tillval); const tv = (d.tillval || []).filter((t) => !r.ingar.has(t) && PRISER.tillval[t]).map((t) => PRISER.tillval[t].namn); return `<tr><td>${e(i + 1)}</td><td><strong>${e(d.namn || '–')}</strong></td><td>${e((PRISER.paket[d.paket] || {}).namn || '')}</td><td>${e(tv.join(', ') || '–')}</td></tr>`; }).join('')}</tbody></table></div>
+              <p class="falt-hint">Personnummer och e-post hanteras separat och visas inte i ${ORD.bestamd}.</p></section>` : ''}
             <section class="dok-avsnitt" id="dok-resa"><h2>Så går det till</h2>
               <ol class="dok-resa">
                 <li ${godkand ? 'data-klar' : 'data-nu'}>${godkand ? '' : '<em class="resa-nu">Nästa steg</em>'}<strong>${arOrder ? 'Signerad order' : 'Godkänd offert'}</strong>${arOrder ? 'Ni signerar ordern digitalt eller med underskrift.' : 'Ni godkänner offerten digitalt eller med underskrift.'}</li>
-                <li ${godkand ? 'data-nu' : ''}>${godkand ? '<em class="resa-nu">Nästa steg</em>' : ''}<strong>${arOrder ? 'Förskott' : 'Underlag &amp; samtycke'}</strong>${arOrder ? 'Vi fakturerar 25 % av ordervärdet.' : medDeltagare() ? 'Deltagarna finns med i offerten – PUB-avtal och samtycken.' : 'Deltagarlista via säker länk, PUB-avtal och samtycken.'}</li>
+                <li ${godkand ? 'data-nu' : ''}>${godkand ? '<em class="resa-nu">Nästa steg</em>' : ''}<strong>${arOrder ? 'Förskott' : 'Underlag &amp; samtycke'}</strong>${arOrder ? 'Vi fakturerar 25 % av ordervärdet.' : medDeltagare() ? 'Deltagarna finns med i offerten – PUB-avtal och samtycken.' : off.harUnderlag ? 'Ert underlag med deltagarna har kommit in – PUB-avtal och samtycken.' : off.underlagPagar ? 'Deltagarlistan i er säkra länk, PUB-avtal och samtycken.' : 'Deltagarlista via säker länk, PUB-avtal och samtycken.'}</li>
                 <li><strong>${arOrder ? 'Samtycke' : 'Order'}</strong>${arOrder ? 'PUB-avtal och samtycken är klara före testdagen.' : 'Ordern signeras och förskottet faktureras.'}</li>
                 <li><strong>Testdag</strong>Vårt testteam bokar tid med er och onboardar alla i appen.</li>
                 <li><strong>Resultat</strong>Riskprofil till varje medarbetare, sammanställning till er.</li>
@@ -230,15 +245,14 @@
             <section class="dok-avsnitt dok-signering" id="dok-signering">
               ${godkand ? `<div class="stampel"><span class="stampel-ikon">${ik('bock')}</span><div><strong>${ORD.klarText} av ${e(off.godkandAv.namn)}${off.godkandAv.roll ? `, ${e(off.godkandAv.roll)}` : ''}</strong><span>${e(datum(off.godkand, { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }))} · ${arOrder ? 'digital signering' : 'digitalt godkännande'}</span></div></div>
                 <div class="vad-hander"><strong>Vad händer nu?</strong><ol>${vadHanderNu().map((t, i) => `<li><span>${i + 1}</span>${e(t)}</li>`).join('')}</ol><p>Frågor? Kontakta ${e(off.saljare || 'Uperformance')} på Uperformance.</p></div>`
-                : `<div class="godkann"><div><strong>${arOrder ? 'Signera ordern' : 'Redo att sätta igång?'}</strong><p>${arOrder ? 'När ordern är signerad fakturerar vi förskottet och vårt testteam kontaktar er för att boka testdagen.' : 'Godkänn offerten digitalt, så skickar vi länken för deltagarlista och samtycke.'}</p></div><div class="godkann-hoger"><span class="godkann-summa"><small>${arOrder ? 'Ordervärde' : 'Totalt'} exkl. moms</small><b>${kr(pr.total)}</b></span><button class="knapp knapp-accent" type="button" data-g="godkann" ${godkannAttr()}>${ik('bock')}${ORD.knapp}</button></div></div>
+                : `<div class="godkann"><div><strong>${arOrder ? 'Signera ordern' : 'Redo att sätta igång?'}</strong><p>${arOrder ? 'När ordern är signerad fakturerar vi förskottet och vårt testteam kontaktar er för att boka testdagen.' : underlagFinns() ? `Godkänn offerten digitalt, så skickar vi PUB-avtalet och ordern – ${deltagareText()}.` : off.underlagPagar ? 'Godkänn offerten digitalt och fyll i deltagarlistan i er säkra länk – sedan skickar vi PUB-avtalet och ordern.' : 'Godkänn offerten digitalt, så skickar vi länken för deltagarlista och samtycke.'}</p></div><div class="godkann-hoger"><span class="godkann-summa"><small>${arOrder ? 'Ordervärde' : 'Totalt'} exkl. moms</small><b>${kr(pr.total)}</b></span><button class="knapp knapp-accent" type="button" data-g="godkann" ${godkannAttr()}>${ik('bock')}${ORD.knapp}</button></div></div>
                   <div class="signatur"><div>Ort och datum</div><div>Ort och datum</div><div>Underskrift, ${e(off.kund.namn)}</div><div>Underskrift, Uperformance AB</div><div>Namnförtydligande</div><div>Namnförtydligande</div></div>`}
             </section>
           </div>
           <footer class="dok-fot"><span>Uperformance AB · Skadeförebyggande hälsoanalys – byggt på elitidrottens metodik</span><span>${ORD.namn} ${e(off.nummer)}</span></footer>
         </article>
-        ${panelHtml()}
         </div>
-        <p class="falt-hint offert-fragor">Frågor om ${ORD.bestamd}? Kontakta ${e(off.saljare)} på Uperformance.</p>
+        <p class="falt-hint offert-fragor">Frågor om ${ORD.bestamd}? Kontakta ${e(off.saljare)} på Uperformance${kontaktLopText() ? ` –${kontaktLopText()}` : ''}.</p>
       </div>`;
     if (window.UPPortal && !lugn && !yta.hasAttribute('data-visad')) document.querySelectorAll('[data-op-tal], .dok-tal-stor strong').forEach((el) => { el.dataset.varde = '0'; UPPortal.rakna(el, pr.total, { format: (v) => kr(v) }); });
     yta.setAttribute('data-visad', '');
@@ -267,6 +281,7 @@
   // webbläsaren, i skarpt läge på servern – med samma logik (kundlogik.js).
   // Fel visas inne i arket: toasten ligger under det modala arket och syns inte där.
   let skickar = false;
+  const fokusStampel = () => { const st = document.querySelector('.stampel'); if (!st) return false; st.setAttribute('tabindex', '-1'); st.focus({ preventScroll: true }); return true; };
   async function godkann() {
     const f = $('[data-godkann-form]', ark); if (!f || !f.reportValidity() || skickar) return;
     const d = new FormData(f); const knapp = $('[data-bekrafta]', ark); const felRuta = $('[data-ark-fel]', ark);
@@ -283,12 +298,13 @@
       off = r.vy.offert; off.kund = off.kund || {}; off.kontakt = off.kontakt || {}; off.offert = off.offert || {};
       ark.close(); rendera();
       const st = document.querySelector('.stampel');
-      if (st) { scrollTo({ top: st.getBoundingClientRect().top + scrollY - 140, behavior: lugn ? 'auto' : 'smooth' }); if (window.UPPortal) setTimeout(() => UPPortal.konfettiFran(st), 700); }
+      // Knappen som öppnade arket finns inte längre – fokus på kvittensen (stämpeln), så att tangentbord och skärmläsare följer med
+      if (st) { fokusStampel(); scrollTo({ top: st.getBoundingClientRect().top + scrollY - 140, behavior: lugn ? 'auto' : 'smooth' }); if (window.UPPortal) setTimeout(() => UPPortal.konfettiFran(st), 700); }
       toast(`${ORD.Bestamd} är ${arOrder ? 'signerad' : 'godkänd'}`, { under: `Tack! ${off.saljare || 'Uperformance'} har fått beskedet.` });
       return;
     }
     // Redan klar, ersatt eller utgången: hämta om – sidan visar läget som det är nu
-    if (r.fel === 'redan-klar' || r.fel === 'ersatt' || r.fel === 'utgangen') { ark.close(); await hamta(); if (r.fel === 'redan-klar') toast(r.meddelande || 'Dokumentet är redan klart.', { typ: 'info' }); return; }
+    if (r.fel === 'redan-klar' || r.fel === 'ersatt' || r.fel === 'utgangen') { ark.close(); await hamta(); if (!fokusStampel()) { const h = document.querySelector('.ogiltig-offert h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus(); } } if (r.fel === 'redan-klar') toast(r.meddelande || 'Dokumentet är redan klart.', { typ: 'info' }); return; }
     if (r.status === 404) { hittadesInte(); return; }
     if (r.status === 400) { visaFel(r.meddelande || 'Namn och behörighet behövs.'); return; }
     // Personal som förhandsgranskar (inloggad i CRM:et): servern tar inte emot ett godkännande – säg varför, inget har skickats

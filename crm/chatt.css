@@ -600,10 +600,15 @@ a.ch-fil:hover { background: rgba(126, 224, 195, .1); transform: translateY(-1px
 /* raden växer in i den fria ytan: från vänster på andras meddelanden, från höger på dina egna – aldrig utanför tråden (bryts
    till två rader i ett smalt fönster). Pekskärm: ett tryck på meddelandet visar raden (data-verktyg, chatt.js). */
 .ch-floede { container-type: inline-size; }
-.ch-verktyg { flex-wrap: wrap; max-width: min(100cqi, calc(100vw - 32px)); border-radius: 18px; }
+.ch-verktyg { flex-wrap: wrap; width: max-content; max-width: min(100cqi, calc(100vw - 32px)); border-radius: 18px; } /* en rad när den ryms – annars bröts den efter bubblans bredd */
 .ch-medd:not(.ch-egen) .ch-verktyg { left: 0; right: auto; }
 .ch-egen .ch-verktyg { left: auto; right: 0; justify-content: flex-end; }
 .ch-medd[data-verktyg] .ch-verktyg { opacity: 1; transform: none; pointer-events: auto; }
+/* Pekskärm: webbläsaren sätter :hover vid ett tryck, och då låg den (ännu osynliga) raden över bubblans överkant och tog trycket –
+   raden öppnades aldrig, eller så blev det en reaktion. Där visas raden bara efter trycket (data-verktyg) eller med tangentbordet. */
+@media (hover: none), (pointer: coarse) {
+  .ch-medd:not([data-verktyg]):not(:has(:focus-visible)) .ch-verktyg { opacity: 0; transform: translateY(4px) scale(.95); pointer-events: none; }
+}
 .ch-andrad { margin-left: 6px; font: 500 .62rem/1 var(--font-brod); letter-spacing: .01em; color: rgba(246, 244, 239, .45); white-space: nowrap; vertical-align: baseline; }
 .ch-egen .ch-andrad { color: rgba(6, 35, 25, .55); }
 .ch-innehall > .ch-andrad { margin: 0 6px; }
@@ -631,6 +636,18 @@ a.ch-fil:hover { background: rgba(126, 224, 195, .1); transform: translateY(-1px
   .ch-tk-mer-ram { display: block; }
   .ch-stapel .lp-avatar:nth-child(n+3) { display: none; }
 }
+/* samma meny när tråden är smal på dator (menyn utfälld i ett fönster runt 1000 px – annars hamnade Minimera utanför tråden) */
+.ch-rum .ch-trad-topp { container: chtopp / inline-size; }
+@container chtopp (max-width: 460px) {
+  .ch-trad-knappar .ch-tk-extra { display: none; }
+  .ch-tk-mer-ram { display: block; }
+}
+/* 320 px: namnet och undertexten ("2 medlemmar · 0 aktiva nu") bryts hellre till två rader än klipps, och listans rubrik krymper lite */
+@container chtopp (max-width: 300px) {
+  .ch-trad-namn :is(strong, small) { white-space: normal; text-overflow: clip; overflow-wrap: anywhere; }
+}
+.ch-lista-topp { container: chlista / inline-size; }
+@container chlista (max-width: 280px) { .ch-lista-titel h1 { font-size: 1.1rem; } }
 /* beskedet överst i listan: länken gällde ett samtal som inte finns (eller som man inte är med i) */
 .ch-saknas { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; margin: 0 14px 10px; padding: 10px 8px 10px 10px; border-radius: 14px;
   background: rgba(255, 200, 87, .07); box-shadow: inset 0 0 0 1px rgba(255, 200, 87, .28); animation: ch-in .4s cubic-bezier(.22, 1, .36, 1) both; }
@@ -642,3 +659,19 @@ a.ch-fil:hover { background: rgba(126, 224, 195, .1); transform: translateY(-1px
 .ch-saknas button .ikon { width: 12px; height: 12px; }
 @media (max-width: 640px) { .ch-saknas button { width: 40px; height: 40px; } }
 @media (prefers-reduced-motion: reduce) { .ch-tk-meny, .ch-saknas { animation: none; } }
+
+/* 21 aviseringar på skrivbordet (2026-10-24): en växel ovanför tipset i samtalslistan (dator) – av från början, mint när den är på */
+.ch-avis-rad { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; margin: 6px 14px 0; padding: 9px 12px 9px 10px; border: 0; border-radius: 14px; cursor: pointer;
+  color: var(--ben); text-align: left; background: rgba(255, 255, 255, .03); box-shadow: inset 0 0 0 1px var(--ch-kant); transition: background-color .2s, box-shadow .2s; }
+.ch-avis-rad:hover { background: rgba(255, 255, 255, .06); }
+.ch-avis-rad:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ch-avis-ikon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; color: rgba(246, 244, 239, .6); background: rgba(255, 255, 255, .06); transition: color .2s, background-color .2s; }
+.ch-avis-ikon .ikon { width: 15px; height: 15px; }
+.ch-avis-text { display: grid; gap: 2px; min-width: 0; } .ch-avis-text strong { font: 600 .74rem/1.2 var(--font-rubrik); } .ch-avis-text small { font-size: .68rem; line-height: 1.4; color: rgba(246, 244, 239, .55); }
+.ch-avis-rad[aria-checked="true"] { box-shadow: inset 0 0 0 1px rgba(126, 224, 195, .35); }
+.ch-avis-rad[aria-checked="true"] .ch-avis-ikon { color: var(--accent); background: rgba(126, 224, 195, .14); }
+.ch-avis-rad[aria-checked="true"] > .chf-vaxel { background: var(--accent); }
+.ch-avis-rad[data-blockerad] .ch-avis-ikon, .ch-avis-rad[data-blockerad] small { color: #ffd98c; }
+.ch-avis-rad > .chf-vaxel { flex: none; }
+.ch-lista > .ch-avis-rad { margin-top: auto; flex: none; }
+.ch-lista > .ch-avis-rad + .ch-lista-tips { margin-top: 6px; }

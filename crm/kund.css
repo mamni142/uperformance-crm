@@ -980,3 +980,65 @@ html[data-dold] *, html[data-dold] *::before, html[data-dold] *::after { animati
 .halsa-rum[data-klart] .skickat { padding-inline: clamp(18px, 3vw, 36px); }
 @media (max-width: 720px) { .halsa-nu { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .halsa-nr[data-klar] { animation: none; } .hp-del-fyll::before, .halsa-falt .etikett::after { transition: none; } }
+
+/* 09-efter testkörningen (2026-10-24): fokus under de fasta raderna, varningen för organisationsnumret, resan med offert och
+   order, kvittot med företagsuppgifter och deltagare och dess utskrift. Inga nya loopar. */
+/* Fokus med Tab/Nästa hamnar aldrig bakom toppraden eller mobilens minisummering (webbläsaren rullade bara till skärmkanten) */
+html:has(.portal-sida) { scroll-padding-top: 76px; }
+@media (max-width: 1060px) {
+  html:has(.mini-summering:not([data-dold])) { scroll-padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+}
+/* organisationsnumret: fel kontrollsiffra är en gul varning under fältet – den stoppar inte inskickningen */
+.kl-falt-varning { display: flex; gap: 6px; margin: 7px 0 0; font-size: .8rem; line-height: 1.4; color: var(--gul-text); }
+.kl-falt-varning:empty { display: none; }
+.kl-falt-varning::before { content: ''; flex: none; width: 6px; height: 6px; margin-top: .45em; border-radius: 50%; background: var(--gul); }
+/* resan efter inskickningen: lika många spalter som steg (offerten och ordern kan vara egna steg) */
+.kl-resa { grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); }
+@media (min-width: 641px) and (max-width: 1100px) {
+  .kl-resa { grid-template-columns: repeat(min(var(--n, 4), 3), minmax(0, 1fr)); }
+  .kl-resa .kl-steg-text strong { display: block; } /* resan har inga korta namn – rubriken står kvar */
+}
+/* kvittot */
+.kl-kvitto-topp { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 16px; }
+.kl-kvitto-meta { margin: 6px 0 0; font: 600 .95rem/1.35 var(--font-rubrik); color: var(--ink); }
+.kl-kvitto-del { padding-top: 16px; border-top: 1px solid var(--kant); }
+.kl-kvitto-uppg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 22px; margin: 12px 0 0; }
+.kl-kvitto-uppg div[data-bred] { grid-column: 1 / -1; }
+.kl-kvitto-uppg dt { font-size: .72rem; color: var(--text-3); }
+.kl-kvitto-uppg dd { margin: 3px 0 0; font: 600 .9rem/1.35 var(--font-rubrik); color: var(--ink); white-space: pre-line; overflow-wrap: anywhere; }
+.kl-kvitto-deltagare summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; cursor: pointer; list-style: none; }
+.kl-kvitto-deltagare summary::-webkit-details-marker { display: none; }
+.kl-kvitto-deltagare summary:focus-visible { outline: 2px solid var(--accent-djup); outline-offset: 3px; border-radius: 8px; }
+.kl-kvitto-visa { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; color: var(--navy); background: var(--ben); }
+.kl-kvitto-visa .ikon { width: 15px; height: 15px; transition: transform .3s var(--mjuk); }
+.kl-kvitto-deltagare[open] .kl-kvitto-visa .ikon { transform: rotate(180deg); }
+.kl-kvitto-deltagare .tabell-rulla { max-height: 420px; overflow: auto; margin-top: 8px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--kant); }
+.kl-kvitto-lista { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.kl-kvitto-lista th, .kl-kvitto-lista td { padding: 9px 12px; border-bottom: 1px solid var(--kant); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.kl-kvitto-lista thead th { position: sticky; top: 0; background: #faf9f6; font: 600 .64rem/1 var(--font-rubrik); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
+.kl-kvitto-lista tbody th { font: 600 .88rem/1.3 var(--font-rubrik); color: var(--ink); }
+.kl-kvitto-lista td:first-child { width: 2.5em; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.kl-kvitto-lista tr:last-child > * { border-bottom: 0; }
+.kl-kvitto-deltagare .summering-not { margin: 8px 0 0; }
+.kl-hjalte h1:focus, .valkommen h1:focus { outline: none; } /* rubriken får fokus efter Skicka/Avbryt (tabindex=-1) */
+@media (max-width: 560px) {
+  .kl-kvitto-uppg { grid-template-columns: minmax(0, 1fr); }
+  .kl-kvitto-skriv { width: 100%; justify-content: center; }
+  .kl-kvitto-lista th, .kl-kvitto-lista td { padding: 8px; }
+}
+/* Utskrift / spara kvitto: ett rent A4 med loggan, kvittot och kontakten – utan hjälten, knappar och bakgrund */
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body.portal-sida { background: #fff; }
+  .portal-bakgrund, .portal-topp .saker, .portal-topp .sparstatus, .kl-framsteg, .prototypvarning, .mini-summering, .toaster, dialog, .kl-kvitto-skriv, .kl-kvitto-visa { display: none !important; }
+  .portal:has(.kl-klar) > .kl-hjalte { display: none !important; } /* kvittot: hjälten (mörk yta) skrivs inte ut */
+  .portal-topp { position: static; padding: 0 0 12px; border-bottom: 1px solid var(--kant); background: none; }
+  .portal { width: 100%; padding: 0; }
+  .kl-klar { display: block; margin-top: 14px; }
+  .kl-kvitto-kort { width: 100%; padding: 0; box-shadow: none; background: none; animation: none !important; }
+  .kl-kvitto-deltagare .tabell-rulla { max-height: none; overflow: visible; box-shadow: none; }
+  .kl-kvitto-lista thead th { position: static; }
+  .kl-kvitto-lista tr, .kl-kvitto-uppg div { break-inside: avoid; }
+  .kund-sida .kl-sidfot { margin-top: 18px; padding-top: 12px; }
+  .kl-sidfot .ikon { display: none; }
+}

@@ -22,7 +22,7 @@
     const u = new URL(a.href, location.href);
     if (u.origin !== location.origin) return false;
     if (u.pathname === location.pathname && u.hash) return false;
-    const p = u.pathname.replace(/\.html$/, '').replace(/^\/[^/]+(?=\/crm(\/|$))/, ''); // GitHub Pages: /<repo>/crm/…
+    const p = u.pathname.replace(/\.html$/, '').replace(/^\/uperformance-crm(?=\/|$)/, '') || '/'; // GitHub Pages: /uperformance-crm/…
     return p === '/' || p === '/index' || p === '/crm/logga-in' || p === '/crm/' || p === '/crm' || p === '/crm/index';
   };
   document.addEventListener('click', (ev) => {

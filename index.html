@@ -1,3 +1,805 @@
 <!doctype html>
-<html lang="sv"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta http-equiv="refresh" content="0; url=crm/logga-in.html">
-<title>Uperformance CRM</title></head><body><p><a href="crm/logga-in.html">Till Uperformance CRM</a></p></body></html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uperformance – Hälsa med elitstandard</title>
+<meta name="description" content="Skadeförebyggande hälsoanalys byggd på elitidrottens testmetodik. Individuell riskprofil för varje medarbetare och spelare – innan riskerna blir skador och sjukfrånvaro.">
+<!-- Förhandsversion: ta bort noindex vid lansering -->
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b1520">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="sv_SE">
+<meta property="og:site_name" content="Uperformance">
+<meta property="og:title" content="Uperformance – Hälsa med elitstandard">
+<meta property="og:description" content="Skadeförebyggande hälsoanalys byggd på elitidrottens testmetodik – för arbetsplatser och idrottslag.">
+<meta property="og:image" content="assets/bilder/film-poster.jpg">
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/up.css?v=28">
+<link rel="stylesheet" href="assets/valj.css?v=1">
+<link rel="stylesheet" href="assets/overgang.css?v=2">
+<script src="assets/overgang.js?v=3"></script>
+<script>document.documentElement.classList.add('js');try{if(localStorage.getItem('up-persona')==='idrott')document.documentElement.dataset.persona='idrott'}catch(e){}</script>
+<script src="assets/valj.js?v=2" defer></script>
+<script src="assets/up.js?v=17" defer></script>
+</head>
+<body>
+
+<!-- Ikoner och logotyp -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="ringgradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#183653"/><stop offset=".55" stop-color="#3aa9c9"/><stop offset="1" stop-color="#7ee0c3"/>
+    </linearGradient>
+    <linearGradient id="ringgradient-elit" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a7d2ff"/><stop offset=".5" stop-color="#3aa9c9"/><stop offset="1" stop-color="#7ee0c3"/>
+    </linearGradient>
+  </defs>
+  <symbol id="logo" viewBox="0 0 1274.2 395">
+    <path fill="none" stroke="currentColor" stroke-width="20" d="M198,10c103.9,0,188,84,188,187.5s-84.1,187.5-188,187.5S10,301,10,197.5,94.1,10,198,10Z"/>
+    <path fill="currentColor" d="M177.5,127.8v88.6c0,7.3,1.6,13,4.7,17.3,3.3,4.1,8.4,6.2,15.5,6.2s12.4-2.1,15.8-6.2c3.4-4.3,5.1-10.1,5.1-17.3v-88.6h49.1v88.6c0,14.9-3.1,27.8-9.3,38.4-6.2,10.5-14.7,18.4-25.5,23.8-10.8,5.3-22.9,8-36.2,8s-25.2-2.7-35.5-8c-10.2-5.3-18.2-13.2-24-23.8-5.8-10.5-8.7-23.3-8.7-38.4v-88.6h49.1-.1Z"/>
+    <path fill="currentColor" d="M518.7,181.6c0,7.7-2.5,13.9-7.6,18.7-5.1,4.7-12.7,7.1-22.8,7.1h-18.2v38.4h-9v-90h27.2c10,0,17.6,2.4,22.7,7.1,5.1,4.7,7.7,11,7.7,18.8h0ZM488.3,199.6c14.1,0,21.1-6,21.1-18s-1.7-10.6-5-13.6c-3.3-3.1-8.7-4.6-16.1-4.6h-18.2v36.3h18.2ZM597.4,207c0,3.1,0,5.4-.3,7.1h-58.3c.3,5.3,1.5,9.9,3.9,13.6,2.3,3.8,5.4,6.7,9.1,8.6,3.8,1.9,7.9,2.8,12.4,2.8s10.7-1.4,14.7-4.2,6.7-6.7,8-11.5h9.5c-1.7,6.9-5.4,12.5-11.1,16.9-5.6,4.3-12.6,6.4-21.1,6.4s-12.5-1.5-17.8-4.4c-5.2-3-9.4-7.2-12.4-12.6-2.9-5.5-4.4-11.9-4.4-19.2s1.5-13.7,4.4-19.2,7-9.7,12.2-12.6c5.2-2.9,11.2-4.4,17.9-4.4s12.5,1.5,17.5,4.4c5.1,2.9,8.9,6.9,11.6,11.8,2.7,4.9,4.1,10.3,4.1,16.3v.2ZM588.3,206.7c0-5.2-1-9.7-3.2-13.4-2.1-3.7-5.1-6.5-8.9-8.4-3.8-1.9-7.9-2.8-12.4-2.8-6.7,0-12.4,2.1-17.1,6.4-4.7,4.3-7.3,10.3-7.9,18.2h49.5ZM622.9,187.9c2-4.4,5-7.8,9-10.2,4.1-2.4,9.1-3.6,15.1-3.6v9.4h-2.4c-6.5,0-11.8,1.8-15.7,5.3s-5.9,9.4-5.9,17.6v39.3h-9v-70.3h9v12.5h0ZM688.2,183h-16.3v62.7h-9v-62.7h-9.8v-7.6h9.8v-4.9c0-7.6,1.9-13.3,5.8-16.9,3.9-3.6,10.3-5.4,19.1-5.4v7.7c-5.8,0-10,1.1-12.4,3.3-2.3,2.2-3.5,6-3.5,11.2v4.9h16.3v7.6h0ZM733.2,246.7c-6.6,0-12.6-1.5-17.9-4.4-5.2-3-9.4-7.2-12.5-12.6-3-5.5-4.5-11.9-4.5-19.2s1.5-13.6,4.6-19.1,7.3-9.7,12.6-12.6c5.3-3,11.3-4.5,17.9-4.5s12.6,1.5,17.9,4.5c5.4,2.9,9.6,7.1,12.6,12.6,3.1,5.4,4.6,11.8,4.6,19.1s-1.5,13.6-4.6,19.1-7.3,9.7-12.7,12.7c-5.4,2.9-11.4,4.4-18,4.4h0ZM733.2,238.9c4.6,0,8.9-1,12.9-3.1,3.9-2.1,7.1-5.3,9.5-9.5,2.5-4.3,3.7-9.5,3.7-15.7s-1.2-11.4-3.6-15.6c-2.4-4.3-5.6-7.5-9.5-9.5-3.9-2.1-8.2-3.2-12.9-3.2s-8.9,1.1-12.9,3.2c-3.9,2.1-7.1,5.2-9.5,9.5-2.3,4.2-3.5,9.4-3.5,15.6s1.2,11.4,3.5,15.7c2.4,4.2,5.5,7.4,9.4,9.5s8.2,3.1,12.9,3.1h0ZM794,187.9c2-4.4,5-7.8,9-10.2,4.1-2.4,9.1-3.6,15.1-3.6v9.4h-2.4c-6.5,0-11.8,1.8-15.7,5.3s-5.9,9.4-5.9,17.6v39.3h-9v-70.3h9v12.5h0ZM915.3,174.1c8.2,0,14.9,2.6,20.1,7.9,5.2,5.1,7.9,12.7,7.9,22.5v41.2h-8.9v-40.2c0-7.6-1.8-13.5-5.5-17.5s-8.7-6.1-15.1-6.1-11.9,2.2-15.8,6.6c-3.9,4.4-5.9,10.7-5.9,19.1v38.1h-8.9v-40.2c0-7.6-1.8-13.5-5.5-17.5s-8.8-6.1-15.2-6.1-11.9,2.2-15.8,6.6c-3.9,4.4-5.9,10.7-5.9,19.1v38.1h-9v-70.3h9v12.1c2.2-4.4,5.4-7.7,9.5-9.9,4.1-2.3,8.7-3.5,13.8-3.5s11.4,1.5,16,4.4,8,7.2,10,12.9c1.9-5.6,5.1-9.8,9.7-12.7,4.6-3,9.9-4.5,15.7-4.5h-.2ZM959.2,210.4c0-7.2,1.4-13.5,4.2-18.9,2.9-5.5,6.9-9.7,12-12.6,5.1-3,10.9-4.5,17.4-4.5s12.4,1.5,17.3,4.6c4.9,3.1,8.4,7,10.6,11.8v-15.4h9v70.3h-9v-15.6c-2.2,4.8-5.8,8.8-10.7,12-4.8,3.1-10.6,4.6-17.3,4.6s-12.1-1.5-17.3-4.5c-5.1-3-9.1-7.3-12-12.7-2.8-5.5-4.2-11.8-4.2-19.1h0ZM1020.6,210.6c0-5.7-1.2-10.6-3.5-14.9-2.3-4.3-5.5-7.6-9.5-9.9-3.9-2.3-8.3-3.5-13.1-3.5s-9.4,1.1-13.4,3.3c-3.9,2.2-7.1,5.5-9.4,9.8-2.2,4.2-3.3,9.2-3.3,15.1s1.1,10.8,3.3,15.2c2.3,4.3,5.4,7.6,9.4,9.9,3.9,2.2,8.4,3.3,13.4,3.3s9.2-1.2,13.1-3.5c4-2.3,7.2-5.6,9.5-9.9,2.3-4.3,3.5-9.3,3.5-14.9h0ZM1083.1,174.1c8.4,0,15.3,2.6,20.6,7.9,5.3,5.1,8,12.7,8,22.5v41.2h-8.9v-40.2c0-7.6-1.9-13.5-5.8-17.5-3.8-4-9-6.1-15.6-6.1s-12.2,2.1-16.2,6.4c-4,4.3-6.1,10.6-6.1,18.9v38.4h-9v-70.3h9v12c2.2-4.3,5.4-7.6,9.7-9.8,4.2-2.3,9-3.5,14.3-3.5h0ZM1127.5,210.6c0-7.3,1.5-13.6,4.4-19.1s7-9.7,12.1-12.6c5.1-3,11-4.5,17.6-4.5s15.8,2.1,21.4,6.4c5.7,4.3,9.3,10.1,10.9,17.5h-9.7c-1.2-5.1-3.8-9-7.9-11.8-3.9-2.9-8.9-4.4-14.8-4.4s-9,1.1-12.7,3.2c-3.8,2.1-6.8,5.4-9,9.7-2.1,4.2-3.2,9.4-3.2,15.6s1.1,11.4,3.2,15.7c2.2,4.3,5.2,7.5,9,9.7,3.8,2.1,8,3.2,12.7,3.2s10.9-1.4,14.8-4.2c4-2.9,6.7-7,7.9-12.1h9.7c-1.6,7.2-5.3,13-10.9,17.4-5.7,4.4-12.8,6.6-21.4,6.6s-12.5-1.5-17.6-4.4c-5.1-3-9.2-7.2-12.1-12.6-2.9-5.5-4.4-11.9-4.4-19.2h0ZM1274.2,207c0,3.1,0,5.4-.3,7.1h-58.3c.3,5.3,1.5,9.9,3.9,13.6,2.3,3.8,5.4,6.7,9.1,8.6,3.8,1.9,7.9,2.8,12.4,2.8s10.7-1.4,14.7-4.2,6.7-6.7,8-11.5h9.5c-1.7,6.9-5.4,12.5-11.1,16.9-5.6,4.3-12.6,6.4-21.1,6.4s-12.5-1.5-17.8-4.4c-5.2-3-9.4-7.2-12.4-12.6-2.9-5.5-4.4-11.9-4.4-19.2s1.5-13.7,4.4-19.2,7-9.7,12.2-12.6c5.2-2.9,11.2-4.4,17.9-4.4s12.5,1.5,17.5,4.4c5.1,2.9,8.9,6.9,11.6,11.8,2.7,4.9,4.1,10.3,4.1,16.3v.2ZM1265,206.7c0-5.2-1-9.7-3.2-13.4-2.1-3.7-5.1-6.5-8.9-8.4s-7.9-2.8-12.4-2.8c-6.7,0-12.4,2.1-17.1,6.4-4.7,4.3-7.3,10.3-7.9,18.2h49.5Z"/>
+  </symbol>
+  <symbol id="i-pil" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-bock" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-puls" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-skold" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-byggnad" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></symbol>
+  <symbol id="i-trofe" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+  <symbol id="i-las" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-graf" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></symbol>
+  <symbol id="i-mobil" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></symbol>
+  <symbol id="i-droppe" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
+  <symbol id="i-hand" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
+  <symbol id="i-rorlighet" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><path d="m9 20 3-6 3 6M6 8l6 2 6-2M12 10v4"/></symbol>
+  <symbol id="i-lunga" viewBox="0 0 24 24"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></symbol>
+  <symbol id="i-hopp" viewBox="0 0 24 24"><path d="m18 9-6-6-6 6M12 3v14M5 21h14"/></symbol>
+  <symbol id="i-blixt" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M22 7 13.5 15.5l-5-5L2 17M16 7h6v6"/></symbol>
+  <symbol id="i-mal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-hjarta" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></symbol>
+  <symbol id="i-stetoskop" viewBox="0 0 24 24"><path d="M11 2v2M5 2v2M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></symbol>
+  <symbol id="i-anvandare" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-grupp" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/><circle cx="9" cy="7" r="4"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="i-kalender" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-dokument" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M16 13H8M16 17H8M10 9H8"/></symbol>
+  <symbol id="i-hjartahand" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.8 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></symbol>
+  <symbol id="i-meny" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-stang" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-instagram" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37zM17.5 6.5h.01"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></symbol>
+  <symbol id="i-paus" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
+  <symbol id="i-uppat" viewBox="0 0 24 24"><path d="M7 7h10v10M7 17 17 7"/></symbol>
+</svg>
+
+<a class="hoppa" href="#innehall">Hoppa till innehållet</a>
+
+<header class="topp" data-topp>
+  <nav class="meny" aria-label="Huvudmeny">
+    <a class="logga" href="#top" aria-label="Uperformance – till startsidan"><svg viewBox="0 0 1274.2 395" aria-hidden="true"><use href="#logo"/></svg></a>
+    <ul class="meny-lista">
+      <li><a class="meny-lank" href="#varfor">Företag</a></li>
+      <li><a class="meny-lank" href="#idrott">Idrott</a></li>
+      <li><a class="meny-lank" href="#metod">Metod</a></li>
+      <li><a class="meny-lank" href="#priser">Priser</a></li>
+      <li><a class="meny-lank" href="#berattelsen">Om oss</a></li>
+    </ul>
+    <div class="meny-hoger">
+      <a class="meny-lank" href="#fragor">Frågor</a>
+      <a class="meny-lank meny-logga-in" href="crm/logga-in.html"><svg class="ikon" aria-hidden="true"><use href="#i-anvandare"/></svg>Logga in</a>
+      <a class="knapp knapp-accent knapp-liten" href="#kontakt">Boka genomgång</a>
+      <button class="meny-oppna" type="button" aria-label="Öppna menyn" aria-expanded="false" aria-controls="mobilmeny" data-meny-oppna><span class="hamburgare" aria-hidden="true"><i></i><i></i><i></i></span></button>
+    </div>
+  </nav>
+</header>
+
+<div class="mobilmeny" id="mobilmeny" data-mobilmeny role="dialog" aria-modal="true" aria-label="Meny">
+  <button class="mobilmeny-stang" type="button" aria-label="Stäng menyn" data-meny-stang><svg class="ikon" aria-hidden="true"><use href="#i-stang"/></svg></button>
+  <a href="#varfor">Företag <svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg></a>
+  <a href="#idrott">Idrott <svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg></a>
+  <a href="#metod">Metod <svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg></a>
+  <a href="#priser">Paket &amp; priser <svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg></a>
+  <a href="#berattelsen">Om oss <svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg></a>
+  <a href="#fragor">Vanliga frågor <svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg></a>
+  <a href="crm/logga-in.html">Logga in <svg class="ikon" aria-hidden="true"><use href="#i-anvandare"/></svg></a>
+  <a class="knapp knapp-accent" href="#kontakt">Boka genomgång <svg class="ikon ikon-pil" aria-hidden="true"><use href="#i-pil"/></svg></a>
+</div>
+
+<main id="innehall">
+
+<!-- HERO -------------------------------------------------------------------- -->
+<section class="hero rutnat" id="top" aria-labelledby="hero-rubrik" data-hero>
+  <div class="hero-bakgrund" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="inre">
+    <div class="persona" role="group" aria-label="Visa innehåll för">
+      <span class="persona-markor" aria-hidden="true"></span>
+      <button type="button" data-persona-knapp="foretag" aria-pressed="true"><svg class="ikon" aria-hidden="true"><use href="#i-byggnad"/></svg>Företag</button>
+      <button type="button" data-persona-knapp="idrott" aria-pressed="false"><svg class="ikon" aria-hidden="true"><use href="#i-trofe"/></svg>Idrott</button>
+    </div>
+
+    <h1 class="hero-rubrik" id="hero-rubrik">Hälsa med <span class="skimmer">elitstandard.</span></h1>
+
+    <p class="hero-ingress" data-persona-visa="foretag">Elitidrottens testmetodik – för hela arbetsplatsen. Vi visar var riskerna finns <em>innan</em> de blir skador, sjukskrivningar och produktionsbortfall, och ger varje medarbetare en egen riskprofil att agera på.</p>
+    <p class="hero-ingress" data-persona-visa="idrott">Förstå maximal kapacitet, begränsningar och hälsostatus – för varje spelare och hela laget. Tester, data och uppföljning från start till mål, samlat på ett ställe.</p>
+
+    <div class="knappar knappar-mitt" data-persona-visa="foretag">
+      <a class="knapp knapp-kontur" href="#priser">Se paket &amp; priser</a>
+      <a class="knapp knapp-accent" href="#kontakt">Boka en genomgång <svg class="ikon ikon-pil" aria-hidden="true"><use href="#i-pil"/></svg></a>
+    </div>
+    <div class="knappar knappar-mitt" data-persona-visa="idrott">
+      <a class="knapp knapp-kontur" href="#idrott">Så testar vi lag</a>
+      <a class="knapp knapp-accent" href="#kontakt">Kontakta oss <svg class="ikon ikon-pil" aria-hidden="true"><use href="#i-pil"/></svg></a>
+    </div>
+    <p class="hero-not" data-persona-visa="foretag">Från 1 995 kr per medarbetare · exkl. moms</p>
+    <p class="hero-not" data-persona-visa="idrott">Förtroende från Brommapojkarna, Djurgården Hockey, Hammarby och IFK Värnamo</p>
+
+    <div data-in>
+      <!-- Scen: Företag -->
+      <div class="scen" data-persona-visa="foretag" aria-label="Exempel på en individuell riskprofil" role="img">
+        <div class="scen-glod"></div>
+        <div class="scen-kort scen-profil"><span class="scen-kant" aria-hidden="true"></span>
+          <div class="profil-topp">
+            <span class="avatar" aria-hidden="true"><svg class="ikon" style="width:20px;height:20px"><use href="#i-anvandare"/></svg></span>
+            <div><div class="profil-namn">Individuell riskprofil</div><div class="profil-roll">Medarbetare · Lager &amp; logistik</div></div>
+            <span class="chip chip-neutral">Bas+</span>
+          </div>
+          <div class="profil-index"><span>Samlad riskbild</span><strong>Låg – följ upp rörlighet</strong></div>
+          <div class="stapel" style="--fyll:76%"><span class="stapel-fyll"></span></div>
+          <div class="profil-rader">
+            <div class="profil-rad"><span class="profil-ikon"><svg class="ikon"><use href="#i-rorlighet"/></svg></span><div class="profil-rad-text"><strong>Rörlighet</strong><span>Branschanpassat test</span></div><span class="chip chip-folj">Följ upp</span></div>
+            <div class="profil-rad"><span class="profil-ikon"><svg class="ikon"><use href="#i-droppe"/></svg></span><div class="profil-rad-text"><strong>Blodvärden</strong><span>Fullständig blodpanel</span></div><span class="chip chip-ok">Bra</span></div>
+            <div class="profil-rad"><span class="profil-ikon"><svg class="ikon"><use href="#i-hand"/></svg></span><div class="profil-rad-text"><strong>Handgreppstyrka</strong><span>Jämfört med referensvärden</span></div><span class="chip chip-ok">Bra</span></div>
+            <div class="profil-rad"><span class="profil-ikon"><svg class="ikon"><use href="#i-puls"/></svg></span><div class="profil-rad-text"><strong>Mobilitet</strong><span>Mobilitetsmätning</span></div><span class="chip chip-ok">Bra</span></div>
+          </div>
+          <div class="profil-fot"><svg class="ikon"><use href="#i-mobil"/></svg><span>Tre rörlighetspass i veckan – schemalagda i UPerformance App.</span></div>
+        </div>
+        <div class="scen-kort scen-sida scen-vanster"><span class="scen-kant" aria-hidden="true"></span>
+          <div class="ring"><svg viewBox="0 0 100 100"><circle class="ring-spar" cx="50" cy="50" r="42" pathLength="100"/><circle class="ring-fyll" cx="50" cy="50" r="42" pathLength="100" style="--varde:75"/></svg><div class="ring-tal"><strong>3/4</strong><small>i grönt</small></div></div>
+          <p>Testområden utan anmärkning</p>
+        </div>
+        <div class="scen-kort scen-sida scen-hoger"><span class="scen-kant" aria-hidden="true"></span>
+          <div class="mini-titel">Team Insights</div>
+          <div class="mini-under">Andel ”följ upp” per område</div>
+          <div class="mini-staplar"><span class="varm" style="--h:78%;--j:0"></span><span style="--h:34%;--j:1"></span><span style="--h:26%;--j:2"></span><span style="--h:48%;--j:3"></span></div>
+          <div class="mini-etiketter"><span>Rörl.</span><span>Blod</span><span>Styrka</span><span>Kond.</span></div>
+          <div class="mini-rad"><span>Avidentifierat</span><span class="chip chip-neutral">Till HR</span></div>
+        </div>
+        <p class="scen-not"><svg class="ikon" aria-hidden="true"><use href="#i-info"/></svg>Bilden visar exempeldata.</p>
+      </div>
+
+      <!-- Scen: Idrott -->
+      <div class="scen" data-persona-visa="idrott" aria-label="Exempel på en spelarprofil" role="img">
+        <div class="scen-glod"></div>
+        <div class="scen-kort scen-profil"><span class="scen-kant" aria-hidden="true"></span>
+          <div class="profil-topp">
+            <span class="avatar" aria-hidden="true">#8</span>
+            <div><div class="profil-namn">Spelarprofil</div><div class="profil-roll">Mittfältare · A-lag</div></div>
+            <span class="chip chip-neutral">Försäsong</span>
+          </div>
+          <div class="profil-index"><span>Kapacitet mot förra testet</span><strong>+4 %</strong></div>
+          <div class="stapel" style="--fyll:84%"><span class="stapel-fyll"></span></div>
+          <div class="profil-rader">
+            <div class="profil-rad"><span class="profil-ikon"><svg class="ikon"><use href="#i-hopp"/></svg></span><div class="profil-rad-text"><strong>Hopp &amp; spänst</strong><span>41,2 cm · +2,1 cm</span></div><span class="chip chip-ok">Bättre</span></div>
+            <div class="profil-rad"><span class="profil-ikon"><svg class="ikon"><use href="#i-blixt"/></svg></span><div class="profil-rad-text"><strong>Mjölksyratröskel</strong><span>15,4 km/h</span></div><span class="chip chip-ok">Bättre</span></div>
+            <div class="profil-rad"><span class="profil-ikon"><svg class="ikon"><use href="#i-lunga"/></svg></span><div class="profil-rad-text"><strong>Spirometri</strong><span>Lungfunktion</span></div><span class="chip chip-ok">Bra</span></div>
+            <div class="profil-rad"><span class="profil-ikon"><svg class="ikon"><use href="#i-rorlighet"/></svg></span><div class="profil-rad-text"><strong>Funktionsscreening</strong><span>Vänster fotled</span></div><span class="chip chip-folj">Följ upp</span></div>
+          </div>
+          <div class="profil-fot"><svg class="ikon"><use href="#i-stetoskop"/></svg><span>Individanpassad plan delad med det medicinska teamet.</span></div>
+        </div>
+        <div class="scen-kort scen-sida scen-vanster"><span class="scen-kant" aria-hidden="true"></span>
+          <div class="ring"><svg viewBox="0 0 100 100"><circle class="ring-spar" cx="50" cy="50" r="42" pathLength="100"/><circle class="ring-fyll" cx="50" cy="50" r="42" pathLength="100" style="--varde:92"/></svg><div class="ring-tal"><strong>24/26</strong><small>testade</small></div></div>
+          <p>Grundnivå satt för truppen</p>
+        </div>
+        <div class="scen-kort scen-sida scen-hoger"><span class="scen-kant" aria-hidden="true"></span>
+          <div class="mini-titel">Benchmark</div>
+          <div class="mini-under">Laget mot jämförelsetal</div>
+          <div class="mini-staplar"><span style="--h:72%;--j:0"></span><span style="--h:64%;--j:1"></span><span style="--h:58%;--j:2"></span><span class="varm" style="--h:40%;--j:3"></span></div>
+          <div class="mini-etiketter"><span>Hopp</span><span>Mjölk.</span><span>Styrka</span><span>Rörl.</span></div>
+          <div class="mini-rad"><span>Hela truppen</span><span class="chip chip-neutral">Per position</span></div>
+        </div>
+        <p class="scen-not"><svg class="ikon" aria-hidden="true"><use href="#i-info"/></svg>Bilden visar exempeldata.</p>
+      </div>
+    </div>
+
+    <ul class="tillit">
+      <li><svg class="ikon" aria-hidden="true"><use href="#i-trofe"/></svg>Testmetodik från elitidrotten</li>
+      <li><svg class="ikon" aria-hidden="true"><use href="#i-anvandare"/></svg>Individuell riskprofil</li>
+      <li><svg class="ikon" aria-hidden="true"><use href="#i-graf"/></svg>Uppföljning över tid</li>
+      <li><svg class="ikon" aria-hidden="true"><use href="#i-las"/></svg>Medicinsk data hanteras av extern tredjepart</li>
+    </ul>
+  </div>
+</section>
+
+<!-- LOGGOR ------------------------------------------------------------------ -->
+<section class="loggband" aria-label="Organisationer som använder Uperformance">
+  <div class="inre loggband-inre">
+    <p>Används av organisationer med högt ställda krav</p>
+    <ul class="loggor">
+      <li><img src="assets/loggor/bp.png" alt="Brommapojkarna" width="52" height="52" loading="lazy"><span aria-hidden="true">Bromma&shy;pojkarna</span></li>
+      <li><img src="assets/loggor/dif.png" alt="Djurgården Hockey" width="52" height="52" loading="lazy"><span aria-hidden="true">Djurgården Hockey</span></li>
+      <li><img src="assets/loggor/hammarby.png" alt="Hammarby" width="52" height="52" loading="lazy"><span aria-hidden="true">Hammarby</span></li>
+      <li><img src="assets/loggor/varnamo.png" alt="IFK Värnamo" width="52" height="52" loading="lazy"><span aria-hidden="true">IFK Värnamo</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- TVÅ ARENOR -------------------------------------------------------------- -->
+<section class="sektion" aria-labelledby="arenor-rubrik">
+  <div class="inre">
+    <div class="huvud huvud-mitt" data-in>
+      <span class="eyebrow">Två arenor · en metod</span>
+      <h2 class="rubrik rubrik-mitt" id="arenor-rubrik">Frigör full potential – på planen och på jobbet.</h2>
+    </div>
+    <div class="varldar">
+      <a class="varld varld-bw" href="#idrott" data-in>
+        <img src="assets/bilder/lopare-bw.jpg" alt="" loading="lazy">
+        <video class="loopfilm" data-loop="assets/film/lopare-loop" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+        <span class="chip"><svg class="ikon" style="width:14px;height:14px" aria-hidden="true"><use href="#i-trofe"/></svg>Idrott</span>
+        <h3>Förstå spelarens verkliga kapacitet.</h3>
+        <p>Att förstå maximal kapacitet, begränsningar och hälsostatus är nyckeln till att frigöra idrottarens och lagets verkliga fysiska potential.</p>
+        <ul class="varld-lista"><li>Screening</li><li>Benchmark</li><li>Återgång till spel</li></ul>
+      </a>
+      <a class="varld" href="#varfor" data-in style="--i:1">
+        <img src="assets/bilder/fingerstick.jpg" alt="" loading="lazy">
+        <video class="loopfilm" data-loop="assets/film/fingerstick-loop" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>
+        <span class="chip"><svg class="ikon" style="width:14px;height:14px" aria-hidden="true"><use href="#i-byggnad"/></svg>Företag</span>
+        <h3>Friskare medarbetare. Lägre sjukfrånvaro.</h3>
+        <p>Regelbundna hälsotester och personlig coaching minskar sjukfrånvaron, höjer produktiviteten och stärker arbetskulturen.</p>
+        <ul class="varld-lista"><li>Riskprofil</li><li>App &amp; coaching</li><li>Rapport till HR</li></ul>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- VARFÖR ------------------------------------------------------------------ -->
+<section class="sektion sektion-sand" id="varfor" aria-labelledby="varfor-rubrik">
+  <div class="inre">
+    <div class="huvud" data-in>
+      <span class="eyebrow">Varför kartlägga hälsan?</span>
+      <h2 class="rubrik" id="varfor-rubrik">Sjukfrånvaro kostar mer än de flesta räknar med.</h2>
+      <p class="ingress">Stress, hög sjukfrånvaro och låg energi hör till de största utmaningarna på svenska arbetsplatser – och påverkar både medarbetarnas välmående och företagets resultat.</p>
+    </div>
+    <div class="tal-rutnat">
+      <article class="kort tal-kort tal-kort-mork" data-in>
+        <div class="tal"><span data-tal="4.2" data-decimaler="1">4,2</span><small>Mkr</small></div>
+        <p>Total kostnad för sjukfrånvaro under ett år för ett företag med 30 anställda, 40 000 kr i månadslön och 5 sjukdagar per person.</p>
+        <span class="kalla">Källa: if.se</span>
+      </article>
+      <article class="kort tal-kort" data-in style="--i:1">
+        <div class="tal"><span data-tal="25">25</span><small>%</small></div>
+        <p>uppger besvär kopplade till arbetet. Vanligast är trötthet, fysisk smärta, sömnstörningar, problem med rygg och nacke samt oro och utmattning.</p>
+        <span class="kalla">Källa: Arbetsmiljöverket</span>
+      </article>
+      <article class="kort tal-kort" data-in style="--i:2">
+        <div class="tal">×<span data-tal="3">3</span></div>
+        <p>Stressade medarbetare är tre gånger mer benägna att byta jobb.</p>
+        <span class="kalla">Källa: Harvard Business Review</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- FILM -------------------------------------------------------------------- -->
+<section class="film" aria-labelledby="film-rubrik" data-film>
+  <img class="film-poster" src="assets/bilder/film-poster.jpg" alt="" aria-hidden="true">
+  <video muted loop playsinline preload="none" poster="assets/bilder/film-poster.jpg" aria-hidden="true" data-film-video>
+    <source src="assets/film/trailer.webm" type="video/webm">
+    <source src="assets/film/trailer.mp4" type="video/mp4">
+  </video>
+  <div class="inre film-inre" data-in>
+    <span class="eyebrow eyebrow-ljus">Proaktivt, inte reaktivt</span>
+    <h2 class="film-rubrik" id="film-rubrik" style="margin-top:1.2rem">Företagshälsovården agerar när det redan gör ont. <em>Vi mäter innan.</em></h2>
+    <div class="film-under">
+      <div>
+        <p>Samma testbatteri som i elitidrotten – anpassat efter er verksamhet och utfört av vårt testteam.</p>
+        <div class="film-tester" aria-label="Exempel på tester">
+          <span>Blodtester</span><span>EKG</span><span>Spirometri</span><span>Hopp &amp; spänst</span><span>Mjölksyra</span><span>Styrka</span><span>Handgrepp</span><span>Rörlighet</span>
+        </div>
+      </div>
+      <button class="film-knapp" type="button" data-film-knapp aria-pressed="false"><span><svg class="ikon" aria-hidden="true"><use href="#i-play"/></svg></span><em style="font-style:normal" data-film-text>Spela film</em></button>
+    </div>
+  </div>
+</section>
+
+<!-- METOD ------------------------------------------------------------------- -->
+<section class="sektion" id="metod" aria-labelledby="metod-rubrik">
+  <div class="inre">
+    <div class="huvud" data-in>
+      <span class="eyebrow">Metoden</span>
+      <h2 class="rubrik" id="metod-rubrik">Hälsokartläggning som medarbetarna uppskattar.</h2>
+      <p class="ingress">Evidensbaserade testmetoder och medicinsk, datadriven analys – för verklig förebyggande effekt.</p>
+    </div>
+    <div class="steg-rutnat">
+      <article class="kort steg-kort lyft" data-in>
+        <span class="steg-nr">01</span>
+        <span class="steg-ikon"><svg class="ikon"><use href="#i-stetoskop"/></svg></span>
+        <h3>Personlig hälsoanalys</h3>
+        <p>Varje medarbetares värden analyseras av vårt team, som bedömer hälsoläget och identifierar eventuella risker.</p>
+      </article>
+      <article class="kort steg-kort lyft" data-in style="--i:1">
+        <span class="steg-nr">02</span>
+        <span class="steg-ikon"><svg class="ikon"><use href="#i-mobil"/></svg></span>
+        <h3>Personlig återkoppling</h3>
+        <p>Varje medarbetare får en personlig digital journal med resultat, trender och praktiska hälsoråd.</p>
+      </article>
+      <article class="kort steg-kort lyft" data-in style="--i:2">
+        <span class="steg-nr">03</span>
+        <span class="steg-ikon"><svg class="ikon"><use href="#i-graf"/></svg></span>
+        <h3>Insikter för företaget</h3>
+        <p>En företagsrapport med sammanställd hälsodata, trender och rekommenderade åtgärder på organisationsnivå.</p>
+      </article>
+    </div>
+
+    <div class="kort resa" data-in>
+      <div class="resa-huvud">
+        <h3>Från första möte till uppföljning</h3>
+        <p>Ett tydligt flöde där ni alltid vet vad som händer härnäst – och vem som ansvarar.</p>
+      </div>
+      <div class="resa-bana">
+      <span class="resa-linje" aria-hidden="true"></span>
+      <ol class="resa-lista">
+        <li><span class="resa-nod" style="--j:0">1</span><strong>Första möte</strong><p>Vi går igenom era behov och tar fram en offert.</p></li>
+        <li><span class="resa-nod" style="--j:1">2</span><strong>Underlag &amp; samtycke</strong><p>Infodokument med testval. Samtycke och PUB-avtal enligt GDPR.</p></li>
+        <li><span class="resa-nod" style="--j:2">3</span><strong>Order</strong><p>Ordern skapas utifrån underlaget och signeras.</p></li>
+        <li><span class="resa-nod" style="--j:3">4</span><strong>Testdag</strong><p>Testteamet bokar tid med er, genomför testerna och onboardar alla i appen.</p></li>
+        <li><span class="resa-nod" style="--j:4">5</span><strong>Resultat</strong><p>Riskprofil till varje medarbetare, sammanställd rapport till er.</p></li>
+        <li><span class="resa-nod" style="--j:5"><svg class="ikon" style="width:18px;height:18px"><use href="#i-bock"/></svg></span><strong>Uppföljning</strong><p>Uppföljningsmöte ungefär två månader senare.</p></li>
+      </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATTFORM --------------------------------------------------------------- -->
+<section class="sektion sektion-sand" id="plattform" aria-labelledby="plattform-rubrik">
+  <div class="inre delad">
+    <div class="bildscen" data-in>
+      <img src="assets/bilder/app.png" alt="UPerformance-plattformen på surfplatta och mobil med testresultat och trender" width="1000" height="903" loading="lazy">
+      <div class="flytetikett flytetikett-a"><span class="ikonruta"><svg class="ikon"><use href="#i-trend"/></svg></span><div><strong>Riskprofil uppdaterad</strong>Efter omtest</div></div>
+      <div class="flytetikett flytetikett-b"><span class="ikonruta"><svg class="ikon"><use href="#i-kalender"/></svg></span><div><strong>Dagens pass</strong>Rörlighet · 12 min</div></div>
+    </div>
+    <div data-in style="--i:1">
+      <span class="eyebrow">UPerformance App &amp; plattform</span>
+      <h2 class="rubrik" id="plattform-rubrik">All data. <span class="skimmer">Ett ställe.</span></h2>
+      <p class="ingress">Allt som samlas in och analyseras lagras i plattformen, där varje medarbetare når sin egen data. Testtillfället blir en ögonblicksbild – appen gör det till ett program.</p>
+      <ul class="punktlista">
+        <li><span class="bock"><svg class="ikon"><use href="#i-bock"/></svg></span><div><strong>Personlig digital journal.</strong> <span>Resultat, trender och praktiska hälsoråd.</span></div></li>
+        <li><span class="bock"><svg class="ikon"><use href="#i-bock"/></svg></span><div><strong>Anpassat träningsprogram.</strong> <span>Med påminnelser mellan de fysiska testtillfällena.</span></div></li>
+        <li><span class="bock"><svg class="ikon"><use href="#i-bock"/></svg></span><div><strong>Följ utvecklingen över tid.</strong> <span>Vi lyfter fram faktorer som kan kopplas till ökad risk för sjukfrånvaro och minskad prestation.</span></div></li>
+        <li><span class="bock"><svg class="ikon"><use href="#i-bock"/></svg></span><div><strong>Insikter på organisationsnivå.</strong> <span>Sammanställd hälsodata, trender och rekommenderade åtgärder.</span></div></li>
+      </ul>
+      <p class="prisnot"><svg class="ikon" aria-hidden="true" style="color:var(--accent-djup)"><use href="#i-mobil"/></svg><span><strong>Ingår</strong> under en introperiod i alla paket</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- IDROTT ------------------------------------------------------------------ -->
+<section class="sektion mork" id="idrott" aria-labelledby="idrott-rubrik">
+  <div class="inre">
+    <div class="idrott-rutnat">
+      <div data-in>
+        <span class="eyebrow eyebrow-ljus">För idrotten</span>
+        <h2 class="rubrik" id="idrott-rubrik">Optimera den <span class="skimmer skimmer-ljus">atletiska potentialen.</span></h2>
+        <p class="ingress">En helhetsplattform från start till mål för organisationer som vill ta hand om sina mest värdefulla tillgångar: spelarna.</p>
+        <ul class="idrott-lofte">
+          <li><svg class="ikon" aria-hidden="true"><use href="#i-skold"/></svg><span>Vi säkerställer att ni uppfyller förbundens krav på årlig medicinsk undersökning.</span></li>
+          <li><svg class="ikon" aria-hidden="true"><use href="#i-trofe"/></svg><span>UEFA-standard på varje undersökning – för spelare på alla nivåer.</span></li>
+          <li><svg class="ikon" aria-hidden="true"><use href="#i-graf"/></svg><span>Jämförelsetal för benchmark mot andra lag.</span></li>
+          <li><svg class="ikon" aria-hidden="true"><use href="#i-dokument"/></svg><span>Testdata laddas upp i plattformen, där det medicinska och fysiska teamet skapar individanpassade planer.</span></li>
+        </ul>
+        <div class="knappar" style="margin-top:2rem">
+          <a class="knapp knapp-accent" href="#kontakt">Kontakta oss <svg class="ikon ikon-pil" aria-hidden="true"><use href="#i-pil"/></svg></a>
+        </div>
+      </div>
+      <div class="idrott-bilder" data-in style="--i:1">
+        <img class="hog" src="assets/bilder/lopare-bw.jpg" alt="Spelare mitt i ett sprinttest på inomhusbana" loading="lazy" style="object-position:30% 50%">
+        <img class="lag" src="assets/bilder/lag-bp.jpg" alt="Brommapojkarna firar ett mål" loading="lazy">
+        <img class="lag" src="assets/bilder/lag-dam.jpg" alt="Damlag på väg ut på planen" loading="lazy">
+      </div>
+    </div>
+
+    <ul class="omraden">
+      <li class="omrade" data-in><svg class="ikon" aria-hidden="true"><use href="#i-mal"/></svg><strong>Profilering &amp; benchmark</strong><p>Säkerställ grundnivå för spelare och lag.</p></li>
+      <li class="omrade" data-in style="--i:1"><svg class="ikon" aria-hidden="true"><use href="#i-trend"/></svg><strong>Utvecklingsuppföljning</strong><p>Mät förbättring över tid och effekten av träningen.</p></li>
+      <li class="omrade" data-in style="--i:2"><svg class="ikon" aria-hidden="true"><use href="#i-blixt"/></svg><strong>Prestationsanalys</strong><p>Förutsäg framtida prestationer och hitta svagheter.</p></li>
+      <li class="omrade" data-in style="--i:3"><svg class="ikon" aria-hidden="true"><use href="#i-hjarta"/></svg><strong>Hälsa &amp; återhämtning</strong><p>Övervaka trötthet och följ protokoll för återgång till spel.</p></li>
+      <li class="omrade" data-in style="--i:4"><svg class="ikon" aria-hidden="true"><use href="#i-uppat"/></svg><strong>Motivation &amp; potential</strong><p>Stötta idrottaren att nå sin fulla kapacitet.</p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- PRISER ------------------------------------------------------------------ -->
+<section class="sektion" id="priser" aria-labelledby="priser-rubrik">
+  <div class="inre">
+    <div class="huvud huvud-mitt" data-in>
+      <span class="eyebrow">Paket</span>
+      <h2 class="rubrik rubrik-mitt" id="priser-rubrik">Tre nivåer. Skräddarsytt innehåll.</h2>
+      <p class="ingress">Alla paket bygger på Bas – vår grundläggande riskprofilering. Från 1 995 kr per medarbetare, exkl. moms. Ert upplägg räknar vi fram tillsammans med er.</p>
+    </div>
+
+    <div class="paket-rutnat">
+      <article class="kort paket lyft" data-in>
+        <span class="paket-niva">Grundpaket</span>
+        <h3>Bas</h3>
+        <p class="paket-sub">Startpunkten – vet var riskerna finns.</p>
+        <div class="paket-pris"><small class="fran">från</small>1 995<small>kr</small></div>
+        <div class="paket-enhet">per medarbetare, exkl. moms</div>
+        <ul class="paket-lista">
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Hälsodeklaration</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>BMI</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Branschanpassat rörlighetstest</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Individuell riskprofil</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Blodtester, light</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Handgreppstyrka</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>UPerformance App (introperiod)</li>
+        </ul>
+        <a class="knapp knapp-kontur-ljus" href="#kontakt">Boka en genomgång</a>
+      </article>
+      <article class="kort paket paket-premium premium-svagare" data-in style="--i:1" data-premium>
+        <span class="premium-glod" aria-hidden="true"><i></i></span>
+        <span class="premium-ljus" aria-hidden="true"></span>
+        <span class="premium-gnistor" aria-hidden="true" data-premium-gnistor="8"></span>
+        <span class="premium-ram" aria-hidden="true"></span>
+        <span class="premium-svep" aria-hidden="true"></span>
+        <span class="paket-niva">Utökat</span>
+        <h3>Bas<span class="premium-plus"><span>+</span></span></h3>
+        <p class="paket-sub">Djupare bild av hjärta, kärl och rörlighet.</p>
+        <div class="paket-pris paket-pris-text">Bygger på Bas</div>
+        <div class="paket-enhet">pris enligt ert upplägg</div>
+        <ul class="paket-lista">
+            <li class="arv"><svg class="ikon"><use href="#i-bock"/></svg>Allt i Bas</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Blodtester, fullständigt</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Mobilitetsmätning</li>
+        </ul>
+        <a class="knapp knapp-accent" href="#kontakt">Boka en genomgång</a>
+      </article>
+      <article class="kort paket paket-premium" data-in style="--i:2" data-premium>
+        <span class="premium-glod" aria-hidden="true"><i></i></span>
+        <span class="premium-ljus" aria-hidden="true"></span>
+        <span class="premium-gnistor" aria-hidden="true" data-premium-gnistor></span>
+        <span class="premium-ram" aria-hidden="true"></span>
+        <span class="premium-svep" aria-hidden="true"></span>
+        <span class="paket-mark premium-mark">Premium</span>
+        <span class="paket-niva">Komplett</span>
+        <h3>Bas<span class="premium-plus"><span>+</span><span>+</span></span></h3>
+        <p class="paket-sub">Vår mest kompletta kartläggning.</p>
+        <div class="paket-pris paket-pris-text">Bygger på Bas</div>
+        <div class="paket-enhet">pris enligt ert upplägg</div>
+        <ul class="paket-lista">
+            <li class="arv"><svg class="ikon"><use href="#i-bock"/></svg>Allt i Bas</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Hjärt-/kärlpaket (blodtester, EKG, urintest)</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Prestationspaket (styrka, hopp, mjölksyra, handgrepp)</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Funktionsscreening</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Mobilitetsmätning</li>
+            <li><svg class="ikon"><use href="#i-bock"/></svg>Spirometri</li>
+        </ul>
+        <a class="knapp knapp-premium" href="#kontakt">Boka en genomgång</a>
+      </article>
+    </div>
+
+    <div class="kort anpassa" data-in>
+      <div class="anpassa-text">
+        <span class="eyebrow">Skräddarsytt</span>
+        <h3>Anpassa med tillval och program</h3>
+        <p>Vi sätter ihop rätt upplägg för er verksamhet på ett första möte – och räknar fram priset tillsammans med er, direkt på plats.</p>
+        <a class="knapp knapp-mork" href="#kontakt">Boka en genomgång <svg class="ikon ikon-pil" aria-hidden="true"><use href="#i-pil"/></svg></a>
+      </div>
+      <div class="anpassa-grupper">
+        <div><h4>Tillval</h4><ul class="anpassa-chips"><li>Prestationspaket</li><li>Hjärt-/kärlpaket</li><li>Mobilitetsmätning</li><li>Styrketest</li><li>Hopp-/spänsttest</li><li>Mjölksyretest</li><li>Funktionsscreening</li><li>Spirometri</li></ul></div>
+        <div><h4>Program</h4><ul class="anpassa-chips"><li>UPerformance App</li><li>Team Insights</li><li>Uppföljning &amp; coaching</li><li>Branschpaket</li></ul></div>
+        <div><h4>Sportpaket</h4><ul class="anpassa-chips"><li>Vasaloppet</li><li>Göteborgsvarvet</li></ul></div>
+      </div>
+    </div>
+
+    <p class="prisfot">Priser exkl. moms. Medicinsk data hanteras av extern tredjepart.</p>
+  </div>
+</section>
+
+<!-- BERÄTTELSEN (text: Berattelsen-Uperformance.pdf, formspråk: presentationsläget i CRM:et) -->
+<section class="berattelse" id="berattelsen" aria-labelledby="berattelse-rubrik" data-berattelse>
+
+  <!-- 1. Titel -->
+  <div class="bs bs-titel" data-in data-bs-namn="Berättelsen">
+    <div class="bs-titel-foto" aria-hidden="true"><img src="assets/bilder/film-poster.jpg" alt="" loading="lazy"></div>
+    <div class="bs-inre">
+      <span class="eyebrow eyebrow-ljus bs-in">Uperformance · Berättelsen</span>
+      <h2 class="bs-rubrik bs-rubrik-stor bs-in" style="--i:1" id="berattelse-rubrik">Från ett lag av halvtidsspelare till <em>Uperformance.</em></h2>
+      <p class="bs-ingress bs-in" style="--i:2">Berättelsen om ett lag, ett mönster och ett möte – i tre delar.</p>
+      <div class="bs-hopp bs-in" style="--i:3"><a href="#berattelsen-1"><b>1</b>Laget</a><a href="#berattelsen-2"><b>2</b>Mönstret</a><a href="#berattelsen-3"><b>3</b>Mötet</a></div>
+    </div>
+  </div>
+
+  <!-- 2. Del 1: laget (som presentationens "Metoden") -->
+  <div class="bs" data-in id="berattelsen-1" data-bs-namn="Del 1 · Laget">
+    <div class="bs-inre">
+      <span class="eyebrow eyebrow-ljus bs-in">Del 1 · Slutet av 70-talet</span>
+      <h3 class="bs-rubrik bs-in" style="--i:1">Det började med ett lag som inte borde ha vunnit.</h3>
+      <div class="bs-tva bs-in" style="--i:2">
+        <p class="bs-ingress">Slutet av 70-talet. En ny tränare tar över IFK Göteborg. Med sig har han en ung, relativt oprövad fysioterapeut från USA.</p>
+        <p class="bs-text">Staben tittade på truppen och såg snickare, rörläggare och lagerarbetare som spelade fotboll på halvtid – utan stjärnor och utan pengar. Frågan blev inte hur man skulle få fler resurser, utan hur man fick ut det yttersta av de resurser man redan hade.</p>
+      </div>
+      <p class="bs-mellan bs-in" style="--i:3">Svaret var att utgå från varje individ.</p>
+      <div class="bs-kort-rad">
+        <article class="bs-kort bs-steg bs-in" style="--i:4"><b>1</b><h4>Mätning</h4><p>Först mättes varje spelares fysiska förutsättningar.</p></article>
+        <article class="bs-kort bs-steg bs-in" style="--i:5"><b>2</b><h4>En egen plan</h4><p>Sedan fick var och en en egen plan för sitt bästa jag.</p></article>
+        <article class="bs-kort bs-steg bs-in" style="--i:6"><b>3</b><h4>Gemensamma mål</h4><p>Allt byggt kring gemensamma mål för laget.</p></article>
+      </div>
+      <p class="bs-resultat bs-in" style="--i:7">Ett lag av halvtidsspelare nådde <em>toppen i Europa.</em><small>Det var också där Uperformance började.</small></p>
+    </div>
+  </div>
+
+  <!-- 3. Del 2: frågan (som presentationens citatbild) -->
+  <div class="bs" data-in id="berattelsen-2" data-bs-namn="Del 2 · Frågan">
+    <div class="bs-inre bs-citat">
+      <div class="bs-citat-bild bs-in"><img src="assets/bilder/dale-bw.jpg" alt="Dale Reese leder ett rörlighetstest" loading="lazy" style="object-position:58% 35%"></div>
+      <figure class="bs-in" style="--i:1">
+        <span class="eyebrow eyebrow-ljus">Del 2 · Mönstret som upprepade sig</span>
+        <p class="bs-citat-intro">Den unga fysioterapeuten hette Dale Reese. Efter IFK Göteborg fortsatte han att arbeta med samma fråga i klubblag och landslag runt om i Sverige och Europa:</p>
+        <blockquote><p>Vad behöver just den här spelaren för att nå sin fulla potential – och vad hotar den?</p></blockquote>
+        <figcaption><strong>Dale Reese</strong>Testansvarig – Uperformance</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- 4. Del 2: priset (som presentationens "Varför kartlägga hälsan?") -->
+  <div class="bs" data-in data-bs-namn="Del 2 · Priset">
+    <div class="bs-inre">
+      <span class="eyebrow eyebrow-ljus bs-in">Varje sådan skada har ett pris</span>
+      <h3 class="bs-rubrik bs-in" style="--i:1">Under alla år såg han samma mönster upprepa sig.</h3>
+      <p class="bs-ingress bs-in" style="--i:2">Skickliga spelare förlorade säsonger, och ibland hela karriärer, på skador som hade gått att undvika om någon mätt och följt upp i tid.</p>
+      <div class="bs-kort-rad">
+        <article class="bs-kort bs-in" style="--i:3"><strong class="bs-tal">Spelaren</strong><p>förlorar utveckling.</p></article>
+        <article class="bs-kort bs-in" style="--i:4"><strong class="bs-tal">Tränaren</strong><p>förlorar en startspelare.</p></article>
+        <article class="bs-kort bs-in" style="--i:5"><strong class="bs-tal">Klubben</strong><p>förlorar poäng, lönekostnad och spelarvärde.</p></article>
+      </div>
+      <p class="bs-resultat bs-in" style="--i:6">Med åren blev <em>data</em> nyckeln – för att fatta rätt beslut innan skadan var ett faktum.</p>
+    </div>
+  </div>
+
+  <!-- 5. Del 3: mötet (som presentationens teambild) -->
+  <div class="bs" data-in id="berattelsen-3" data-bs-namn="Del 3 · Mötet">
+    <div class="bs-inre">
+      <span class="eyebrow eyebrow-ljus bs-in">Del 3 · Landslaget</span>
+      <h3 class="bs-rubrik bs-in" style="--i:1">Mötet som blev Uperformance.</h3>
+      <p class="bs-ingress bs-in" style="--i:2">I landslaget mötte Dale Gustav Svensson – född och uppvuxen i Göteborg, med 32 landskamper, VM 2018 och EM 2020 på meritlistan.</p>
+      <div class="bs-motet">
+        <article class="bs-person bs-in" style="--i:3">
+          <img src="assets/bilder/dale.jpg" alt="Dale Reese" loading="lazy" style="object-position:64% 30%">
+          <div><span>Fysioterapeut</span><h4>Dale Reese</h4><p>IFK Göteborg, klubblag och landslag runt om i Sverige och Europa.</p></div>
+        </article>
+        <div class="bs-motet-u bs-in" style="--i:4" aria-hidden="true"><span><i class="u-glod"></i><i class="u-streck"></i><i class="u-komet"></i><i class="u-puls"></i><i class="u-puls"></i><i class="u-flode"></i><i class="u-flode u-flode-h"></i><svg viewBox="0 0 396 395"><use href="#logo" width="1274.2" height="395"/></svg></span><small>Uperformance</small></div>
+        <article class="bs-person bs-in" style="--i:5">
+          <img src="assets/bilder/gustav.jpg" alt="Gustav Svensson" loading="lazy" style="object-position:74% 30%">
+          <div><span>Landslagsspelare</span><h4>Gustav Svensson</h4><p>Född och uppvuxen i Göteborg. 32 landskamper, VM 2018 och EM 2020.</p></div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Del 3: Gustav i siffror (som presentationens nyckeltal) -->
+  <div class="bs" data-in data-bs-namn="Del 3 · Gustav">
+    <div class="bs-inre">
+      <span class="eyebrow eyebrow-ljus bs-in">Del 3 · Gustav Svensson</span>
+      <h3 class="bs-rubrik bs-in" style="--i:1">Få känner en elitkropp inifrån lika väl.</h3>
+      <p class="bs-ingress bs-in" style="--i:2">Gustav hade då redan varit proffs i Turkiet, Ukraina, Kina och USA, blivit svensk mästare med IFK Göteborg och vunnit MLS Cup med Seattle Sounders. Han spelade elitfotboll tills han var 38 år, med över 450 klubbmatcher.</p>
+      <div class="bs-kort-rad">
+        <article class="bs-kort bs-in" style="--i:3"><strong class="bs-tal"><span data-tal="32">32</span></strong><p>landskamper, med VM 2018 och EM 2020 på meritlistan.</p><small>Landslaget</small></article>
+        <article class="bs-kort bs-in" style="--i:4"><strong class="bs-tal"><span data-tal="450">450</span>+</strong><p>klubbmatcher – proffs i Turkiet, Ukraina, Kina och USA.</p><small>Klubbfotbollen</small></article>
+        <article class="bs-kort bs-in" style="--i:5"><strong class="bs-tal"><span data-tal="38">38</span> år</strong><p>så länge spelade han elitfotboll. Svensk mästare med IFK Göteborg och MLS Cup med Seattle Sounders.</p><small>Titlar</small></article>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Svaret (som presentationens "Så går det till") -->
+  <div class="bs" data-in data-bs-namn="Svaret">
+    <div class="bs-inre">
+      <span class="eyebrow eyebrow-ljus bs-in">Samtalen mellan dem landade i en fråga</span>
+      <h3 class="bs-rubrik bs-in" style="--i:1">Varför gör inte alla klubbar så här?</h3>
+      <p class="bs-ingress bs-in" style="--i:2">Svaret blev Uperformance – vi hjälper klubbar och spelare att undvika onödiga skador, så att spelarna står på planen och klubben får tillbaka det den investerat.</p>
+      <ol class="bs-resa bs-in" style="--i:3">
+        <li><strong>IFK Göteborg</strong>Ett lag av halvtidsspelare nådde toppen i Europa.</li>
+        <li><strong>Klubblag och landslag</strong>Samma mönster: skador som hade gått att undvika.</li>
+        <li><strong>Landslaget</strong>Dale mötte Gustav Svensson.</li>
+        <li><strong>Uperformance</strong>Spelarna står på planen – klubben får tillbaka det den investerat.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 8. Citatet (som presentationens citatbild) -->
+  <div class="bs" data-in data-bs-namn="Tillgänglighet">
+    <div class="bs-inre bs-citat">
+      <div class="bs-citat-bild bs-in"><picture><source srcset="assets/bilder/gustav-ifk-hd.avif" type="image/avif"><img src="assets/bilder/gustav-ifk-hd.jpg" alt="Gustav Svensson i IFK Göteborgs tröja" loading="lazy" style="object-position:51% 50%"></picture></div>
+      <figure class="bs-in" style="--i:1">
+        <blockquote><p class="bs-citat-stor">Tillgänglighet är den bästa <em>värvningen.</em></p></blockquote>
+        <figcaption><strong>Gustav Svensson</strong>Vd – Uperformance · 32 landskamper, VM 2018 och EM 2020</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- Navigeringen längst ner, som i presentationen -->
+  <nav class="bs-botten" aria-label="Berättelsens bilder" data-bs-botten>
+    <span class="bs-botten-namn" data-bs-aktuell>Berättelsen</span>
+    <span class="bs-prickar" data-bs-prickar></span>
+    <span class="bs-raknare" data-bs-raknare>1 / 8</span>
+    <button class="bs-pil" type="button" data-bs-steg="-1" aria-label="Föregående bild"><svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg></button>
+    <button class="bs-pil" type="button" data-bs-steg="1" aria-label="Nästa bild"><svg class="ikon" aria-hidden="true"><use href="#i-pil"/></svg></button>
+  </nav>
+</section>
+
+<!-- TEAM -------------------------------------------------------------------- -->
+<section class="sektion sektion-sand" id="team" aria-labelledby="team-rubrik">
+  <div class="inre">
+    <div class="huvud" data-in>
+      <span class="eyebrow">Sprungna ur idrotten</span>
+      <h2 class="rubrik" id="team-rubrik">Ett team i världsklass.</h2>
+      <p class="ingress">Gustav Svensson kommer från en lång karriär inom elitfotbollen och har, tillsammans med Dale Reese – som i över 25 år arbetat med Sveriges främsta spelare – byggt upp ett starkt team av hälsoexperter och fysiologer. Roger Mellin, medgrundare och ägare, har över 20 års erfarenhet av ledarskap inom läkemedels- och medtechindustrin.</p>
+    </div>
+
+    <figure class="citat" data-in>
+      <div class="citat-bild"><img src="assets/bilder/gustav-skog.jpg" alt="Gustav Svensson, vd för Uperformance" loading="lazy"></div>
+      <div class="citat-text">
+        <blockquote><p>Vi hjälper företag att minska sjukfrånvaro och öka produktiviteten genom förebyggande hälsoarbete.</p></blockquote>
+        <figcaption><strong>Gustav Svensson</strong><span>Vd, Uperformance</span></figcaption>
+      </div>
+    </figure>
+
+    <div class="team-rutnat">
+      <article class="kort person lyft" data-in>
+        <div class="person-bild"><img src="assets/bilder/gustav.jpg" alt="Gustav Svensson" loading="lazy" style="object-position:74% 30%"></div>
+        <div class="person-text">
+          <span class="person-roll">Vd</span>
+          <h3>Gustav Svensson</h3>
+          <ul><li>Elitfotbollsspelare sedan 2000</li><li>Landslagsspelare 2009–2021</li><li>F.d. lagkapten i IFK Göteborg</li></ul>
+        </div>
+      </article>
+      <article class="kort person lyft" data-in style="--i:1">
+        <div class="person-bild"><img src="assets/bilder/dale.jpg" alt="Dale Reese" loading="lazy" style="object-position:64% 30%"></div>
+        <div class="person-text">
+          <span class="person-roll">Testansvarig</span>
+          <h3>Dale Reese</h3>
+          <ul><li>Tidigare aktiv i Svenska Fotbollförbundet</li><li>25+ års erfarenhet från internationell elitsport</li></ul>
+        </div>
+      </article>
+      <article class="kort person lyft" data-in style="--i:2">
+        <div class="person-bild"><img src="assets/bilder/roger.jpg" alt="Roger Mellin" loading="lazy" style="object-position:66% 30%"></div>
+        <div class="person-text">
+          <span class="person-roll">Medgrundare</span>
+          <h3>Roger Mellin</h3>
+          <ul><li>20+ år inom svensk läkemedels- och medtechindustri</li><li>Medgrundare och ägare</li></ul>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- VI GER TILLBAKA --------------------------------------------------------- -->
+<section class="sektion" aria-labelledby="ge-rubrik">
+  <div class="inre ge">
+    <div class="ge-bild" data-in>
+      <img src="assets/bilder/lag-dam.jpg" alt="Fotbollsspelare på väg ut på planen i motljus" loading="lazy">
+      <div class="flytetikett"><span class="ikonruta"><svg class="ikon"><use href="#i-hjartahand"/></svg></span><div><strong>Tillbaka till idrotten</strong>Klubbar &amp; ungdomsverksamhet</div></div>
+    </div>
+    <div data-in style="--i:1">
+      <span class="eyebrow">Vi ger tillbaka</span>
+      <h2 class="rubrik" id="ge-rubrik">Allt började med en ambition: att stärka folkhälsan.</h2>
+      <p class="ingress">I dag är vi en drivande kraft som med mätbara metoder hjälper idrottsföreningar och arbetsplatser med förebyggande stöd mot ohälsa och sjukfrånvaro.</p>
+      <p class="ingress">En del av våra intäkter går tillbaka till klubbar, ungdomsverksamheter och hälsofrämjande projekt.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FRÅGOR ------------------------------------------------------------------ -->
+<section class="sektion sektion-sand" id="fragor" aria-labelledby="fragor-rubrik">
+  <div class="inre-smal">
+    <div class="huvud huvud-mitt" data-in>
+      <span class="eyebrow">Vanliga frågor</span>
+      <h2 class="rubrik rubrik-mitt" id="fragor-rubrik">Bra att veta.</h2>
+    </div>
+    <div class="faq" data-in>
+      <details open>
+        <summary>Vad ingår i Bas?<span class="plus" aria-hidden="true"><svg class="ikon"><use href="#i-plus"/></svg></span></summary>
+        <div class="svar"><p>Bas är vår grundläggande riskprofilering och ingår i alla paket:</p><ul><li>Hälsodeklaration och BMI</li><li>Branschanpassat rörlighetstest</li><li>Blodtester (light) och handgreppstyrka</li><li>Individuell riskprofil</li><li>UPerformance App under en introperiod</li></ul></div>
+      </details>
+      <details>
+        <summary>Vem ser resultaten?<span class="plus" aria-hidden="true"><svg class="ikon"><use href="#i-plus"/></svg></span></summary>
+        <div class="svar"><p>Varje medarbetare får sina egna resultat i en personlig digital journal. Som företag får ni en sammanställd rapport på organisationsnivå med trender och rekommenderade åtgärder.</p><p>Medicinsk data hanteras av extern tredjepart. Innan testerna tecknas personuppgiftsbiträdesavtal och varje medarbetare lämnar sitt samtycke.</p></div>
+      </details>
+      <details>
+        <summary>Kan testerna anpassas efter vår bransch?<span class="plus" aria-hidden="true"><svg class="ikon"><use href="#i-plus"/></svg></span></summary>
+        <div class="svar"><p>Ja. Rörlighetstestet i Bas är alltid branschanpassat, och med Branschpaketet skräddarsyr vi metodiken helt – för tunga lyft, skiftarbete, kontorsergonomi med mera.</p></div>
+      </details>
+      <details>
+        <summary>Hur går det till praktiskt?<span class="plus" aria-hidden="true"><svg class="ikon"><use href="#i-plus"/></svg></span></summary>
+        <div class="svar"><p>Efter ett första möte får ni en offert. Medarbetarna fyller i ett underlag med testval och samtycke, och när ordern är signerad kontaktar vårt testteam er direkt för att boka tid. På testdagen onboardas alla även i appen.</p></div>
+      </details>
+      <details>
+        <summary>Vad händer efter testdagen?<span class="plus" aria-hidden="true"><svg class="ikon"><use href="#i-plus"/></svg></span></summary>
+        <div class="svar"><p>Varje medarbetare får sin riskprofil och ett anpassat träningsprogram i appen. Ungefär två månader senare har vi ett uppföljningsmöte med er. Vill ni följa utvecklingen över tid gör vi omtest kvartals- eller halvårsvis.</p></div>
+      </details>
+      <details>
+        <summary>Arbetar ni med idrottsföreningar?<span class="plus" aria-hidden="true"><svg class="ikon"><use href="#i-plus"/></svg></span></summary>
+        <div class="svar"><p>Ja – det är där vi kommer ifrån. Vi hjälper klubbar med screening, benchmark mot andra lag och uppföljning, och ser till att ni uppfyller förbundens krav på årlig medicinsk undersökning.</p></div>
+      </details>
+      <details>
+        <summary>Vad kostar det?<span class="plus" aria-hidden="true"><svg class="ikon"><use href="#i-plus"/></svg></span></summary>
+        <div class="svar"><p>Grundpaketet Bas börjar på 1 995 kr per medarbetare, exkl. moms. Hela upplägget – paket, tillval och program – räknar vi fram tillsammans med er på ett första möte.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- KONTAKT ----------------------------------------------------------------- -->
+<section class="sektion" id="kontakt" aria-labelledby="kontakt-rubrik">
+  <div class="inre kontakt">
+    <div class="kontakt-info" data-in>
+      <span class="eyebrow eyebrow-ljus">Kontakt</span>
+      <h2 id="kontakt-rubrik" style="margin-top:1.1rem">Ta första steget mot bättre hälsa och högre <span class="skimmer skimmer-ljus">prestation.</span></h2>
+      <p>Hör av dig så berättar vi hur – för hela arbetsplatsen eller hela laget.</p>
+      <ol class="kontakt-steg">
+        <li><span>1</span>Ett första möte där vi går igenom era behov.</li>
+        <li><span>2</span>En offert anpassad efter er verksamhet.</li>
+        <li><span>3</span>Testdag, riskprofiler och uppföljning.</li>
+      </ol>
+    </div>
+
+    <form class="kort formular" data-in style="--i:1" data-kontaktformular data-endpoint="" novalidate>
+      <div class="formular-rutnat">
+        <div><label class="etikett" for="f-namn">Namn</label><input class="falt" id="f-namn" name="namn" autocomplete="name" required></div>
+        <div><label class="etikett" for="f-epost">E-post</label><input class="falt" id="f-epost" name="epost" type="email" autocomplete="email" required></div>
+        <div><label class="etikett" for="f-org">Företag eller förening <em>(valfritt)</em></label><input class="falt" id="f-org" name="organisation" autocomplete="organization"></div>
+        <div><label class="etikett" for="f-typ">Jag representerar</label>
+          <select class="falt" id="f-typ" name="typ">
+            <option>Ett företag</option>
+            <option>En idrottsförening</option>
+            <option>Annat</option>
+          </select>
+        </div>
+        <div class="hel"><label class="etikett" for="f-meddelande">Meddelande</label><textarea class="falt" id="f-meddelande" name="meddelande" rows="5"></textarea></div>
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
+      </div>
+      <div class="formular-fot">
+        <p>Vi använder uppgifterna bara för att besvara din förfrågan.</p>
+        <button class="knapp knapp-mork" type="submit">Skicka <svg class="ikon ikon-pil" aria-hidden="true"><use href="#i-pil"/></svg></button>
+      </div>
+      <p class="formular-svar" role="status" data-formular-svar></p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer class="sidfot">
+  <div class="inre">
+    <div class="sidfot-topp">
+      <div>
+        <a class="sidfot-logga logga" href="#top" aria-label="Uperformance – till toppen"><svg viewBox="0 0 1274.2 395" aria-hidden="true"><use href="#logo"/></svg></a>
+        <p>Skadeförebyggande hälsoanalys byggd på elitidrottens metodik – för arbetsplatser och idrottslag.</p>
+      </div>
+      <div>
+        <h4>Erbjudande</h4>
+        <ul><li><a href="#varfor">Företag</a></li><li><a href="#idrott">Idrott</a></li><li><a href="#priser">Paket &amp; priser</a></li><li><a href="#plattform">UPerformance App</a></li></ul>
+      </div>
+      <div>
+        <h4>Om oss</h4>
+        <ul><li><a href="#berattelsen">Vår berättelse</a></li><li><a href="#team">Teamet</a></li><li><a href="#metod">Metoden</a></li><li><a href="#fragor">Vanliga frågor</a></li></ul>
+      </div>
+      <div>
+        <h4>Kontakt</h4>
+        <ul><li><a href="#kontakt">Kontakta oss</a></li><li><a href="crm/logga-in.html">Logga in</a></li><li><a class="social" href="https://www.instagram.com/uperformanceab/" rel="noopener" target="_blank"><svg class="ikon" aria-hidden="true"><use href="#i-instagram"/></svg>Instagram</a></li></ul>
+      </div>
+    </div>
+    <div class="sidfot-ord" aria-hidden="true" data-in>Uperformance</div>
+    <div class="sidfot-botten">
+      <span>© <span data-ar>2026</span> Uperformance AB</span>
+      <span>Priser exkl. moms · Medicinsk data hanteras av extern tredjepart</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

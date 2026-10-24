@@ -1,0 +1,120 @@
+/* Uperformance CRM – filmen (film.js, window.UPFilm). En biograf i CRM:ets mörka formspråk: samma marinblå/mint-sken som
+   presentationen, ramen med tunn mintkant, kontrollerna som glas och kapitlen som en remsa under. Allt som rör sig är transform
+   eller opacitet. Under uppspelningen vilar kontrollerna (data-vilar-kontroller) – hovring och tangentbordsfokus tar fram dem. */
+
+html[data-film-oppen] { overflow: hidden; }
+.film { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; overflow: hidden;
+  color: var(--ben); background: transparent; }
+.film::backdrop { background: rgba(5, 11, 18, .9); }
+.film[open] { animation: film-in .45s var(--mjuk) both; }
+@keyframes film-in { from { opacity: 0; } }
+.film[data-stanger] { animation: film-ut .26s ease both; }
+@keyframes film-ut { to { opacity: 0; } }
+
+.film-inre { position: relative; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 12px;
+  padding: 14px clamp(14px, 3vw, 36px) max(16px, env(safe-area-inset-bottom));
+  background: radial-gradient(80% 70% at 12% 0%, rgba(22, 54, 90, .85), transparent 60%), radial-gradient(70% 80% at 100% 100%, rgba(15, 110, 87, .34), transparent 62%), #070f18; }
+
+/* ---- toppraden: märket, titeln, kapitlet som spelas och Stäng ---- */
+.film-topp { display: flex; align-items: center; gap: 14px; min-width: 0; min-height: 44px; }
+.film-ogon { display: inline-flex; align-items: center; gap: 10px; flex: none; font: 600 .72rem/1 var(--font-rubrik); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+.film-ogon i { display: block; width: 30px; height: 30px; color: var(--ben); }
+.film-ogon svg { display: block; width: 100%; height: 100%; }
+.film-titel { margin: 0; min-width: 0; font: 600 clamp(1rem, .8rem + .55vw, 1.25rem)/1.2 var(--font-rubrik); letter-spacing: -.02em; color: #fff; }
+.film-titel em { font-style: normal; font-weight: 500; color: rgba(246, 244, 239, .58); }
+.film-nu { margin-left: auto; min-width: 0; font: 600 .8rem/1.2 var(--font-rubrik); font-variant-numeric: tabular-nums; color: rgba(246, 244, 239, .7); text-align: right; }
+.film[data-fel] .film-nu { color: #ffc9a8; }
+
+/* ---- bilden: 16:9 som ryms i ytan (containerenheter), mintkant och djup skugga ---- */
+.film-scen { position: relative; min-height: 0; display: grid; place-items: center; container-type: size; }
+.film-ram { position: relative; width: 100%; max-height: 100%; width: min(100cqw, calc(100cqh * 16 / 9)); aspect-ratio: 16 / 9; overflow: hidden; border-radius: clamp(14px, 1.6vw, 24px); background: #000;
+  box-shadow: 0 0 0 1px rgba(126, 224, 195, .22), 0 0 70px -24px rgba(126, 224, 195, .28), 0 44px 90px -40px rgba(0, 0, 0, .9); }
+.film-video { display: block; width: 100%; height: 100%; object-fit: cover; background: #000; cursor: pointer; }
+.film-stor { position: absolute; left: 50%; top: 50%; display: grid; place-items: center; width: clamp(64px, 8vw, 96px); aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  color: var(--ink); background: linear-gradient(160deg, #a6edd8, var(--accent) 60%, #5fd0ae); box-shadow: 0 18px 44px -14px rgba(126, 224, 195, .85), inset 0 1px 0 rgba(255, 255, 255, .5);
+  transform: translate(-50%, -50%); transition: opacity .3s ease, transform .45s var(--mjuk); }
+.film-stor svg { width: 40%; height: 40%; margin-left: 7%; }
+.film-stor:hover { transform: translate(-50%, -50%) scale(1.06); }
+.film:is([data-spelar], [data-slut]) .film-stor { opacity: 0; transform: translate(-50%, -50%) scale(.8); pointer-events: none; }
+.film-slut { position: absolute; left: 0; right: 0; bottom: clamp(14px, 7%, 52px); display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 16px; animation: film-slut-in .7s var(--mjuk) .2s both; }
+.film-slut[hidden] { display: none; }
+@keyframes film-slut-in { from { opacity: 0; transform: translateY(14px); } }
+
+/* ---- knapparna ---- */
+.film-knapp { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; cursor: pointer; white-space: nowrap;
+  color: var(--ben); background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); font: 600 .86rem/1 var(--font-rubrik);
+  transition: background-color .2s, transform .35s var(--mjuk); }
+.film-knapp:hover { background: rgba(255, 255, 255, .15); }
+.film-knapp:active { transform: scale(.96); transition-duration: .12s; }
+.film-knapp svg { width: 18px; height: 18px; flex: none; }
+.film-knapp-mint { color: var(--ink); background: linear-gradient(160deg, #a6edd8, var(--accent) 60%, #5fd0ae); box-shadow: 0 12px 28px -12px rgba(126, 224, 195, .8), inset 0 1px 0 rgba(255, 255, 255, .5); }
+.film-knapp-mint:hover { background: linear-gradient(160deg, #b9f2e2, #8fe6cc 60%, #6bd6b6); }
+.film-rund { width: 44px; padding: 0; }
+.film :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* ---- kontrollerna: spela/pausa, tidslinjen med kapitelstreck, tiden, börja om, helskärm ---- */
+.film-kontroller { display: flex; align-items: center; gap: 12px; width: min(100%, 1400px); margin: 0 auto; min-width: 0; }
+.film-tidlinje { position: relative; flex: 1; min-width: 60px; height: 44px; display: flex; align-items: center; cursor: pointer; touch-action: none; border-radius: 8px; }
+.film-spar { position: relative; width: 100%; height: 6px; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, .14); transition: transform .2s var(--mjuk); }
+.film-tidlinje:hover .film-spar, .film[data-drar] .film-spar { transform: scaleY(1.35); }
+.film-buffrat, .film-spelat { position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0); }
+.film-buffrat { background: rgba(255, 255, 255, .16); }
+.film-spelat { background: linear-gradient(90deg, var(--is), var(--accent)); }
+.film-streck { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: #070f18; }
+.film-knopp { position: absolute; left: 0; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; pointer-events: none; background: #fff;
+  box-shadow: 0 0 0 4px rgba(126, 224, 195, .35), 0 4px 12px rgba(0, 0, 0, .45); }
+.film-tid { flex: none; font: 500 .82rem/1 var(--font-rubrik); font-variant-numeric: tabular-nums; color: rgba(246, 244, 239, .62); white-space: nowrap; }
+.film-tid b { font-weight: 600; color: #fff; }
+
+/* ---- kapitlen: miniatyr ur filmen (en remsa, 8 bilder), nummer, tid och rubrik. Det som spelas lyser mint med en egen mätare ---- */
+.film-kapitel { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; width: min(100%, 1400px); margin: 0 auto; padding: 0; list-style: none; }
+.film-kapitel button { width: 100%; height: 100%; display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 10px; padding: 6px 10px 6px 6px; border: 0; border-radius: 14px;
+  text-align: left; cursor: pointer; color: rgba(246, 244, 239, .72); background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); transition: background-color .2s, color .2s; }
+.film-kapitel button:hover { color: #fff; background: rgba(255, 255, 255, .09); }
+.film-kapitel button[data-aktiv] { color: #fff; background: rgba(126, 224, 195, .1); box-shadow: inset 0 0 0 1px rgba(126, 224, 195, .5), 0 0 24px -10px rgba(126, 224, 195, .6); }
+.film-kap-bild { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px;
+  background: #0b1520 url(film/uperformance-film-kapitel.jpg) no-repeat; background-size: 800% 100%; background-position: calc(var(--k) * 100% / 7) 0; }
+.film-kap-bild::after { content: ''; position: absolute; inset: 0; background: rgba(7, 15, 24, .38); transition: opacity .25s; }
+.film-kapitel button:is(:hover, [data-aktiv]) .film-kap-bild::after { opacity: 0; }
+.film-kap-bild i { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 3px; transform-origin: 0 50%; transform: scaleX(0); background: var(--accent); }
+.film-kapitel button[data-sett] .film-kap-bild i { transform: scaleX(1); opacity: .55; }
+.film-kapitel button:not([data-aktiv]):not([data-sett]) .film-kap-bild i { transform: scaleX(0) !important; }
+.film-kap-text { display: grid; gap: 4px; min-width: 0; }
+.film-kap-text small { font: 600 .66rem/1 var(--font-rubrik); letter-spacing: .06em; font-variant-numeric: tabular-nums; color: rgba(246, 244, 239, .5); }
+.film-kapitel button[data-aktiv] .film-kap-text small { color: var(--accent); }
+.film-kap-text span { font: 600 .76rem/1.25 var(--font-rubrik); overflow-wrap: break-word; hyphens: auto; }
+
+/* ---- biograf: under uppspelningen vilar allt utom bilden efter 2,6 s utan rörelse (film.js vakna) ---- */
+.film :is(.film-topp, .film-kontroller, .film-kapitel) { transition: opacity .55s ease; }
+.film[data-vilar-kontroller]:not(:has(:focus-visible, .film-topp:hover, .film-kontroller:hover, .film-kapitel:hover)) :is(.film-topp, .film-kontroller, .film-kapitel) { opacity: 0; }
+.film[data-vilar-kontroller]:not(:has(:focus-visible)) .film-inre { cursor: none; }
+
+/* Under 1200 px: kapitlen blir en rad som rullar i sidled (snäpper), miniatyren ovanför texten blir kvar till vänster */
+@media (max-width: 1199px) {
+  .film-kapitel { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(210px, 24%); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 2px; }
+  .film-kapitel::-webkit-scrollbar { display: none; }
+  .film-kapitel li { scroll-snap-align: start; }
+}
+/* Mobil: bilden får hela bredden (ingen containerhöjd att räkna med), titeln och kapitlets namn i toppen döljs, Stäng blir en rund knapp */
+@media (max-width: 700px) {
+  .film-inre { grid-template-rows: auto auto auto auto; align-content: center; gap: 12px; padding: max(10px, env(safe-area-inset-top)) 12px max(14px, env(safe-area-inset-bottom)); }
+  .film-scen { container-type: normal; }
+  .film-ram { width: 100%; border-radius: 14px; }
+  .film-titel em, .film-nu { display: none; }
+  .film-stang { margin-left: auto; width: 44px; padding: 0; }
+  .film-stang span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .film-kontroller { gap: 6px; }
+  .film-tid { font-size: .74rem; }
+  .film-kapitel { grid-auto-columns: minmax(200px, 72%); }
+  .film-slut .film-knapp { min-height: 40px; padding: 0 14px; font-size: .8rem; }
+}
+/* Liggande telefon: bara bilden, kontrollerna och Stäng */
+@media (max-height: 520px) and (orientation: landscape) {
+  .film-inre { grid-template-rows: auto minmax(0, 1fr) auto; gap: 6px; padding-top: 6px; padding-bottom: max(6px, env(safe-area-inset-bottom)); }
+  .film-kapitel { display: none; }
+  .film-titel em { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .film[open], .film[data-stanger], .film-slut { animation: none; }
+  .film *, .film :is(.film-topp, .film-kontroller, .film-kapitel) { transition: none; }
+}

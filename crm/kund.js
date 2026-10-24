@@ -29,7 +29,11 @@
   let kund = { namn: '' };
   let saljare = { namn: 'Uperformance', kort: 'oss' };
   let halsoformular = {}; // bara status per formulär – svaren syns aldrig här
+  let dokument = { offert: null, order: null }; // affärens offert och order: nummer, läge och datum (vyKundlank) – aldrig nyckeln
   let halsaPa = true; // hälsoformuläret (steg 3) – alltid på i demoläget
+  // Uperformances kontaktväg (skarpt läge: KONTAKT_EPOST/KONTAKT_TEL, server/konfig.js). Demoläget visar säljarens e-post som förut;
+  // i skarpt läge följer personalens egna adresser aldrig med till kundsidorna (kund.test.js).
+  const UPK = (L && L.lage && L.lage.kontakt) || null;
   let steg = 1;
   let stoppad = false; // länken har slutat gälla medan sidan var öppen
   let lyssnar = false;
@@ -56,7 +60,7 @@
     sparrad: ['Länken är stängd', 'Uperformance har stängt den här länken. Kontakta din kontaktperson på Uperformance om ni behöver fortsätta.'],
     saknas: ['Länken hittades inte', 'Kontrollera att hela adressen kom med – långa länkar bryts ibland i e-postprogram. Fungerar den ändå inte, kontakta din kontaktperson på Uperformance.'],
   };
-  const tillStart = '<div class="knapprad"><a class="knapp knapp-kontur" href="https://www.uperformance.se/">' + ik('hem') + 'Till uperformance.se</a></div>';
+  const tillStart = '<div class="knapprad"><a class="knapp knapp-kontur" href="../">' + ik('hem') + 'Till hemsidan</a></div>';
   function visaOgiltig(fel) {
     stoppad = true; clearTimeout(sparTimer); clearTimeout(nyttForsok);
     if (ark.open) ark.close();
@@ -85,6 +89,7 @@
     if (!vy || !vy.lank) return;
     halsaPa = typeof vy.halsoformularPa === 'boolean' ? vy.halsoformularPa : !(L && L.lage && L.lage.halsoformular === false);
     halsoformular = vy.halsoformular || {};
+    dokument = vy.dokument || { offert: null, order: null };
     kund = vy.kund || { namn: '' };
     saljare = vy.saljare || { namn: 'Uperformance', kort: 'oss' };
     if (helt) {
@@ -204,6 +209,8 @@
   const datumLang = (iso) => new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' });
   const datumTid = (iso) => { const d = new Date(iso); return `${d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' })} kl. ${d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}`; };
   const sammaDag = (iso) => new Date(iso).toDateString() === new Date().toDateString();
+  // "idag", "igår" eller "23 okt." (hälsostegets rader)
+  const dagText = (iso) => { if (!iso) return ''; if (sammaDag(iso)) return 'idag'; const igar = new Date(); igar.setDate(igar.getDate() - 1); return new Date(iso).toDateString() === igar.toDateString() ? 'igår' : datum(iso); };
   const tillvalLista = Object.keys(PRISER.tillval);
   const klarhet = () => {
     const s = summeraUnderlag(lank);
@@ -284,6 +291,30 @@
   };
   const redoAttSkicka = (s) => s.komplett && (!halsaPa || hlage().alla) && !!lank.bekraftelse1 && !!lank.bekraftelse2;
   const kontaktNamn = () => (saljare.namn && saljare.namn !== 'Uperformance' ? `${saljare.namn} på Uperformance` : 'Uperformance');
+  // Vägarna att nå Uperformance: säljarens e-post (demoläget) och Uperformances egen e-post och telefon (skarpt läge, när de är ifyllda)
+  const telHref = (t) => `tel:${String(t).replace(/[^\d+]/g, '')}`;
+  const kontaktVagar = () => [
+    saljare.epost ? { typ: 'mejl', text: saljare.epost, href: `mailto:${saljare.epost}`, aria: `E-post till ${saljare.namn || 'Uperformance'}` } : null,
+    UPK && UPK.epost && UPK.epost !== saljare.epost ? { typ: 'mejl', text: UPK.epost, href: `mailto:${UPK.epost}`, aria: 'E-post till Uperformance' } : null,
+    UPK && UPK.tel ? { typ: 'samtal', text: UPK.tel, href: telHref(UPK.tel), aria: 'Ring Uperformance' } : null,
+  ].filter(Boolean);
+  // " – adress · telefon" i löptext (sidfoten)
+  const kontaktLopText = () => { const v = kontaktVagar(); return v.length ? ` – ${v.map((x) => `<a href="${e(x.href)}" aria-label="${e(`${x.aria}: ${x.text}`)}">${e(x.text)}</a>`).join(' · ')}` : ''; };
+  // Nästa steg för offerten och ordern i resan efter inskickningen och i "Efter att ni skickat" (bara nummer, läge och datum)
+  const dokGiltig = (d) => !!d && (!d.giltigTill || d.giltigTill >= new Date().toISOString().slice(0, 10));
+  function dokSteg() {
+    const o = dokument.offert; const r = dokument.order; const ut = [];
+    if (!o && !r) return [{ klar: false, ikon: 'sparat', text: 'Offert och order', under: `${kontaktNamn()} går igenom underlaget och skickar offert och order` }];
+    if (o) {
+      const klar = o.status === 'godkand';
+      ut.push({ klar, ikon: 'sparat', text: klar ? `Offert ${o.nummer} godkänd` : `Offert ${o.nummer}`,
+        under: klar ? (o.godkand ? datumTid(o.godkand) : 'Godkänd') : dokGiltig(o) ? `Väntar på ert godkännande${o.giltigTill ? ` – gäller till ${datumLang(o.giltigTill)}` : ''}` : `Giltighetstiden har gått ut – kontakta ${kontaktNamn()}` });
+    }
+    const rk = !!r && r.status === 'signerad';
+    ut.push({ klar: rk, ikon: 'sparat', text: !r ? 'Order' : rk ? `Order ${r.nummer} signerad` : `Order ${r.nummer}`,
+      under: !r ? `${kontaktNamn()} skickar ordern att signera` : rk ? (r.godkand ? datumTid(r.godkand) : 'Signerad') : dokGiltig(r) ? `Väntar på er signering${r.giltigTill ? ` – signeras senast ${datumLang(r.giltigTill)}` : ''}` : `Tiden för att signera har gått ut – kontakta ${kontaktNamn()}` });
+    return ut;
+  }
 
   /* Hjältens nyckeltal bredvid ringen (glaspanel): deltagare, hälsoformulär (eller preliminärt värde) och hur länge länken gäller.
      Ritas om när man skriver (uppdateraLive) – samma tal som stegremsan och summeringen. */
@@ -311,13 +342,15 @@
   const sidokortHtml = () => {
     const resa = [
       ...(halsaPa ? [['hjarta', 'Hälsoformulären', 'Varje deltagare svarar själv – svaren går direkt till testteamet']] : []),
-      ['sparat', 'Offert och order', `${kontaktNamn()} går igenom underlaget och skickar offert och order`],
+      // Offerten (och ordern) som redan finns på affären – de som är klara står inte med
+      ...dokSteg().filter((x) => !x.klar).map((x) => [x.ikon, x.text, x.under]),
       ['kalender', 'Testdagen bokas', 'Testteamet kontaktar er och bokar testdagen'],
     ];
     const ini = String(saljare.namn || 'U').split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0]).join('').toUpperCase();
+    const vagar = kontaktVagar();
     return `<section class="kl-sidokort kl-kontaktkort" aria-label="Din kontakt"><p class="kl-sidokort-etikett">Din kontakt</p>
         <div class="kl-person"><span class="kl-person-ava" aria-hidden="true">${e(ini)}</span><div><strong>${e(saljare.namn || 'Uperformance')}</strong><small>Uperformance AB</small></div></div>
-        ${saljare.epost ? `<a class="kl-person-lank" href="mailto:${e(saljare.epost)}">${ik('mejl')}<span>${e(saljare.epost)}</span></a>` : '<p class="kl-sidokort-not">Hör av er till er kontakt om något är oklart – allt ni har fyllt i finns kvar.</p>'}</section>
+        ${vagar.length ? vagar.map((x) => `<a class="kl-person-lank" href="${e(x.href)}" aria-label="${e(`${x.aria}: ${x.text}`)}">${ik(x.typ)}<span>${e(x.text)}</span></a>`).join('') : '<p class="kl-sidokort-not">Hör av er till er kontakt om något är oklart – allt ni har fyllt i finns kvar.</p>'}</section>
       ${steg === 4 ? '' : `<section class="kl-sidokort kl-efter" aria-label="Efter att ni skickat"><p class="kl-sidokort-etikett">Efter att ni skickat</p>
         <ol>${resa.map(([ikon, t, u], i) => `<li style="--i:${i}"><span class="kl-efter-ikon">${ik(ikon)}</span><span><strong>${e(t)}</strong><small>${e(u)}</small></span></li>`).join('')}</ol></section>`}`;
   };
@@ -341,7 +374,7 @@
       <section class="kl-hjalte" data-mork-yta ${klar ? 'data-klar' : ''} aria-labelledby="kl-rubrik">
         <div class="kl-hjalte-text">
           <p class="kl-hjalte-ogon"><span>Kundunderlag</span>${kund.namn ? `<span class="kl-ogon-vem">${e(kund.namn)}</span>` : ''}</p>
-          ${klar ? `<h1 id="kl-rubrik">Tack${fornamn ? ` ${e(fornamn)}` : ''}&nbsp;– underlaget är <em>inskickat</em>.</h1>
+          ${klar ? `<h1 id="kl-rubrik" tabindex="-1">Tack${fornamn ? ` ${e(fornamn)}` : ''}&nbsp;– underlaget är <em>inskickat</em>.</h1>
           <p class="kl-hjalte-ingress">Uppgifterna har kommit fram till Uperformance. Här ser ni vad som händer härnäst – och vad ni skickade.</p>`
             : `<h1 id="kl-rubrik">${fornamn ? `Hej ${e(fornamn)}, välkommen` : 'Välkommen'} till <em>er hälsokartläggning</em>.</h1>
           <p class="kl-hjalte-ingress">Här fyller ni i uppgifterna vi behöver för offert, order och testdag – en rad per anställd, med paket och tillval.${halsaPa ? ' Varje deltagare svarar sedan själv på ett kort hälsoformulär.' : ''} Allt sparas automatiskt, så ni kan gå ifrån och fortsätta senare.</p>
@@ -356,7 +389,7 @@
         <div class="kl-sida"><aside class="summering" data-summering aria-label="${steg === 4 ? 'Er beställning' : 'Summering'}">${summeringHtml(s)}</aside>${sidokortHtml()}</div>
       </div>
       ${miniHtml(s, pct)}`}
-      <footer class="portal-fot kl-sidfot"><span>${ik('samtal')}<span>${klar ? 'Behöver ni ändra något?' : 'Frågor?'} Kontakta ${e(kontaktNamn())}${saljare.epost ? ` – <a href="mailto:${e(saljare.epost)}">${e(saljare.epost)}</a>` : ''}.</span></span><span>${ik('las')}<span>Uppgifterna hanteras enligt personuppgiftsbiträdesavtalet mellan er och Uperformance.</span></span></footer>`;
+      <footer class="portal-fot kl-sidfot"><span>${ik('samtal')}<span>${klar ? 'Behöver ni ändra något?' : 'Frågor?'} Kontakta ${e(kontaktNamn())}${kontaktLopText()}.</span></span><span>${ik('las')}<span>Uppgifterna hanteras enligt personuppgiftsbiträdesavtalet mellan er och Uperformance.</span></span></footer>`;
     UPPortal.startaRing(); UPPortal.forstaVisning(); framsteg(klar ? 100 : pct);
     nyaRader.clear();
     if (klar && !smutsig) { sparstatus.removeAttribute('data-sparar'); sparstatus.removeAttribute('data-sparfel'); $('span', sparstatus).textContent = 'Inskickat'; }
@@ -407,15 +440,18 @@
   // Formatfel per fält – ett tomt fält är inte fel, det räknas som kvar att fylla i
   const foretagFormatFel = (s) => { const f = {}; s.foretagFel.forEach((x) => { if (x.startsWith('Organisationsnumret')) f.orgnr = x; else if (x.startsWith('E-postadressen')) f.epost = x; }); return f; };
   const gruppKlar = (g, fel) => g.falt.filter((f) => String(lank.foretag[f.id] || '').trim() && !fel[f.id]).length;
+  // Varning per fält som inte stoppar (organisationsnummer med fel kontrollsiffra – foretagVarningar i data.js)
+  const foretagVarning = (s) => { const v = {}; (s.foretagVarningar || []).forEach((x) => { if (/organisationsnumret/.test(x)) v.orgnr = x; }); return v; };
   function visaForetag(s) {
-    const fel = foretagFormatFel(s);
+    const fel = foretagFormatFel(s); const varn = foretagVarning(s);
     const falt = (f) => {
       const id = e(f.id); const v = lank.foretag[f.id] || ''; const ff = String(v).trim() && fel[f.id] ? fel[f.id] : '';
-      const attr = `class="falt" id="ftg-${id}" data-foretag="${id}" aria-describedby="ftg-${id}-fel" aria-required="true" ${ff ? 'aria-invalid="true"' : ''}`;
-      return `<div class="kl-falt" ${f.textarea ? 'data-bred' : ''} ${String(v).trim() && !fel[f.id] ? 'data-ok' : ''}><label class="etikett" for="ftg-${id}">${e(f.etikett)}<span class="krav" aria-hidden="true">*</span></label>
+      const fv = !ff && varn[f.id] ? varn[f.id] : '';
+      const attr = `class="falt" id="ftg-${id}" data-foretag="${id}" aria-describedby="ftg-${id}-fel${f.id === 'orgnr' ? ` ftg-${id}-varning` : ''}" aria-required="true" ${ff ? 'aria-invalid="true"' : ''}`;
+      return `<div class="kl-falt" ${f.textarea ? 'data-bred' : ''} ${String(v).trim() && !fel[f.id] && !fv ? 'data-ok' : ''}><label class="etikett" for="ftg-${id}">${e(f.etikett)}<span class="krav" aria-hidden="true">*</span></label>
         ${f.textarea ? `<textarea ${attr} rows="3" maxlength="${f.id === 'faktura' ? 1000 : 300}">${e(v)}</textarea>`
           : `<input ${attr} type="${e(f.typ || 'text')}" maxlength="300" value="${e(v)}" ${f.hint ? `placeholder="${e(f.hint)}"` : ''} autocomplete="${{ epost: 'email', tel: 'tel', kontakt: 'name', namn: 'organization' }[f.id] || 'off'}">`}
-        <p class="kl-falt-fel" id="ftg-${id}-fel" data-falt-fel="${id}">${e(ff)}</p></div>`;
+        <p class="kl-falt-fel" id="ftg-${id}-fel" data-falt-fel="${id}">${e(ff)}</p>${f.id === 'orgnr' ? `<p class="kl-falt-varning" id="ftg-${id}-varning" data-falt-varning="${id}">${e(fv)}</p>` : ''}</div>`;
     };
     return `${panelHuvud(1, 'Används för offert, order och faktura – och så att testteamet vet vart de ska komma. Alla fält behövs.')}
       ${foretagGrupper().map((g, i) => { const k = gruppKlar(g, fel); return `<section class="kl-kort kl-grupp" aria-labelledby="kl-grupp-${i}">
@@ -429,7 +465,8 @@
     const r = prisaDeltagare(d.paket, d.tillval);
     return tillvalLista.map((t) => {
       const tv = PRISER.tillval[t]; const ingar = r.ingar.has(t); const vald = (d.tillval || []).includes(t) && !ingar;
-      return `<button type="button" data-g="${prefix}tillval" data-id="${e(d.id || '')}" data-tillval="${e(t)}" aria-pressed="${vald}" ${ingar ? 'disabled' : ''}>${ingar || vald ? ik('bock') : ''}${e(tv.namn)} · <b>${ingar ? 'ingår' : tv.pris == null ? 'offert' : '+' + e(kr(tv.pris))}</b></button>`;
+      // Ingår i paketet: vald och låst – aria-pressed="true" och aria-disabled, så att skärmläsaren inte läser "inte vald"
+      return `<button type="button" data-g="${prefix}tillval" data-id="${e(d.id || '')}" data-tillval="${e(t)}" aria-pressed="${vald || ingar}" ${ingar ? 'disabled aria-disabled="true"' : ''}>${ingar || vald ? ik('bock') : ''}${e(tv.namn)} · <b>${ingar ? 'ingår<span class="sr"> i paketet</span>' : tv.pris == null ? 'offert' : '+' + e(kr(tv.pris))}</b></button>`;
     }).join('');
   };
   const paketKnappar = (d, prefix = '') => PAKET_ORDNING.map((p) => `<button type="button" data-g="${prefix}paket" data-id="${e(d.id || '')}" data-paket="${e(p)}" aria-pressed="${d.paket === p}">${e(paketNamn(p))}</button>`).join('');
@@ -441,8 +478,10 @@
   const radStatus = (fel) => (fel.length ? fel.map((f) => `<span class="chip ${arSaknas(f) ? 'chip-gul' : 'chip-rod'} chip-prick">${e(f)}</span>`).join('') : `<span class="chip chip-ok">${ik('bock')}Klar</span>`);
   const radLage = (fel) => (!fel.length ? '' : fel.every(arSaknas) ? 'saknas' : 'fel');
   // Vilket fält felet gäller – så att rätt ruta markeras
+  // "Ogiltigt personnummer – …" säger varför (pnrFelText i data.js) – därför matchas personnummerfelen på början av texten
   const FALT_FEL = { 'Namn saknas': ['namn', 'saknas'], 'E-post saknas': ['epost', 'saknas'], 'Ogiltig e-post': ['epost', 'fel'], 'E-posten finns två gånger': ['epost', 'fel'], 'Personnummer saknas': ['pnr', 'saknas'], 'Ogiltigt personnummer': ['pnr', 'fel'], 'Personnumret finns två gånger': ['pnr', 'fel'] };
-  const faltLage = (fel) => { const m = {}; fel.forEach((f) => { const x = FALT_FEL[f]; if (x) m[x[0]] = x[1]; }); return m; };
+  const faltFor = (f) => FALT_FEL[f] || (/^Ogiltigt personnummer/.test(f) ? ['pnr', 'fel'] : null);
+  const faltLage = (fel) => { const m = {}; fel.forEach((f) => { const x = faltFor(f); if (x) m[x[0]] = x[1]; }); return m; };
   const faltAttr = (lage) => (lage === 'fel' ? 'aria-invalid="true"' : lage === 'saknas' ? 'data-saknas' : '');
   const halsaChip = (d) => { const h = hlage().per[d.id] || { status: 'ej-skickat' }; const [txt, cls] = hstatus(h.status); return `${ik('hjarta')}Hälsoformulär <span class="chip ${cls} chip-prick">${e(txt)}</span>`; };
   const radPris = (d) => { const r = prisaDeltagare(d.paket, d.tillval); return `${kr(r.pris)}${r.offert ? ' + offert' : ''}`; };
@@ -494,16 +533,18 @@
   const halsoRadHtml = (d, h, i) => {
     const [txt, cls] = hstatus(h.status); const f = h.f; const ok = kanSkickas(d);
     const andrad = epostAndrad(d, h); const kan = kanPaminnas(d, h);
-    const info = h.status === 'besvarad' ? `Klart ${datum(f.besvarad)} – svaren finns hos Uperformance`
-      : h.status === 'ej-skickat' ? (ok ? `Skickas till ${d.epost.trim()}` : 'Namn och en giltig e-postadress behövs först')
-      : `${h.status === 'oppnad' ? 'Öppnat' : 'Skickat'} ${datum(f.oppnad || f.skickad)} till ${(f.forifyllt || {}).epost || ''}${f.paminnd ? ` · påmint ${datum(f.paminnd)}` : ''}`;
+    // En status per rad: chippet säger läget, texten datumet och när man kan påminna (förut stod "Skickat" tre gånger)
     const senast = f && (f.paminnd || f.skickad);
-    const vantaChip = vantarPaSvar(h) && !kan && senast ? `<span class="chip chip-is chip-prick" title="Ni kan påminna igen 24 timmar efter senaste utskicket">${f.paminnd ? 'Påmint' : 'Skickat'} ${sammaDag(senast) ? 'idag' : 'igår'}</span>` : '';
+    const nastaPaminn = senast ? new Date(new Date(senast).getTime() + 24 * 3600 * 1000) : null;
+    const kanSen = vantarPaSvar(h) && !kan && nastaPaminn ? ` · kan påminnas ${sammaDag(nastaPaminn.toISOString()) ? 'idag' : 'imorgon'} kl. ${nastaPaminn.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })}` : '';
+    const info = h.status === 'besvarad' ? `Klart ${dagText(f.besvarad)} – svaren finns hos Uperformance`
+      : h.status === 'ej-skickat' ? (ok ? `Skickas till ${d.epost.trim()}` : 'Namn och en giltig e-postadress behövs först')
+      : `${h.status === 'oppnad' ? 'Öppnat' : 'Skickat'} ${dagText(f.oppnad || f.skickad)} till ${(f.forifyllt || {}).epost || ''}${f.paminnd ? ` · påmint ${dagText(f.paminnd)}` : ''}${kanSen}`;
     // Skarpt läge: den personliga länken går bara till deltagaren (servern skickar den) – arbetsgivaren ser aldrig
     // nyckeln, bara status (h.token är en pseudonym). Demoläget som förut, med kopiera/öppna.
     const knappar = h.status === 'besvarad' ? ''
       : h.status === 'ej-skickat' ? (ok ? `<button class="knapp knapp-mork knapp-liten" type="button" data-g="skicka-halsa" data-id="${e(d.id)}">${ik('mejl')}Skicka</button>` : `<button class="knapp knapp-spok knapp-liten" type="button" data-g="till-rad" data-id="${e(d.id)}">Rätta raden</button>`)
-      : `${kan ? `<button class="knapp knapp-kontur knapp-liten" type="button" data-g="paminn" data-id="${e(d.id)}">${ik('klocka')}${andrad ? 'Påminn på nya adressen' : 'Påminn'}</button>` : vantaChip}${skarp ? '' : `<button class="knapp knapp-spok knapp-liten" type="button" data-g="kopiera-halsa" data-id="${e(d.id)}">${ik('lank')}Kopiera länk</button><a class="knapp knapp-spok knapp-liten" href="${e(halsoUrl(h.token))}" target="_blank" rel="noopener">${ik('oga')}Öppna som deltagare</a>`}`;
+      : `${kan ? `<button class="knapp knapp-kontur knapp-liten" type="button" data-g="paminn" data-id="${e(d.id)}">${ik('klocka')}${andrad ? 'Påminn på nya adressen' : 'Påminn'}</button>` : ''}${skarp ? '' : `<button class="knapp knapp-spok knapp-liten" type="button" data-g="kopiera-halsa" data-id="${e(d.id)}">${ik('lank')}Kopiera länk</button><a class="knapp knapp-spok knapp-liten" href="${e(halsoUrl(h.token))}" target="_blank" rel="noopener">${ik('oga')}Öppna som deltagare</a>`}`;
     return `<div class="halso-rad" data-halso-rad="${e(d.id)}" ${h.status === 'besvarad' ? 'data-klar' : ''} ${andrad ? 'data-andrad' : ''}><div><strong>${e(d.namn || `Rad ${i + 1}`)}<span class="chip ${cls} chip-prick">${e(txt)}</span></strong><small>${e(info)}</small>${andrad ? `<small class="halso-andrad">E-posten är ändrad till ${e(String(d.epost).trim())} – skicka en påminnelse till den nya adressen.</small>` : ''}</div>${knappar ? `<div class="knapprad">${knappar}</div>` : ''}</div>`;
   };
   // Inte skickade först, sedan de som väntar på svar, sist de som är klara
@@ -547,7 +588,8 @@
     // Samma fel på flera rader blir en rad i checklistan – detaljerna kan fällas ut
     const grupper = new Map();
     varningsRader.forEach((x) => x.fel.forEach((f) => { if (!grupper.has(f)) grupper.set(f, []); grupper.get(f).push(x); }));
-    const namnLista = (lista) => { const n = lista.map((x) => String(x.d.namn || '').trim().split(' ')[0] || `rad ${x.i + 1}`); return n.slice(0, 3).join(', ') + (n.length > 3 ? ' …' : ''); };
+    // Hela namnet – två som heter Anna går annars inte att skilja åt
+    const namnLista = (lista) => { const n = lista.map((x) => String(x.d.namn || '').trim().replace(/\s+/g, ' ') || `rad ${x.i + 1}`); return n.slice(0, 3).join(', ') + (n.length > 3 ? ` och ${plural(n.length - 3, 'till', 'till')}` : ''); };
     const gruppHtml = [...grupper.entries()].map(([fel, lista]) => `<div class="varning-grupp" ${arSaknas(fel) ? 'data-saknas' : ''}><button type="button" data-g="till-rad" data-id="${e(lista[0].d.id)}">${ik('varning')}<span><strong>${e(fel)}</strong> ${lista.length === 1 ? `på rad ${lista[0].i + 1}` : `på ${lista.length} rader`}<small>${e(namnLista(lista))}</small></span><span class="varning-ga"><span>${lista.length === 1 ? 'Gå till raden' : 'Gå till första'}</span>${ik('pil')}</span></button></div>`).join('');
     const antalAtt = s.foretagFel.length + grupper.size + (saknasHalsa ? 1 : 0) + (!s.antal ? 1 : 0);
     // En mening om vad som stoppar knappen – det som är kvar står redan i listan ovanför
@@ -617,16 +659,33 @@
 
   /* Inskickat: resan härifrån i hjältens remsa, kvittot under hjälten */
   function resaHtml() {
+    // Offerten och ordern på affären (dokument från vyKundlank) markeras med nummer och datum när de är godkända/signerade
     const resa = [
       { klar: true, text: 'Underlaget är inskickat', under: lank.inskickad ? datumTid(lank.inskickad) : '' },
       ...(halsaPa ? [{ klar: true, text: 'Alla har svarat på hälsoformuläret', under: 'Svaren finns hos Uperformances testteam' }] : []),
-      { klar: false, text: 'Offert och order', under: `${kontaktNamn()} går igenom underlaget och skickar offert och order` },
+      ...dokSteg(),
       { klar: false, text: 'Testdagen bokas', under: 'Testteamet kontaktar er och bokar testdagen' },
     ];
-    return `<ol class="kl-steg kl-resa" aria-label="Så går det vidare" ${resa.length === 3 ? 'data-tre-steg' : ''}>${resa.map((x, i) => `<li class="kl-steg-knapp" style="--i:${i}" ${x.klar ? 'data-klar' : ''} ${!x.klar && resa[i - 1] && resa[i - 1].klar ? 'aria-current="step"' : ''}><span class="steg-siffra">${x.klar ? ik('bock') : i + 1}</span><span class="kl-steg-text"><strong>${e(x.text)}</strong>${x.under ? `<small>${e(x.under)}</small>` : ''}</span></li>`).join('')}</ol>`;
+    return `<ol class="kl-steg kl-resa" aria-label="Så går det vidare" style="--n:${resa.length}" ${resa.length === 3 ? 'data-tre-steg' : ''}>${resa.map((x, i) => `<li class="kl-steg-knapp" style="--i:${i}" ${x.klar ? 'data-klar' : ''} ${!x.klar && resa[i - 1] && resa[i - 1].klar ? 'aria-current="step"' : ''}><span class="steg-siffra">${x.klar ? ik('bock') : i + 1}</span><span class="kl-steg-text"><strong>${e(x.text)}</strong>${x.under ? `<small>${e(x.under)}</small>` : ''}</span></li>`).join('')}</ol>`;
   }
+  /* Kvittot (2026-10-24): beställningen, företagsuppgifterna och deltagarna – namn, paket och tillval, aldrig e-post eller
+     personnummer (samma regel som orderns bilaga) – och Skriv ut / spara kvitto. Utskriften är ett rent A4 (kund.css 09). */
   function visaSkickat(s) {
-    return `<div class="kl-klar"><section class="kl-kort kl-kvitto-kort" aria-label="Det här skickade ni">${kvittoHtml(s, 'Det här skickade ni')}${PRISNOT}</section></div>`;
+    const f = lank.foretag || {};
+    const uppg = FORETAG_FALT.filter((x) => String(f[x.id] || '').trim()).map((x) => `<div ${x.textarea ? 'data-bred' : ''}><dt>${e(x.etikett)}</dt><dd>${e(String(f[x.id]).trim())}</dd></div>`).join('');
+    const tvNamn = (d) => valdaTillval(d).map((t) => PRISER.tillval[t].namn).join(', ');
+    const rader = lank.deltagare.map((d, i) => `<tr><td>${e(i + 1)}</td><th scope="row">${e(String(d.namn || '').trim() || '–')}</th><td>${e(paketNamn(d.paket))}</td><td>${e(tvNamn(d) || '–')}</td></tr>`).join('');
+    const n = lank.deltagare.length;
+    return `<div class="kl-klar"><section class="kl-kort kl-kvitto-kort" aria-labelledby="kl-kvitto-rubrik">
+      <div class="kl-kvitto-topp"><div><p class="kl-summa-etikett" id="kl-kvitto-rubrik">Kvitto · det här skickade ni</p>
+        <p class="kl-kvitto-meta">${e(f.namn || kund.namn || '')}${lank.inskickad ? ` · inskickat ${e(datumTid(lank.inskickad))}` : ''}</p></div>
+        <button class="knapp knapp-kontur knapp-liten kl-kvitto-skriv" type="button" data-g="skriv-ut">${ik('skrivare')}Skriv ut / spara kvitto</button></div>
+      ${kvittoHtml(s, 'Beställningen')}${PRISNOT}
+      ${uppg ? `<div class="kl-kvitto-del"><p class="kl-summa-etikett">Företagsuppgifter</p><dl class="kl-kvitto-uppg">${uppg}</dl></div>` : ''}
+      ${n ? `<details class="kl-kvitto-del kl-kvitto-deltagare" ${n <= 8 ? 'open' : ''}><summary><span class="kl-summa-etikett">Deltagare (${e(n)})</span><span class="kl-kvitto-visa">${ik('chevron')}</span></summary>
+        <div class="tabell-rulla"><table class="kl-kvitto-lista"><thead><tr><th scope="col">#</th><th scope="col">Namn</th><th scope="col">Paket</th><th scope="col">Tillval</th></tr></thead><tbody>${rader}</tbody></table></div>
+        <p class="summering-not">E-post och personnummer skickades med underlaget men visas inte i kvittot.</p></details>` : ''}
+    </section></div>`;
   }
 
   /* Delvisa uppdateringar när man skriver – listan ritas inte om ------------------ */
@@ -657,14 +716,19 @@
         if (l !== 'fel') inp.removeAttribute('aria-invalid'); else if (!har) inp.setAttribute('aria-invalid', 'true');
         inp.toggleAttribute('data-saknas', l === 'saknas' && !har);
       });
+      // Skärmläsaren hör vem knappen tar bort – namnet följer med medan man skriver
+      const tb = $('[data-g="ta-bort"]', rad); if (tb) tb.setAttribute('aria-label', `Ta bort ${String(d.namn || '').trim() || 'deltagaren'}`);
     });
     if (steg === 1) {
-      const fel = foretagFormatFel(s);
+      const fel = foretagFormatFel(s); const varn = foretagVarning(s);
       $$('[data-foretag]').forEach((inp) => {
         const id = inp.dataset.foretag; const f = String(inp.value).trim() && fel[id] ? fel[id] : '';
         const p = $(`[data-falt-fel="${sel(id)}"]`);
         if (!f) { inp.removeAttribute('aria-invalid'); if (p) p.textContent = ''; } else if (inp !== fokus) { inp.setAttribute('aria-invalid', 'true'); if (p) p.textContent = f; }
-        const ruta = inp.closest('.kl-falt'); if (ruta) ruta.toggleAttribute('data-ok', !!String(inp.value).trim() && !fel[id]);
+        // Varningen (kontrollsiffran) visas när man lämnar fältet, som formatfelen – och försvinner direkt när numret stämmer
+        const pv = $(`[data-falt-varning="${sel(id)}"]`); const fv = !f && varn[id] ? varn[id] : '';
+        if (pv && (!fv || inp !== fokus)) pv.textContent = fv;
+        const ruta = inp.closest('.kl-falt'); if (ruta) ruta.toggleAttribute('data-ok', !!String(inp.value).trim() && !fel[id] && !fv);
       });
       const grupper = foretagGrupper();
       $$('[data-grupp-nr]').forEach((el) => { const g = grupper[+el.dataset.gruppNr]; if (!g) return; const k = gruppKlar(g, fel); el.textContent = `${k} av ${g.falt.length}`; el.toggleAttribute('data-klar', k === g.falt.length); });
@@ -749,10 +813,12 @@
 
   /* Ta bort en rad: bekräftelse när deltagaren har fått sitt hälsoformulär, annars Ångra i toasten ---- */
   function oppnaTaBort(d) {
-    const fornamn = String(d.namn || '').trim().split(' ')[0] || 'deltagaren';
+    // Hela namnet (två med samma förnamn ska gå att skilja åt), och namnet bara en gång i texten
+    const namn = String(d.namn || '').trim().replace(/\s+/g, ' ');
     const h = hlage().per[d.id] || {};
-    ark.innerHTML = `<div class="ark-huvud"><div><h2 id="ark-titel">Ta bort ${e(String(d.namn || '').trim() || 'deltagaren')}?</h2><p>Raden försvinner från underlaget.</p></div><button class="ikonknapp" type="button" data-g="stang-ark" aria-label="Stäng">${ik('stang')}</button></div>
-      <div class="ark-kropp"><p class="ark-varning">${ik('varning')}<span>${e(/[sxz]$/i.test(fornamn) ? fornamn : fornamn + 's')} personliga länk till hälsoformuläret slutar gälla. ${h.status === 'besvarad' ? `${e(fornamn)} har redan svarat – läggs ${e(fornamn)} till igen behöver ett nytt formulär skickas och besvaras.` : `Läggs ${e(fornamn)} till igen skickas ett nytt formulär.`}</span></p></div>
+    const vems = namn ? `${/[sxz]$/i.test(namn) ? namn : namn + 's'} personliga länk` : 'Deltagarens personliga länk';
+    ark.innerHTML = `<div class="ark-huvud"><div><h2 id="ark-titel">Ta bort ${e(namn || 'deltagaren')}?</h2><p>Raden försvinner från underlaget.</p></div><button class="ikonknapp" type="button" data-g="stang-ark" aria-label="Stäng">${ik('stang')}</button></div>
+      <div class="ark-kropp"><p class="ark-varning">${ik('varning')}<span>${e(vems)} till hälsoformuläret slutar gälla. ${h.status === 'besvarad' ? 'Formuläret är redan besvarat – läggs deltagaren till igen behöver ett nytt formulär skickas och besvaras.' : 'Läggs deltagaren till igen skickas ett nytt formulär.'}</span></p></div>
       <div class="ark-fot"><button class="knapp knapp-spok" type="button" data-g="stang-ark">Avbryt</button><button class="knapp knapp-fara" type="button" data-g="ta-bort-bekrafta" data-id="${e(d.id)}">${ik('papperskorg')}Ta bort</button></div>`;
     ark.showModal(); ($('.ark-fot [data-g="stang-ark"]', ark) || $('[data-g="stang-ark"]', ark)).focus(); // Avbryt först – Ta bort är farlig
   }
@@ -856,11 +922,17 @@
         if (!r.ok) { el.disabled = false; atgardFel(r); return; }
         tillampaVy(r.vy, true); steg = KLAR;
         rendera(); scrollTo({ top: 0, behavior: lugn ? 'auto' : 'smooth' });
+        // Knappen finns inte i tackvyn – fokus på rubriken, så att tangentbord och skärmläsare vet var de är
+        const rubrik = $('#kl-rubrik'); if (rubrik) rubrik.focus({ preventScroll: true });
         setTimeout(() => UPPortal.konfettiFran($('[data-ring]')), 900);
       } finally { upptagen = false; }
     },
     'forsok-igen': () => starta(),
+    'skriv-ut': () => print(),
   };
+  // Utskriften av kvittot tar med alla deltagare, även när listan är ihopfälld på skärmen (också vid Ctrl+P)
+  addEventListener('beforeprint', () => { $$('.kl-kvitto-deltagare:not([open])').forEach((x) => { x.open = true; x.dataset.stangEfter = ''; }); });
+  addEventListener('afterprint', () => { $$('.kl-kvitto-deltagare[data-stang-efter]').forEach((x) => { x.open = false; delete x.dataset.stangEfter; }); });
   // Varje deltagare får en egen nyckel. Demoläget skickar inget; skarpt läge lägger meddelandet i
   // serverns utkorg (riktig e-post med engångskod kopplas på vid flytten).
   async function skickaHalsa(lista) {

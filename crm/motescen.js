@@ -84,6 +84,7 @@
       <div class="ms-knappar">
         <button type="button" class="ms-knapp ms-knapp-mint" data-ms="starta">${ikon('play')}Starta presentation</button>
         <button type="button" class="ms-knapp ms-knapp-glas" data-ms="kalkyl">${ikon('kalkyl')}Öppna kalkylen</button>
+        ${window.UPFilm ? `<button type="button" class="ms-knapp ms-knapp-glas ms-knapp-film" data-film title="Spela filmen – utan ljud"><span class="ms-film-bild" aria-hidden="true">${ikon('play')}</span>Filmen<small>${e(UPFilm.tid(UPFilm.LANGD))}</small></button>` : ''}
       </div>
       <p class="ms-not"><button type="button" class="ms-planera" data-ms="planera">Planera mötet – välj kund och bilder<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button></p>
       <p class="ms-pris"><svg class="ikon" data-i="las" aria-hidden="true"><use href="#i-las"/></svg>Priserna och kalkylen syns bara här i CRM:et – aldrig på webbplatsen.</p>`;
